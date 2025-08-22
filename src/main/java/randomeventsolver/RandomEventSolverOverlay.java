@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import javax.inject.Inject;
 import net.runelite.api.Client;
+import net.runelite.api.NPC;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
@@ -46,9 +47,6 @@ public class RandomEventSolverOverlay extends Overlay
 				}
 			}
 		}
-		{
-
-		}
 
 		if (plugin.getPatternNextAnswer() != null)
 		{
@@ -69,6 +67,17 @@ public class RandomEventSolverOverlay extends Overlay
 						answerWidget.getBounds().y + (answerWidget.getBounds().height / 2) + (graphics2D.getFontMetrics().getHeight() / 2) - graphics2D.getFontMetrics().getDescent()
 					);
 					OverlayUtil.renderTextLocation(graphics2D, textPoint, text, Color.YELLOW);
+				}
+			}
+		}
+
+		if (plugin.getPheasantNPC() != null && !plugin.getPheasantNPC().isEmpty())
+		{
+			for (NPC pheasantNPC : plugin.getPheasantNPC())
+			{
+				if (pheasantNPC != null && !pheasantNPC.isDead())
+				{
+					OverlayUtil.renderPolygon(graphics2D, pheasantNPC.getConvexHull(), Color.GREEN);
 				}
 			}
 		}
