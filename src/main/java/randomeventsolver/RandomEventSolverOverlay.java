@@ -82,6 +82,11 @@ public class RandomEventSolverOverlay extends Overlay
 			}
 		}
 
+		if (plugin.getActivePinballPost() != null)
+		{
+			OverlayUtil.renderPolygon(graphics2D, plugin.getActivePinballPost().getConvexHull(), Color.GREEN);
+		}
+
 		return null;
 	}
 }

@@ -22,8 +22,17 @@ import javax.inject.Inject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Actor;
+import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
+import net.runelite.api.DynamicObject;
+import net.runelite.api.GameObject;
 import net.runelite.api.NPC;
+import net.runelite.api.Player;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.AnimationChanged;
+import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
@@ -31,6 +40,7 @@ import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.NpcID;
+import net.runelite.api.gameval.ObjectID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
@@ -148,6 +158,12 @@ public class RandomEventSolverPlugin extends Plugin
 		.put(4, NpcID.MACRO_PHEASANT_MODEL_4)
 		.build();
 
+	@Getter
+	private GameObject activePinballPost;
+
+	private final Set<Integer> PINBALL_POST_OBJECTS_SET = ImmutableSet.of(ObjectID.PINBALL_POST_TREE_INACTIVE, ObjectID.PINBALL_POST_IRON_INACTIVE, ObjectID.PINBALL_POST_COAL_INACTIVE, ObjectID.PINBALL_POST_FISHING_INACTIVE, ObjectID.PINBALL_POST_ESSENCE_INACTIVE);
+	private Set<GameObject> pinballPostsSet = new HashSet<>();
+
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -171,9 +187,50 @@ public class RandomEventSolverPlugin extends Plugin
 	}
 
 	@Subscribe
+	public void onAnimationChanged(AnimationChanged animationChanged)
+	{
+		Actor actor = animationChanged.getActor();
+		if (actor instanceof NPC)
+		{
+			log.debug("NPC Animation changed: {} - New Animation ID: {}", ((NPC) actor).getName(), actor.getAnimation());
+		}
+		else if (actor instanceof GameObject)
+		{
+			log.debug("GameObject Animation changed: {} - New Animation ID: {}", ((GameObject) actor).getId(), actor.getAnimation());
+		}
+		else if (actor instanceof Player)
+		{
+			log.debug("Player Animation changed: {} - New Animation ID: {}", ((Player) actor).getName(), actor.getAnimation());
+		}
+		else if (actor instanceof DynamicObject)
+		{
+			log.debug("DynamicObject Animation changed: {} - New Animation ID: {}", ((DynamicObject) actor).getModel().getSceneId(), actor.getAnimation());
+		}
+		else
+		{
+			log.debug("Unknown Actor Animation changed: {} - New Animation ID: {}", actor.getName(), actor.getAnimation());
+		}
+	}
+
+	@Subscribe
 	public void onGameTick(GameTick gameTick)
 	{
-
+		if (this.getRegionIDFromCurrentLocalPointInstanced() == 7758)
+		{
+			for (GameObject pinballObject : this.pinballPostsSet)
+			{
+				if (pinballObject != null && pinballObject.getRenderable() instanceof DynamicObject)
+				{
+					DynamicObject dynamicPinballObject = (DynamicObject) pinballObject.getRenderable();
+					if (dynamicPinballObject != null && dynamicPinballObject.getAnimation().getId() == 4005)
+					{
+						this.activePinballPost = pinballObject;
+						log.debug("Active pinball post found with ID: {}", this.activePinballPost.getId());
+						break; // Exit the loop once we find the active post
+					}
+				}
+			}
+		}
 	}
 
 	@Subscribe
@@ -433,6 +490,41 @@ public class RandomEventSolverPlugin extends Plugin
 			this.pheasantNPC = new HashSet<>();
 			this.pheasantTailFeathers = 0;
 		}
+		else if (npcDespawned.getNpc().getId() == NpcID.PINBALL_TROLL_LFT && npcDespawned.getNpc().getId() == NpcID.PINBALL_TROLL_RHT)
+		{
+			log.debug("A pinball troll despawned, resetting active pinball post.");
+			this.activePinballPost = null;
+			this.pinballPostsSet = new HashSet<>();
+		}
+	}
+
+	@Subscribe
+	public void onGameObjectSpawned(GameObjectSpawned gameObjectSpawned)
+	{
+		GameObject gameObject = gameObjectSpawned.getGameObject();
+		if (this.getRegionIDFromCurrentLocalPointInstanced() == 7758)
+		{
+			if (PINBALL_POST_OBJECTS_SET.contains(gameObject.getId()))
+			{
+				log.debug("A new pinball post object spawned with ID: {}, adding to the set.", gameObject.getId());
+				this.pinballPostsSet.add(gameObject);
+			}
+		}
+	}
+
+	@Subscribe
+	public void onChatMessage(ChatMessage chatMessage)
+	{
+		log.debug("Chat message received: {}", chatMessage.getMessage());
+		if (chatMessage.getType() == ChatMessageType.GAMEMESSAGE)
+		{
+			if (chatMessage.getMessage().equals("You may now leave the game area.") && this.getRegionIDFromCurrentLocalPointInstanced() == 7758)
+			{
+				log.debug("Pinball game has ended so resetting active pinball post and pinball posts set.");
+				this.activePinballPost = null;
+				this.pinballPostsSet = new HashSet<>();
+			}
+		}
 	}
 
 	@Provides
@@ -518,6 +610,12 @@ public class RandomEventSolverPlugin extends Plugin
 		}
 		log.warn("No matching selection widget found for model widget ID: {}", modelWidget.getId());
 		return null;
+	}
+
+	// Accounts for local instances too such as inside the pinball random event
+	private int getRegionIDFromCurrentLocalPointInstanced()
+	{
+		return WorldPoint.fromLocalInstance(this.client, this.client.getLocalPlayer().getLocalLocation()).getRegionID();
 	}
 
 	@Getter
