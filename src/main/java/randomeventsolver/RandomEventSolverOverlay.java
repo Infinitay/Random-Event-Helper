@@ -3,19 +3,19 @@ package randomeventsolver;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.geom.Area;
+import java.util.Objects;
 import javax.inject.Inject;
 import net.runelite.api.Client;
+import net.runelite.api.GroundObject;
 import net.runelite.api.NPC;
-import net.runelite.api.Perspective;
 import net.runelite.api.Point;
-import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
 import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
-import net.runelite.client.util.Text;
 
 public class RandomEventSolverOverlay extends Overlay
 {
@@ -85,6 +85,20 @@ public class RandomEventSolverOverlay extends Overlay
 		if (plugin.getActivePinballPost() != null)
 		{
 			OverlayUtil.renderPolygon(graphics2D, plugin.getActivePinballPost().getConvexHull(), Color.GREEN);
+		}
+
+		if (plugin.getExerciseMatsAnswerList() != null && !plugin.getExerciseMatsAnswerList().isEmpty())
+		{
+			// Get the non-null ground objects, map it to their convex hulls, and then combine them into a single shape
+			Area combinedMatHull = new Area();
+			plugin.getExerciseMatsAnswerList().stream().filter(Objects::nonNull).map(GroundObject::getConvexHull).forEach(hull -> combinedMatHull.add(new Area(hull)));
+			for (GroundObject exerciseGroundObject : plugin.getExerciseMatsAnswerList())
+			{
+				if (exerciseGroundObject != null)
+				{
+					OverlayUtil.renderPolygon(graphics2D, combinedMatHull, Color.GREEN);
+				}
+			}
 		}
 
 		return null;

@@ -1,15 +1,16 @@
 package randomeventsolver;
 
 import com.google.common.collect.BiMap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.inject.Provides;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.DynamicObject;
 import net.runelite.api.GameObject;
+import net.runelite.api.GroundObject;
 import net.runelite.api.NPC;
 import net.runelite.api.Player;
 import net.runelite.api.coords.WorldPoint;
@@ -34,13 +36,16 @@ import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.GroundObjectSpawned;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
+import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.ObjectID;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
@@ -184,6 +189,10 @@ public class RandomEventSolverPlugin extends Plugin
 		this.patternNextAnswer = null;
 		this.patternNextAnswerWidget = null;
 		this.relationshipSystem = null;
+		this.exerciseMatsAnswerList.clear();
+		this.exerciseMatsMultimap.clear();
+		this.exerciseVarbitMatMultimap.clear();
+
 	}
 
 	@Subscribe
@@ -215,6 +224,7 @@ public class RandomEventSolverPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick gameTick)
 	{
+//		log.debug("isInstanced: {} | Region ID: {} | WorldPoint Region ID: {}", this.client.getTopLevelWorldView().isInstance(), this.client.getLocalPlayer().getWorldLocation().getRegionID(), this.getRegionIDFromCurrentLocalPointInstanced());
 		if (this.getRegionIDFromCurrentLocalPointInstanced() == 7758)
 		{
 			for (GameObject pinballObject : this.pinballPostsSet)
@@ -405,12 +415,12 @@ public class RandomEventSolverPlugin extends Plugin
 					if (chatboxText != null && !chatboxText.isEmpty())
 					{
 						log.debug("Chatbox text loaded: {}", chatboxText);
-						Matcher matcher = FREAKY_FORESTER_PATTERN.matcher(chatboxText);
+						Matcher freakyForesterMatcher = FREAKY_FORESTER_PATTERN.matcher(chatboxText);
 
-						if (matcher.find())
+						if (freakyForesterMatcher.find())
 						{
-							String fullMatch = matcher.group(0);
-							this.pheasantTailFeathers = Integer.parseInt(matcher.group("numberOfTails"));
+							String fullMatch = freakyForesterMatcher.group(0);
+							this.pheasantTailFeathers = Integer.parseInt(freakyForesterMatcher.group("numberOfTails"));
 
 							System.out.println("Full match: " + fullMatch);
 							System.out.println("Number of tails: " + this.pheasantTailFeathers);
@@ -496,6 +506,13 @@ public class RandomEventSolverPlugin extends Plugin
 			this.activePinballPost = null;
 			this.pinballPostsSet = new HashSet<>();
 		}
+		else if (npcDespawned.getNpc().getId() == NpcID.MACRO_DRILLDEMON)
+		{
+			log.debug("Drill Demon NPC despawned, resetting exercise mats and mappings.");
+			this.exerciseMatsAnswerList.clear();
+			this.exerciseMatsMultimap.clear();
+			this.exerciseVarbitMatMultimap.clear();
+		}
 	}
 
 	@Subscribe
@@ -512,17 +529,114 @@ public class RandomEventSolverPlugin extends Plugin
 		}
 	}
 
+	private Set<String> DRILL_DEMON_EXERCISE_STRINGS = ImmutableSet.of(DrillExercise.JOG.drillSergeantText, DrillExercise.SIT_UP.drillSergeantText, DrillExercise.PUSH_UP.drillSergeantText, DrillExercise.STAR_JUMP.drillSergeantText);
+
+	@Getter
+	private List<GroundObject> exerciseMatsAnswerList = Lists.newArrayList();
+
 	@Subscribe
 	public void onChatMessage(ChatMessage chatMessage)
 	{
-		log.debug("Chat message received: {}", chatMessage.getMessage());
+		log.debug("Chat message ({}) received: {}", chatMessage.getType(), chatMessage.getMessage());
+		String sanitizedChatMessage = Text.sanitizeMultilineText(chatMessage.getMessage());
 		if (chatMessage.getType() == ChatMessageType.GAMEMESSAGE)
 		{
-			if (chatMessage.getMessage().equals("You may now leave the game area.") && this.getRegionIDFromCurrentLocalPointInstanced() == 7758)
+			if (this.getRegionIDFromCurrentLocalPointInstanced() == 7758 && sanitizedChatMessage.equals("You may now leave the game area."))
 			{
 				log.debug("Pinball game has ended so resetting active pinball post and pinball posts set.");
 				this.activePinballPost = null;
 				this.pinballPostsSet = new HashSet<>();
+			}
+		}
+		else if (chatMessage.getType() == ChatMessageType.DIALOG)
+		{
+			if (this.client.getLocalPlayer().getWorldLocation().getRegionID() == 12619)
+			{
+				this.exerciseMatsAnswerList.clear();
+				DrillExercise exercise = DrillExercise.getExerciseFromText(sanitizedChatMessage);
+				if (exercise != null)
+				{
+					log.debug("Drill Demon requested exercise: {}", exercise.name());
+					this.exerciseMatsAnswerList = Lists.newArrayList(this.exerciseVarbitMatMultimap.get(exercise.getVarbitValue()));
+					log.debug("Drill Demon exercise mats list set to: {}", this.exerciseMatsAnswerList);
+				}
+				else
+				{
+					log.warn("Drill Demon requested unknown exercise: {}", sanitizedChatMessage);
+					this.exerciseMatsAnswerList.clear();
+				}
+			}
+		}
+	}
+
+	@Subscribe
+	public void onVarbitChanged(VarbitChanged varbitChanged)
+	{
+		switch (varbitChanged.getVarbitId())
+		{
+			case VarbitID.MACRO_DRILLDEMON_POST_1:
+				this.updateExerciseMappings(varbitChanged.getValue(), 1);
+				break;
+			case VarbitID.MACRO_DRILLDEMON_POST_2:
+				this.updateExerciseMappings(varbitChanged.getValue(), 2);
+				break;
+			case VarbitID.MACRO_DRILLDEMON_POST_3:
+				this.updateExerciseMappings(varbitChanged.getValue(), 3);
+				break;
+			case VarbitID.MACRO_DRILLDEMON_POST_4:
+				this.updateExerciseMappings(varbitChanged.getValue(), 4);
+				break;
+			default:
+				break;
+		}
+	}
+
+	private void updateExerciseMappings(int exerciseVarbitValue, int postNumber)
+	{
+		DrillExercise exercise = DrillExercise.VARBIT_TO_EXERCISE_MAP.get(exerciseVarbitValue);
+		if (exercise != null)
+		{
+			log.debug("Drill Demon exercise of Post_{} changed to: {} ({})", postNumber, exercise.getVarbitValue(), exercise.name());
+			this.exerciseVarbitMatMultimap.replaceValues(exerciseVarbitValue, this.exerciseMatsMultimap.get(postNumber));
+		}
+		else
+		{
+			log.warn("Drill Demon exercise varbit changed to unknown value: {}", exerciseVarbitValue);
+			this.exerciseVarbitMatMultimap.replaceValues(exerciseVarbitValue, ImmutableSet.of());
+		}
+	}
+
+	// <Post Number, Mat>
+	private Multimap<Integer, GroundObject> exerciseMatsMultimap = HashMultimap.create(4, 2);
+
+	// <Exercise Varbit, Mat>
+	private Multimap<Integer, GroundObject> exerciseVarbitMatMultimap = HashMultimap.create(4, 2);
+
+	@Subscribe
+	public void onGroundObjectSpawned(GroundObjectSpawned groundObjectSpawned)
+	{
+		if (this.client.getLocalPlayer().getWorldLocation().getRegionID() == 12619)
+		{
+			switch (groundObjectSpawned.getGroundObject().getId())
+			{
+				case ObjectID.BARRACK_MAT_1:
+					exerciseMatsMultimap.put(1, groundObjectSpawned.getGroundObject());
+					log.debug("Added exercise mat with ID {} to post 1", groundObjectSpawned.getGroundObject().getId());
+					break;
+				case ObjectID.BARRACK_MAT_2:
+					exerciseMatsMultimap.put(2, groundObjectSpawned.getGroundObject());
+					log.debug("Added exercise mat with ID {} to post 2", groundObjectSpawned.getGroundObject().getId());
+					break;
+				case ObjectID.BARRACK_MAT_3:
+					exerciseMatsMultimap.put(3, groundObjectSpawned.getGroundObject());
+					log.debug("Added exercise mat with ID {} to post 3", groundObjectSpawned.getGroundObject().getId());
+					break;
+				case ObjectID.BARRACK_MAT_4:
+					exerciseMatsMultimap.put(4, groundObjectSpawned.getGroundObject());
+					log.debug("Added exercise mat with ID {} to post 4", groundObjectSpawned.getGroundObject().getId());
+					break;
+				default:
+					break;
 			}
 		}
 	}
@@ -640,5 +754,32 @@ public class RandomEventSolverPlugin extends Plugin
 		MAGIC(ImmutableSet.of(RandomEventItem.AIR_RUNE, RandomEventItem.EARTH_RUNE, RandomEventItem.FIRE_RUNE, RandomEventItem.STAFF));
 
 		private final ImmutableSet<RandomEventItem> models;
+	}
+
+	@Getter
+	@AllArgsConstructor
+	enum DrillExercise
+	{
+		JOG(1, "Get yourself over there and jog on that mat, private!"),
+		SIT_UP(2, "Get on that mat and give me sit ups, private!"),
+		PUSH_UP(3, "Drop and give me push ups on that mat, private!"),
+		STAR_JUMP(4, "I want to see you on that mat doing star jumps, private!");
+
+		private final int varbitValue;
+		private final String drillSergeantText;
+
+		private static final Map<Integer, DrillExercise> VARBIT_TO_EXERCISE_MAP = Maps.uniqueIndex(ImmutableList.copyOf(values()), DrillExercise::getVarbitValue);
+
+		private static DrillExercise getExerciseFromText(String text)
+		{
+			for (DrillExercise exercise : values())
+			{
+				if (text.toLowerCase().endsWith(exercise.getDrillSergeantText().toLowerCase()))
+				{
+					return exercise;
+				}
+			}
+			return null;
+		}
 	}
 }
