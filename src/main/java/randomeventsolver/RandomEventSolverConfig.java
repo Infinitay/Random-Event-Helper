@@ -37,4 +37,14 @@ public interface RandomEventSolverConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		keyName = "isPinballEnabled",
+		name = "Pinball",
+		description = "Helps highlight the answers for the Pinball random event."
+	)
+	default boolean isPinballEnabled()
+	{
+		return true;
+	}
 }

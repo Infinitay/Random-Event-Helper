@@ -19,7 +19,6 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.plugins.Plugin;
 import net.runelite.client.ui.overlay.OverlayManager;
 import randomeventsolver.data.RandomEventItem;
 
@@ -130,7 +129,6 @@ public class SurpriseExamHelper
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded widgetLoaded)
 	{
-		// log.debug("Widget loaded with group ID: {}", widgetLoaded.getGroupId());
 		if (widgetLoaded.getGroupId() == InterfaceID.PATTERN_CARDS)
 		{
 
@@ -221,7 +219,6 @@ public class SurpriseExamHelper
 	@Subscribe
 	public void onWidgetClosed(WidgetClosed widgetClosed)
 	{
-		// log.debug("Widget closed with group ID: {}", widgetClosed.getGroupId());
 		if (widgetClosed.getGroupId() == InterfaceID.PATTERN_CARDS)
 		{
 			log.debug("Pattern cards widget closed, resetting pattern card answers.");

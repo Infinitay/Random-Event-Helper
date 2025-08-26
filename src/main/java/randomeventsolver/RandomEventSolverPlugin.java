@@ -71,6 +71,7 @@ import randomeventsolver.data.Grave;
 import randomeventsolver.data.RandomEventItem;
 import randomeventsolver.randomevents.beekeeper.BeekeeperHelper;
 import randomeventsolver.randomevents.freakyforester.FreakyForesterHelper;
+import randomeventsolver.randomevents.pinball.PinballHelper;
 import randomeventsolver.randomevents.surpriseexam.SurpriseExamHelper;
 import randomeventsolver.randomevents.surpriseexam.SurpriseExamOverlay;
 
@@ -110,11 +111,8 @@ public class RandomEventSolverPlugin extends Plugin
 	@Inject
 	private FreakyForesterHelper freakyForesterHelper;
 
-	@Getter
-	private GameObject activePinballPost;
-
-	private final Set<Integer> PINBALL_POST_OBJECTS_SET = ImmutableSet.of(ObjectID.PINBALL_POST_TREE_INACTIVE, ObjectID.PINBALL_POST_IRON_INACTIVE, ObjectID.PINBALL_POST_COAL_INACTIVE, ObjectID.PINBALL_POST_FISHING_INACTIVE, ObjectID.PINBALL_POST_ESSENCE_INACTIVE);
-	private Set<GameObject> pinballPostsSet = new HashSet<>();
+	@Inject
+	private PinballHelper pinballHelper;
 
 	@Override
 	protected void startUp() throws Exception
@@ -133,6 +131,10 @@ public class RandomEventSolverPlugin extends Plugin
 		{
 			freakyForesterHelper.startUp();
 		}
+		if (config.isPinballEnabled())
+		{
+			pinballHelper.startUp();
+		}
 	}
 
 	@Override
@@ -146,6 +148,7 @@ public class RandomEventSolverPlugin extends Plugin
 		surpriseExamHelper.shutDown();
 		beekeeperHelper.shutDown();
 		freakyForesterHelper.shutDown();
+		pinballHelper.shutDown();
 	}
 
 	@Subscribe
@@ -187,6 +190,17 @@ public class RandomEventSolverPlugin extends Plugin
 					freakyForesterHelper.shutDown();
 				}
 			}
+			else if (configChanged.getKey().equals("isPinballEnabled"))
+			{
+				if (config.isPinballEnabled())
+				{
+					pinballHelper.startUp();
+				}
+				else
+				{
+					pinballHelper.shutDown();
+				}
+			}
 		}
 	}
 
@@ -221,42 +235,25 @@ public class RandomEventSolverPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick gameTick)
 	{
-//		log.debug("isInstanced: {} | WorldLocation Region ID: {} | LocalLocation Region ID: {}", this.client.getTopLevelWorldView().isInstance(), this.client.getLocalPlayer().getWorldLocation().getRegionID(), this.getRegionIDFromCurrentLocalPointInstanced());
-		if (this.getRegionIDFromCurrentLocalPointInstanced() == 7758)
+		// log.debug("isInstanced: {} | WorldLocation Region ID: {} | LocalLocation Region ID: {}", this.client.getTopLevelWorldView().isInstance(), this.client.getLocalPlayer().getWorldLocation().getRegionID(), this.getRegionIDFromCurrentLocalPointInstanced());
+		// There is an edgecase where when you're at the grave digger random event if a varb is still 0 then it won't fire.
+		// So lets handle this by checking to see if a player is in the grave digger random event area via NPC Leo spawn
+		// And by using a separate variable to make sure not to run this constantly every game tick
+		if (this.initiallyEnteredGraveDiggerArea)
 		{
-			for (GameObject pinballObject : this.pinballPostsSet)
+			for (Grave.GraveNumber graveNumber : Grave.GraveNumber.values())
 			{
-				if (pinballObject != null && pinballObject.getRenderable() instanceof DynamicObject)
-				{
-					DynamicObject dynamicPinballObject = (DynamicObject) pinballObject.getRenderable();
-					if (dynamicPinballObject != null && dynamicPinballObject.getAnimation().getId() == 4005)
-					{
-						this.activePinballPost = pinballObject;
-						log.debug("Active pinball post found with ID: {}", this.activePinballPost.getId());
-						break; // Exit the loop once we find the active post
-					}
-				}
+				VarbitChanged graveTypeVarbitChangedEvent = new VarbitChanged();
+				graveTypeVarbitChangedEvent.setVarbitId(graveNumber.getGraveTypeVarbitID());
+				graveTypeVarbitChangedEvent.setValue(this.client.getVarbitValue(graveNumber.getGraveTypeVarbitID()));
+				VarbitChanged placedCoffinVarbitChangedEvent = new VarbitChanged();
+				placedCoffinVarbitChangedEvent.setVarbitId(graveNumber.getPlacedCoffinVarbitID());
+				placedCoffinVarbitChangedEvent.setValue(this.client.getVarbitValue(graveNumber.getPlacedCoffinVarbitID()));
+				this.onVarbitChanged(graveTypeVarbitChangedEvent);
+				this.onVarbitChanged(placedCoffinVarbitChangedEvent);
+				this.initiallyEnteredGraveDiggerArea = false;
 			}
 
-			// There is an edgecase where when you're at the grave digger random event if a varb is still 0 then it won't fire.
-			// So lets handle this by checking to see if a player is in the grave digger random event area via NPC Leo spawn
-			// And by using a separate variable to make sure not to run this constantly every game tick
-			if (this.initiallyEnteredGraveDiggerArea)
-			{
-				for (Grave.GraveNumber graveNumber : Grave.GraveNumber.values())
-				{
-					VarbitChanged graveTypeVarbitChangedEvent = new VarbitChanged();
-					graveTypeVarbitChangedEvent.setVarbitId(graveNumber.getGraveTypeVarbitID());
-					graveTypeVarbitChangedEvent.setValue(this.client.getVarbitValue(graveNumber.getGraveTypeVarbitID()));
-					VarbitChanged placedCoffinVarbitChangedEvent = new VarbitChanged();
-					placedCoffinVarbitChangedEvent.setVarbitId(graveNumber.getPlacedCoffinVarbitID());
-					placedCoffinVarbitChangedEvent.setValue(this.client.getVarbitValue(graveNumber.getPlacedCoffinVarbitID()));
-					this.onVarbitChanged(graveTypeVarbitChangedEvent);
-					this.onVarbitChanged(placedCoffinVarbitChangedEvent);
-					this.initiallyEnteredGraveDiggerArea = false;
-				}
-
-			}
 		}
 	}
 
@@ -276,7 +273,7 @@ public class RandomEventSolverPlugin extends Plugin
 	public void onNpcSpawned(NpcSpawned npcSpawned)
 	{
 		NPC npc = npcSpawned.getNpc();
-		if (this.getRegionIDFromCurrentLocalPointInstanced() == 7758)
+		if (RandomEventSolverPlugin.isInRandomEventLocalInstance(this.client))
 		{
 			if (npc.getId() == NpcID.MACRO_GRAVEDIGGER)
 			{
@@ -294,13 +291,7 @@ public class RandomEventSolverPlugin extends Plugin
 	@Subscribe
 	public void onNpcDespawned(NpcDespawned npcDespawned)
 	{
-		if (npcDespawned.getNpc().getId() == NpcID.PINBALL_TROLL_LFT && npcDespawned.getNpc().getId() == NpcID.PINBALL_TROLL_RHT)
-		{
-			log.debug("A pinball troll despawned, resetting active pinball post.");
-			this.activePinballPost = null;
-			this.pinballPostsSet = new HashSet<>();
-		}
-		else if (npcDespawned.getNpc().getId() == NpcID.MACRO_DRILLDEMON)
+		if (npcDespawned.getNpc().getId() == NpcID.MACRO_DRILLDEMON)
 		{
 			log.debug("Drill Demon NPC despawned, resetting exercise mats and mappings.");
 			this.exerciseMatsAnswerList.clear();
@@ -325,14 +316,9 @@ public class RandomEventSolverPlugin extends Plugin
 	{
 		GameObject gameObject = gameObjectSpawned.getGameObject();
 		// Pinball and grave digger random even locations are in region 7758
-		if (this.getRegionIDFromCurrentLocalPointInstanced() == 7758)
+		if (RandomEventSolverPlugin.isInRandomEventLocalInstance(this.client))
 		{
-			if (PINBALL_POST_OBJECTS_SET.contains(gameObject.getId()))
-			{
-				log.debug("A new pinball post object spawned with ID: {}, adding to the set.", gameObject.getId());
-				this.pinballPostsSet.add(gameObject);
-			}
-			else if (Grave.GraveNumber.isGravestoneObjectID(gameObject.getId()))
+			if (Grave.GraveNumber.isGravestoneObjectID(gameObject.getId()))
 			{
 				Grave.GraveNumber graveNumber = Grave.GraveNumber.getGraveNumberFromGravestoneObjectID(gameObject.getId());
 				if (graveNumber != null)
@@ -402,16 +388,7 @@ public class RandomEventSolverPlugin extends Plugin
 	{
 		log.debug("Chat message ({}) received: {}", chatMessage.getType(), chatMessage.getMessage());
 		String sanitizedChatMessage = Text.sanitizeMultilineText(chatMessage.getMessage());
-		if (chatMessage.getType() == ChatMessageType.GAMEMESSAGE)
-		{
-			if (this.getRegionIDFromCurrentLocalPointInstanced() == 7758 && sanitizedChatMessage.equals("You may now leave the game area."))
-			{
-				log.debug("Pinball game has ended so resetting active pinball post and pinball posts set.");
-				this.activePinballPost = null;
-				this.pinballPostsSet = new HashSet<>();
-			}
-		}
-		else if (chatMessage.getType() == ChatMessageType.DIALOG)
+		if (chatMessage.getType() == ChatMessageType.DIALOG)
 		{
 			if (this.client.getLocalPlayer().getWorldLocation().getRegionID() == 12619)
 			{
@@ -613,7 +590,7 @@ public class RandomEventSolverPlugin extends Plugin
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded menuEntryAdded)
 	{
-		if (this.getRegionIDFromCurrentLocalPointInstanced() == 7758)
+		if (RandomEventSolverPlugin.isInRandomEventLocalInstance(this.client))
 		{
 			if (Coffin.getCoffinFromItemID(menuEntryAdded.getItemId()) != null && menuEntryAdded.getOption().equals("Check"))
 			{
@@ -628,10 +605,14 @@ public class RandomEventSolverPlugin extends Plugin
 		return configManager.getConfig(RandomEventSolverConfig.class);
 	}
 
-	// Accounts for local instances too such as inside the pinball random event
-	private int getRegionIDFromCurrentLocalPointInstanced()
+	// Accounts for local instances too such as inside the pinball and gravekeeper random event
+	public static int getRegionIDFromCurrentLocalPointInstanced(Client client)
 	{
-		return WorldPoint.fromLocalInstance(this.client, this.client.getLocalPlayer().getLocalLocation()).getRegionID();
+		return WorldPoint.fromLocalInstance(client, client.getLocalPlayer().getLocalLocation()).getRegionID();
+	}
+
+	public static boolean isInRandomEventLocalInstance(Client client) {
+		return RandomEventSolverPlugin.getRegionIDFromCurrentLocalPointInstanced(client) == 7758;
 	}
 
 	@Getter
