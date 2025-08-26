@@ -2,6 +2,7 @@ package randomeventsolver;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -10,7 +11,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Multisets;
 import com.google.inject.Provides;
+import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +34,7 @@ import net.runelite.api.Client;
 import net.runelite.api.DynamicObject;
 import net.runelite.api.GameObject;
 import net.runelite.api.GroundObject;
+import net.runelite.api.Item;
 import net.runelite.api.NPC;
 import net.runelite.api.Player;
 import net.runelite.api.coords.WorldPoint;
@@ -37,12 +43,15 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.GroundObjectSpawned;
+import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.ObjectID;
 import net.runelite.api.gameval.VarbitID;
@@ -55,6 +64,8 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
+import randomeventsolver.data.Coffin;
+import randomeventsolver.data.Grave;
 import randomeventsolver.data.RandomEventItem;
 
 @Slf4j
@@ -75,12 +86,14 @@ public class RandomEventSolverPlugin extends Plugin
 	@Inject
 	private ItemManager itemManager;
 
-
 	@Inject
 	private RandomEventSolverConfig config;
 
 	@Inject
 	private RandomEventSolverOverlay overlay;
+
+	@Inject
+	private RandomEventSolverItemOverlay itemOverlay;
 
 	@Getter
 	private ImmutableSet<RandomEventItem> patternCardAnswers;
@@ -173,6 +186,7 @@ public class RandomEventSolverPlugin extends Plugin
 	protected void startUp() throws Exception
 	{
 		this.overlayManager.add(overlay);
+		this.overlayManager.add(itemOverlay);
 		this.patternCardAnswers = null;
 		this.patternCardAnswerWidgets = null;
 		this.patternNextAnswer = null;
@@ -184,6 +198,7 @@ public class RandomEventSolverPlugin extends Plugin
 	protected void shutDown() throws Exception
 	{
 		this.overlayManager.remove(overlay);
+		this.overlayManager.remove(itemOverlay);
 		this.patternCardAnswers = null;
 		this.patternCardAnswerWidgets = null;
 		this.patternNextAnswer = null;
@@ -221,10 +236,12 @@ public class RandomEventSolverPlugin extends Plugin
 		}
 	}
 
+	private boolean initiallyEnteredGraveDiggerArea;
+
 	@Subscribe
 	public void onGameTick(GameTick gameTick)
 	{
-//		log.debug("isInstanced: {} | Region ID: {} | WorldPoint Region ID: {}", this.client.getTopLevelWorldView().isInstance(), this.client.getLocalPlayer().getWorldLocation().getRegionID(), this.getRegionIDFromCurrentLocalPointInstanced());
+//		log.debug("isInstanced: {} | WorldLocation Region ID: {} | LocalLocation Region ID: {}", this.client.getTopLevelWorldView().isInstance(), this.client.getLocalPlayer().getWorldLocation().getRegionID(), this.getRegionIDFromCurrentLocalPointInstanced());
 		if (this.getRegionIDFromCurrentLocalPointInstanced() == 7758)
 		{
 			for (GameObject pinballObject : this.pinballPostsSet)
@@ -239,6 +256,26 @@ public class RandomEventSolverPlugin extends Plugin
 						break; // Exit the loop once we find the active post
 					}
 				}
+			}
+
+			// There is an edgecase where when you're at the grave digger random event if a varb is still 0 then it won't fire.
+			// So lets handle this by checking to see if a player is in the grave digger random event area via NPC Leo spawn
+			// And by using a separate variable to make sure not to run this constantly every game tick
+			if (this.initiallyEnteredGraveDiggerArea)
+			{
+				for (Grave.GraveNumber graveNumber : Grave.GraveNumber.values())
+				{
+					VarbitChanged graveTypeVarbitChangedEvent = new VarbitChanged();
+					graveTypeVarbitChangedEvent.setVarbitId(graveNumber.getGraveTypeVarbitID());
+					graveTypeVarbitChangedEvent.setValue(this.client.getVarbitValue(graveNumber.getGraveTypeVarbitID()));
+					VarbitChanged placedCoffinVarbitChangedEvent = new VarbitChanged();
+					placedCoffinVarbitChangedEvent.setVarbitId(graveNumber.getPlacedCoffinVarbitID());
+					placedCoffinVarbitChangedEvent.setValue(this.client.getVarbitValue(graveNumber.getPlacedCoffinVarbitID()));
+					this.onVarbitChanged(graveTypeVarbitChangedEvent);
+					this.onVarbitChanged(placedCoffinVarbitChangedEvent);
+					this.initiallyEnteredGraveDiggerArea = false;
+				}
+
 			}
 		}
 	}
@@ -489,6 +526,19 @@ public class RandomEventSolverPlugin extends Plugin
 				}
 			}
 		}
+		else if (this.getRegionIDFromCurrentLocalPointInstanced() == 7758)
+		{
+			if (npc.getId() == NpcID.MACRO_GRAVEDIGGER)
+			{
+				log.debug("Grave Digger Leo NPC spawned in grave digger random event area.");
+				this.initiallyEnteredGraveDiggerArea = true;
+				// Take this opportunity to initialize the BufferedImage for the coffin items
+				for (Coffin coffin : Coffin.values())
+				{
+					coffinItemImageMap.put(coffin, coffin.getItemImage(this.itemManager));
+				}
+			}
+		}
 	}
 
 	@Subscribe
@@ -513,18 +563,87 @@ public class RandomEventSolverPlugin extends Plugin
 			this.exerciseMatsMultimap.clear();
 			this.exerciseVarbitMatMultimap.clear();
 		}
+		else if (npcDespawned.getNpc().getId() == NpcID.MACRO_GRAVEDIGGER)
+		{
+			log.debug("Grave Digger Leo NPC despawned, resetting grave digger area state.");
+			this.initiallyEnteredGraveDiggerArea = false;
+			this.graveMap.clear();
+			this.coffinsInInventory.clear();
+			this.coffinItemImageMap.clear();
+		}
 	}
+
+	@Getter
+	private Map<Coffin, BufferedImage> coffinItemImageMap = Maps.newHashMap();
 
 	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned gameObjectSpawned)
 	{
 		GameObject gameObject = gameObjectSpawned.getGameObject();
+		// Pinball and grave digger random even locations are in region 7758
 		if (this.getRegionIDFromCurrentLocalPointInstanced() == 7758)
 		{
 			if (PINBALL_POST_OBJECTS_SET.contains(gameObject.getId()))
 			{
 				log.debug("A new pinball post object spawned with ID: {}, adding to the set.", gameObject.getId());
 				this.pinballPostsSet.add(gameObject);
+			}
+			else if (Grave.GraveNumber.isGravestoneObjectID(gameObject.getId()))
+			{
+				Grave.GraveNumber graveNumber = Grave.GraveNumber.getGraveNumberFromGravestoneObjectID(gameObject.getId());
+				if (graveNumber != null)
+				{
+					log.debug("A new gravestone object ({}) spawned with ID: {}, updating grave map.", graveNumber.name(), gameObject.getId());
+					Grave grave = this.graveMap.get(graveNumber);
+					if (grave == null)
+					{
+						grave = new Grave(graveNumber);
+					}
+					grave.setGraveStone(gameObject);
+					this.graveMap.put(graveNumber, grave);
+				}
+				else
+				{
+					log.warn("Gravestone object ID {} does not map to a known grave number.", gameObject.getId());
+				}
+			}
+			else if (Grave.GraveNumber.isEmptyGraveObjectID(gameObject.getId()))
+			{
+				Grave.GraveNumber graveNumber = Grave.GraveNumber.getGraveNumberFromEmptyGraveObjectID(gameObject.getId());
+				if (graveNumber != null)
+				{
+					log.debug("A new empty grave object ({}) spawned with ID: {}, updating grave map.", graveNumber.name(), gameObject.getId());
+					Grave grave = this.graveMap.get(graveNumber);
+					if (grave == null)
+					{
+						grave = new Grave(graveNumber);
+					}
+					grave.setEmptyGrave(gameObject);
+					this.graveMap.put(graveNumber, grave);
+				}
+				else
+				{
+					log.warn("Empty grave object ID {} does not map to a known grave number.", gameObject.getId());
+				}
+			}
+			else if (Grave.GraveNumber.isFilledGraveObjectID(gameObject.getId()))
+			{
+				Grave.GraveNumber graveNumber = Grave.GraveNumber.getGraveNumberFromFilledGraveObjectID(gameObject.getId());
+				if (graveNumber != null)
+				{
+					log.debug("A new filled grave object ({}) spawned with ID: {}, updating grave map.", graveNumber.name(), gameObject.getId());
+					Grave grave = this.graveMap.get(graveNumber);
+					if (grave == null)
+					{
+						grave = new Grave(graveNumber);
+					}
+					grave.setFilledGrave(gameObject);
+					this.graveMap.put(graveNumber, grave);
+				}
+				else
+				{
+					log.warn("Filled grave object ID {} does not map to a known grave number.", gameObject.getId());
+				}
 			}
 		}
 	}
@@ -569,6 +688,10 @@ public class RandomEventSolverPlugin extends Plugin
 		}
 	}
 
+	// <Grave Number, Grave>
+	@Getter
+	private Map<Grave.GraveNumber, Grave> graveMap = Maps.newHashMap();
+
 	@Subscribe
 	public void onVarbitChanged(VarbitChanged varbitChanged)
 	{
@@ -586,8 +709,72 @@ public class RandomEventSolverPlugin extends Plugin
 			case VarbitID.MACRO_DRILLDEMON_POST_4:
 				this.updateExerciseMappings(varbitChanged.getValue(), 4);
 				break;
+			case VarbitID.MACRO_DIGGER_GRAVE_1: // Grave type/Gravestone
+				this.updateRequiredCoffin(Grave.GraveNumber.ONE, varbitChanged.getValue());
+				break;
+			case VarbitID.MACRO_DIGGER_COFFIN_1: // Placed coffin into the grave
+				this.updatePlacedCoffin(Grave.GraveNumber.ONE, varbitChanged.getValue());
+				break;
+			case VarbitID.MACRO_DIGGER_GRAVE_2:
+				this.updateRequiredCoffin(Grave.GraveNumber.TWO, varbitChanged.getValue());
+				break;
+			case VarbitID.MACRO_DIGGER_COFFIN_2:
+				this.updatePlacedCoffin(Grave.GraveNumber.TWO, varbitChanged.getValue());
+				break;
+			case VarbitID.MACRO_DIGGER_GRAVE_3:
+				this.updateRequiredCoffin(Grave.GraveNumber.THREE, varbitChanged.getValue());
+				break;
+			case VarbitID.MACRO_DIGGER_COFFIN_3:
+				this.updatePlacedCoffin(Grave.GraveNumber.THREE, varbitChanged.getValue());
+				break;
+			case VarbitID.MACRO_DIGGER_GRAVE_4:
+				this.updateRequiredCoffin(Grave.GraveNumber.FOUR, varbitChanged.getValue());
+				break;
+			case VarbitID.MACRO_DIGGER_COFFIN_4:
+				this.updatePlacedCoffin(Grave.GraveNumber.FOUR, varbitChanged.getValue());
+				break;
+			case VarbitID.MACRO_DIGGER_GRAVE_5:
+				this.updateRequiredCoffin(Grave.GraveNumber.FIVE, varbitChanged.getValue());
+				break;
+			case VarbitID.MACRO_DIGGER_COFFIN_5:
+				this.updatePlacedCoffin(Grave.GraveNumber.FIVE, varbitChanged.getValue());
+				break;
 			default:
 				break;
+		}
+	}
+
+	private void updateRequiredCoffin(Grave.GraveNumber graveNumber, int requiredCoffinVarbitValue)
+	{
+		log.debug("Grave {} required coffin varbit changed to value: {}", graveNumber.name(), requiredCoffinVarbitValue);
+		Coffin coffin = Coffin.getCoffinFromVarbitValue(requiredCoffinVarbitValue);
+		if (coffin != null)
+		{
+			log.debug("Grave {} requires {} coffin", graveNumber.name(), coffin.name());
+			Grave grave = this.graveMap.getOrDefault(graveNumber, new Grave(graveNumber));
+			grave.setRequiredCoffin(coffin);
+			this.graveMap.put(graveNumber, grave);
+		}
+		else
+		{
+			log.warn("Grave {} required coffin varbit changed to unknown coffin value: {}", graveNumber.name(), requiredCoffinVarbitValue);
+		}
+	}
+
+	private void updatePlacedCoffin(Grave.GraveNumber graveNumber, int placedCoffinVarbitValue)
+	{
+		log.debug("Grave {} placed coffin varbit changed to value: {}", graveNumber.name(), placedCoffinVarbitValue);
+		Coffin coffin = Coffin.getCoffinFromVarbitValue(placedCoffinVarbitValue);
+		if (coffin != null)
+		{
+			log.debug("Found {} coffin placed into Grave {}", coffin.name(), graveNumber.name());
+			Grave grave = this.graveMap.getOrDefault(graveNumber, new Grave(graveNumber));
+			grave.setPlacedCoffin(coffin);
+			this.graveMap.put(graveNumber, grave);
+		}
+		else
+		{
+			log.warn("Grave {} placed coffin varbit changed to unknown coffin value: {}", graveNumber.name(), placedCoffinVarbitValue);
 		}
 	}
 
@@ -637,6 +824,56 @@ public class RandomEventSolverPlugin extends Plugin
 					break;
 				default:
 					break;
+			}
+		}
+	}
+
+	private Multiset<Integer> previousInventory = HashMultiset.create();
+	private Multiset<Integer> currentInventoryItems = HashMultiset.create();
+	@Getter
+	private Set<Integer> coffinsInInventory = new HashSet<>();
+
+	@Subscribe
+	public void onItemContainerChanged(ItemContainerChanged itemContainerChanged)
+	{
+		// In case of unequipping an item -> INVENTORY -> EQUIPMENT changes
+		if (itemContainerChanged.getContainerId() == InventoryID.INV)
+		{
+			this.currentInventoryItems.clear();
+			List<Item> itemStream = Arrays.stream(itemContainerChanged.getItemContainer().getItems()).filter(item -> item.getId() != -1).collect(Collectors.toList());
+			itemStream.forEach(item -> this.currentInventoryItems.add(item.getId(), this.itemManager.getItemComposition(item.getId()).isStackable() ? 1 : item.getQuantity()));
+
+			Multiset<Integer> currentInventory = HashMultiset.create();
+			List<Item> inventoryItems = Arrays.stream(itemContainerChanged.getItemContainer().getItems()).filter(item -> item.getId() != -1).collect(Collectors.toList());
+			inventoryItems.forEach(item -> currentInventory.add(item.getId(), item.getQuantity()));
+
+			// Remember that for set operations difference A - B != B - A
+			Multiset<Integer> addedItems = Multisets.difference(currentInventory, this.previousInventory);
+			Multiset<Integer> removedItems = Multisets.difference(this.previousInventory, currentInventory);
+			log.debug("Added Items: " + addedItems);
+			log.debug("Removed Items: " + removedItems);
+
+			for (Integer itemID : addedItems.elementSet())
+			{
+				if (Coffin.getCoffinFromItemID(itemID) != null)
+				{
+					this.coffinsInInventory.add(itemID);
+					log.debug("Found {} coffin in inventory", Coffin.getCoffinFromItemID(itemID).name());
+				}
+			}
+
+			this.previousInventory = currentInventory;
+		}
+	}
+
+	@Subscribe
+	public void onMenuEntryAdded(MenuEntryAdded menuEntryAdded)
+	{
+		if (this.getRegionIDFromCurrentLocalPointInstanced() == 7758)
+		{
+			if (Coffin.getCoffinFromItemID(menuEntryAdded.getItemId()) != null && menuEntryAdded.getOption().equals("Check"))
+			{
+				menuEntryAdded.getMenuEntry().setDeprioritized(true);
 			}
 		}
 	}
