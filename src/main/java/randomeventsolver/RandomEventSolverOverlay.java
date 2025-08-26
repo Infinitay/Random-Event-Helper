@@ -53,24 +53,6 @@ public class RandomEventSolverOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics2D)
 	{
-		if (plugin.getBeehiveAnswerWidgets() != null && !plugin.getBeehiveAnswerWidgets().isEmpty())
-		{
-			for (int i = 0; i < plugin.getBeehiveAnswerWidgets().size(); i++)
-			{
-				Widget answerWidget = plugin.getBeehiveAnswerWidgets().get(i);
-				if (answerWidget != null && !answerWidget.isHidden() && answerWidget.getModelId() != -1)
-				{
-					graphics2D.setFont(graphics2D.getFont().deriveFont(18f));
-					String text = String.valueOf(i + 1);
-					Point textPoint = new Point(
-						answerWidget.getBounds().x + (answerWidget.getBounds().width / 2) - (graphics2D.getFontMetrics().stringWidth(text) / 2),
-						answerWidget.getBounds().y + (answerWidget.getBounds().height / 2) + (graphics2D.getFontMetrics().getHeight() / 2) - graphics2D.getFontMetrics().getDescent()
-					);
-					OverlayUtil.renderTextLocation(graphics2D, textPoint, text, Color.YELLOW);
-				}
-			}
-		}
-
 		if (plugin.getPheasantNPC() != null && !plugin.getPheasantNPC().isEmpty())
 		{
 			for (NPC pheasantNPC : plugin.getPheasantNPC())
@@ -169,7 +151,9 @@ public class RandomEventSolverOverlay extends Overlay
 								{
 									OverlayUtil.renderImageLocation(graphics2D, centeredSpritePoint, crossBufferedImage);
 								}
-							} else {
+							}
+							else
+							{
 								if (centeredSpritePoint != null)
 								{
 									OverlayUtil.renderImageLocation(graphics2D, centeredSpritePoint, checkBufferedImage);
