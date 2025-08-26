@@ -8,12 +8,12 @@ import net.runelite.client.config.ConfigItem;
 public interface RandomEventSolverConfig extends Config
 {
 	@ConfigItem(
-		keyName = "greeting",
-		name = "Welcome Greeting",
-		description = "The message to show to the user when they login"
+		keyName = "isSurpriseExamEnabled",
+		name = "Surprise Exam",
+		description = "Helps highlight the answers for the Surprise Exam random event. Supports both matching and next item questions."
 	)
-	default String greeting()
+	default boolean isSurpriseExamEnabled()
 	{
-		return "Hello";
+		return true;
 	}
 }
