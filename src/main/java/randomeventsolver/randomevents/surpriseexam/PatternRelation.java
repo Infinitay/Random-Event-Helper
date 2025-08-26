@@ -1,4 +1,4 @@
-package randomeventsolver.exam;
+package randomeventsolver.randomevents.surpriseexam;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;

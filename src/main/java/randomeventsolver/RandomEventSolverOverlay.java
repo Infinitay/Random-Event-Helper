@@ -53,22 +53,6 @@ public class RandomEventSolverOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics2D)
 	{
-		if (plugin.getPatternCardAnswerWidgets() != null && !plugin.getPatternCardAnswerWidgets().isEmpty())
-		{
-			for (Widget answerWidget : plugin.getPatternCardAnswerWidgets())
-			{
-				if (answerWidget != null && !answerWidget.isHidden())
-				{
-					OverlayUtil.renderPolygon(graphics2D, answerWidget.getBounds(), Color.GREEN);
-				}
-			}
-		}
-
-		if (plugin.getPatternNextAnswer() != null)
-		{
-			OverlayUtil.renderPolygon(graphics2D, plugin.getPatternNextAnswerWidget().getBounds(), Color.GREEN);
-		}
-
 		if (plugin.getBeehiveAnswerWidgets() != null && !plugin.getBeehiveAnswerWidgets().isEmpty())
 		{
 			for (int i = 0; i < plugin.getBeehiveAnswerWidgets().size(); i++)

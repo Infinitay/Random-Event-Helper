@@ -1,4 +1,4 @@
-package randomeventsolver;
+package randomeventsolver.randomevents.surpriseexam;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
