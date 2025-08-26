@@ -34,10 +34,6 @@ public class DrillDemonOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics2D)
 	{
-		if (client.getLocalPlayer() != null)
-		{
-			OverlayUtil.renderPolygon(graphics2D, client.getLocalPlayer().getCanvasTilePoly(), Color.CYAN);
-		}
 		if (plugin.getExerciseMatsAnswerList() != null && !plugin.getExerciseMatsAnswerList().isEmpty())
 		{
 			// Get the non-null ground objects, map it to their convex hulls, and then combine them into a single shape
