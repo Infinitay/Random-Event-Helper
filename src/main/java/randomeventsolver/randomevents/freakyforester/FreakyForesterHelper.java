@@ -74,7 +74,6 @@ public class FreakyForesterHelper
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded widgetLoaded)
 	{
-		// log.debug("Widget loaded with group ID: {}", widgetLoaded.getGroupId());
 		if (widgetLoaded.getGroupId() == InterfaceID.CHAT_LEFT)
 		{
 			this.clientThread.invokeLater(() -> {

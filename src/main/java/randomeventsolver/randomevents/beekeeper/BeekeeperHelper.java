@@ -55,7 +55,6 @@ public class BeekeeperHelper extends Plugin
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded widgetLoaded)
 	{
-		// log.debug("Widget loaded with group ID: {}", widgetLoaded.getGroupId());
 		if (widgetLoaded.getGroupId() == InterfaceID.BEEHIVE)
 		{
 			this.clientThread.invokeLater(() -> {
@@ -137,7 +136,6 @@ public class BeekeeperHelper extends Plugin
 	@Subscribe
 	public void onWidgetClosed(WidgetClosed widgetClosed)
 	{
-		// log.debug("Widget closed with group ID: {}", widgetClosed.getGroupId());
 		if (widgetClosed.getGroupId() == InterfaceID.BEEHIVE)
 		{
 			log.debug("Beehive widget closed, resetting beehive answer widgets.");

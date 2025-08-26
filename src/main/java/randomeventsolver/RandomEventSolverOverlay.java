@@ -53,11 +53,6 @@ public class RandomEventSolverOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics2D)
 	{
-		if (plugin.getActivePinballPost() != null)
-		{
-			OverlayUtil.renderPolygon(graphics2D, plugin.getActivePinballPost().getConvexHull(), Color.GREEN);
-		}
-
 		if (plugin.getExerciseMatsAnswerList() != null && !plugin.getExerciseMatsAnswerList().isEmpty())
 		{
 			// Get the non-null ground objects, map it to their convex hulls, and then combine them into a single shape
