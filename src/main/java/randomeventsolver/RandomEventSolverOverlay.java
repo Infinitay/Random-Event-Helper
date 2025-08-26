@@ -53,17 +53,6 @@ public class RandomEventSolverOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics2D)
 	{
-		if (plugin.getPheasantNPC() != null && !plugin.getPheasantNPC().isEmpty())
-		{
-			for (NPC pheasantNPC : plugin.getPheasantNPC())
-			{
-				if (pheasantNPC != null && !pheasantNPC.isDead())
-				{
-					OverlayUtil.renderPolygon(graphics2D, pheasantNPC.getConvexHull(), Color.GREEN);
-				}
-			}
-		}
-
 		if (plugin.getActivePinballPost() != null)
 		{
 			OverlayUtil.renderPolygon(graphics2D, plugin.getActivePinballPost().getConvexHull(), Color.GREEN);
