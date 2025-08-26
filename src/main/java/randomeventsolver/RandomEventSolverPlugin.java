@@ -70,6 +70,7 @@ import randomeventsolver.data.Coffin;
 import randomeventsolver.data.Grave;
 import randomeventsolver.data.RandomEventItem;
 import randomeventsolver.randomevents.beekeeper.BeekeeperHelper;
+import randomeventsolver.randomevents.drilldemon.DrillDemonHelper;
 import randomeventsolver.randomevents.freakyforester.FreakyForesterHelper;
 import randomeventsolver.randomevents.pinball.PinballHelper;
 import randomeventsolver.randomevents.surpriseexam.SurpriseExamHelper;
@@ -114,6 +115,9 @@ public class RandomEventSolverPlugin extends Plugin
 	@Inject
 	private PinballHelper pinballHelper;
 
+	@Inject
+	private DrillDemonHelper drillDemonHelper;
+
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -135,6 +139,10 @@ public class RandomEventSolverPlugin extends Plugin
 		{
 			pinballHelper.startUp();
 		}
+		if (config.isDrillDemonEnabled())
+		{
+			drillDemonHelper.startUp();
+		}
 	}
 
 	@Override
@@ -142,13 +150,11 @@ public class RandomEventSolverPlugin extends Plugin
 	{
 		this.overlayManager.remove(overlay);
 		this.overlayManager.remove(itemOverlay);
-		this.exerciseMatsAnswerList.clear();
-		this.exerciseMatsMultimap.clear();
-		this.exerciseVarbitMatMultimap.clear();
 		surpriseExamHelper.shutDown();
 		beekeeperHelper.shutDown();
 		freakyForesterHelper.shutDown();
 		pinballHelper.shutDown();
+		drillDemonHelper.shutDown();
 	}
 
 	@Subscribe
@@ -199,6 +205,17 @@ public class RandomEventSolverPlugin extends Plugin
 				else
 				{
 					pinballHelper.shutDown();
+				}
+			}
+			else if (configChanged.getKey().equals("isDrillDemonEnabled"))
+			{
+				if (config.isDrillDemonEnabled())
+				{
+					drillDemonHelper.startUp();
+				}
+				else
+				{
+					drillDemonHelper.shutDown();
 				}
 			}
 		}
@@ -291,14 +308,7 @@ public class RandomEventSolverPlugin extends Plugin
 	@Subscribe
 	public void onNpcDespawned(NpcDespawned npcDespawned)
 	{
-		if (npcDespawned.getNpc().getId() == NpcID.MACRO_DRILLDEMON)
-		{
-			log.debug("Drill Demon NPC despawned, resetting exercise mats and mappings.");
-			this.exerciseMatsAnswerList.clear();
-			this.exerciseMatsMultimap.clear();
-			this.exerciseVarbitMatMultimap.clear();
-		}
-		else if (npcDespawned.getNpc().getId() == NpcID.MACRO_GRAVEDIGGER)
+		if (npcDespawned.getNpc().getId() == NpcID.MACRO_GRAVEDIGGER)
 		{
 			log.debug("Grave Digger Leo NPC despawned, resetting grave digger area state.");
 			this.initiallyEnteredGraveDiggerArea = false;
@@ -378,35 +388,11 @@ public class RandomEventSolverPlugin extends Plugin
 		}
 	}
 
-	private Set<String> DRILL_DEMON_EXERCISE_STRINGS = ImmutableSet.of(DrillExercise.JOG.drillSergeantText, DrillExercise.SIT_UP.drillSergeantText, DrillExercise.PUSH_UP.drillSergeantText, DrillExercise.STAR_JUMP.drillSergeantText);
-
-	@Getter
-	private List<GroundObject> exerciseMatsAnswerList = Lists.newArrayList();
-
 	@Subscribe
 	public void onChatMessage(ChatMessage chatMessage)
 	{
-		log.debug("Chat message ({}) received: {}", chatMessage.getType(), chatMessage.getMessage());
-		String sanitizedChatMessage = Text.sanitizeMultilineText(chatMessage.getMessage());
-		if (chatMessage.getType() == ChatMessageType.DIALOG)
-		{
-			if (this.client.getLocalPlayer().getWorldLocation().getRegionID() == 12619)
-			{
-				this.exerciseMatsAnswerList.clear();
-				DrillExercise exercise = DrillExercise.getExerciseFromText(sanitizedChatMessage);
-				if (exercise != null)
-				{
-					log.debug("Drill Demon requested exercise: {}", exercise.name());
-					this.exerciseMatsAnswerList = Lists.newArrayList(this.exerciseVarbitMatMultimap.get(exercise.getVarbitValue()));
-					log.debug("Drill Demon exercise mats list set to: {}", this.exerciseMatsAnswerList);
-				}
-				else
-				{
-					log.warn("Drill Demon requested unknown exercise: {}", sanitizedChatMessage);
-					this.exerciseMatsAnswerList.clear();
-				}
-			}
-		}
+		// log.debug("Chat message ({}) received: {}", chatMessage.getType(), chatMessage.getMessage());
+		// String sanitizedChatMessage = Text.sanitizeMultilineText(chatMessage.getMessage());
 	}
 
 	// <Grave Number, Grave>
@@ -418,18 +404,6 @@ public class RandomEventSolverPlugin extends Plugin
 	{
 		switch (varbitChanged.getVarbitId())
 		{
-			case VarbitID.MACRO_DRILLDEMON_POST_1:
-				this.updateExerciseMappings(varbitChanged.getValue(), 1);
-				break;
-			case VarbitID.MACRO_DRILLDEMON_POST_2:
-				this.updateExerciseMappings(varbitChanged.getValue(), 2);
-				break;
-			case VarbitID.MACRO_DRILLDEMON_POST_3:
-				this.updateExerciseMappings(varbitChanged.getValue(), 3);
-				break;
-			case VarbitID.MACRO_DRILLDEMON_POST_4:
-				this.updateExerciseMappings(varbitChanged.getValue(), 4);
-				break;
 			case VarbitID.MACRO_DIGGER_GRAVE_1: // Grave type/Gravestone
 				this.updateRequiredCoffin(Grave.GraveNumber.ONE, varbitChanged.getValue());
 				break;
@@ -499,54 +473,11 @@ public class RandomEventSolverPlugin extends Plugin
 		}
 	}
 
-	private void updateExerciseMappings(int exerciseVarbitValue, int postNumber)
-	{
-		DrillExercise exercise = DrillExercise.VARBIT_TO_EXERCISE_MAP.get(exerciseVarbitValue);
-		if (exercise != null)
-		{
-			log.debug("Drill Demon exercise of Post_{} changed to: {} ({})", postNumber, exercise.getVarbitValue(), exercise.name());
-			this.exerciseVarbitMatMultimap.replaceValues(exerciseVarbitValue, this.exerciseMatsMultimap.get(postNumber));
-		}
-		else
-		{
-			log.warn("Drill Demon exercise varbit changed to unknown value: {}", exerciseVarbitValue);
-			this.exerciseVarbitMatMultimap.replaceValues(exerciseVarbitValue, ImmutableSet.of());
-		}
-	}
-
-	// <Post Number, Mat>
-	private Multimap<Integer, GroundObject> exerciseMatsMultimap = HashMultimap.create(4, 2);
-
-	// <Exercise Varbit, Mat>
-	private Multimap<Integer, GroundObject> exerciseVarbitMatMultimap = HashMultimap.create(4, 2);
 
 	@Subscribe
 	public void onGroundObjectSpawned(GroundObjectSpawned groundObjectSpawned)
 	{
-		if (this.client.getLocalPlayer().getWorldLocation().getRegionID() == 12619)
-		{
-			switch (groundObjectSpawned.getGroundObject().getId())
-			{
-				case ObjectID.BARRACK_MAT_1:
-					exerciseMatsMultimap.put(1, groundObjectSpawned.getGroundObject());
-					log.debug("Added exercise mat with ID {} to post 1", groundObjectSpawned.getGroundObject().getId());
-					break;
-				case ObjectID.BARRACK_MAT_2:
-					exerciseMatsMultimap.put(2, groundObjectSpawned.getGroundObject());
-					log.debug("Added exercise mat with ID {} to post 2", groundObjectSpawned.getGroundObject().getId());
-					break;
-				case ObjectID.BARRACK_MAT_3:
-					exerciseMatsMultimap.put(3, groundObjectSpawned.getGroundObject());
-					log.debug("Added exercise mat with ID {} to post 3", groundObjectSpawned.getGroundObject().getId());
-					break;
-				case ObjectID.BARRACK_MAT_4:
-					exerciseMatsMultimap.put(4, groundObjectSpawned.getGroundObject());
-					log.debug("Added exercise mat with ID {} to post 4", groundObjectSpawned.getGroundObject().getId());
-					break;
-				default:
-					break;
-			}
-		}
+
 	}
 
 	private Multiset<Integer> previousInventory = HashMultiset.create();
@@ -611,34 +542,8 @@ public class RandomEventSolverPlugin extends Plugin
 		return WorldPoint.fromLocalInstance(client, client.getLocalPlayer().getLocalLocation()).getRegionID();
 	}
 
-	public static boolean isInRandomEventLocalInstance(Client client) {
-		return RandomEventSolverPlugin.getRegionIDFromCurrentLocalPointInstanced(client) == 7758;
-	}
-
-	@Getter
-	@AllArgsConstructor
-	enum DrillExercise
+	public static boolean isInRandomEventLocalInstance(Client client)
 	{
-		JOG(1, "Get yourself over there and jog on that mat, private!"),
-		SIT_UP(2, "Get on that mat and give me sit ups, private!"),
-		PUSH_UP(3, "Drop and give me push ups on that mat, private!"),
-		STAR_JUMP(4, "I want to see you on that mat doing star jumps, private!");
-
-		private final int varbitValue;
-		private final String drillSergeantText;
-
-		private static final Map<Integer, DrillExercise> VARBIT_TO_EXERCISE_MAP = Maps.uniqueIndex(ImmutableList.copyOf(values()), DrillExercise::getVarbitValue);
-
-		private static DrillExercise getExerciseFromText(String text)
-		{
-			for (DrillExercise exercise : values())
-			{
-				if (text.toLowerCase().endsWith(exercise.getDrillSergeantText().toLowerCase()))
-				{
-					return exercise;
-				}
-			}
-			return null;
-		}
+		return RandomEventSolverPlugin.getRegionIDFromCurrentLocalPointInstanced(client) == 7758;
 	}
 }

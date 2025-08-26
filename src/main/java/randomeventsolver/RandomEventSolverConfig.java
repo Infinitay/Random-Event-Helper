@@ -47,4 +47,14 @@ public interface RandomEventSolverConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		keyName = "isDrillDemonEnabled",
+		name = "Drill Demon",
+		description = "Helps highlight the answers for the Drill Demon random event."
+	)
+	default boolean isDrillDemonEnabled()
+	{
+		return true;
+	}
 }

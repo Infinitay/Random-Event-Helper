@@ -53,20 +53,6 @@ public class RandomEventSolverOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics2D)
 	{
-		if (plugin.getExerciseMatsAnswerList() != null && !plugin.getExerciseMatsAnswerList().isEmpty())
-		{
-			// Get the non-null ground objects, map it to their convex hulls, and then combine them into a single shape
-			Area combinedMatHull = new Area();
-			plugin.getExerciseMatsAnswerList().stream().filter(Objects::nonNull).map(GroundObject::getConvexHull).forEach(hull -> combinedMatHull.add(new Area(hull)));
-			for (GroundObject exerciseGroundObject : plugin.getExerciseMatsAnswerList())
-			{
-				if (exerciseGroundObject != null)
-				{
-					OverlayUtil.renderPolygon(graphics2D, combinedMatHull, Color.GREEN);
-				}
-			}
-		}
-
 		if (plugin.getGraveMap() != null && !plugin.getGraveMap().isEmpty())
 		{
 			if (checkBufferedImage == null)
