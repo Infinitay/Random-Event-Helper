@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
@@ -16,14 +17,19 @@ import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.ui.overlay.OverlayManager;
 import randomeventsolver.data.RandomEventItem;
 
 @Slf4j
-public class SurpriseExamHelper extends Plugin
+@Singleton
+public class SurpriseExamHelper
 {
+	@Inject
+	private EventBus eventBus;
+
 	@Inject
 	private Client client;
 
@@ -99,9 +105,9 @@ public class SurpriseExamHelper extends Plugin
 		InterfaceID.PatternNext.SELECT_3
 	};
 
-	@Override
-	protected void startUp() throws Exception
+	public void startUp()
 	{
+		this.eventBus.register(this);
 		this.overlayManager.add(overlay);
 		this.patternCardAnswers = null;
 		this.patternCardAnswerWidgets = null;
@@ -110,9 +116,9 @@ public class SurpriseExamHelper extends Plugin
 		this.relationshipSystem = new OSRSItemRelationshipSystem();
 	}
 
-	@Override
-	protected void shutDown() throws Exception
+	public void shutDown()
 	{
+		this.eventBus.unregister(this);
 		this.overlayManager.remove(overlay);
 		this.patternCardAnswers = null;
 		this.patternCardAnswerWidgets = null;
@@ -310,3 +316,4 @@ public class SurpriseExamHelper extends Plugin
 		return null;
 	}
 }
+

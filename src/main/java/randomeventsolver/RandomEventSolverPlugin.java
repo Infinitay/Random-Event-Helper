@@ -58,7 +58,9 @@ import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -67,6 +69,8 @@ import net.runelite.client.util.Text;
 import randomeventsolver.data.Coffin;
 import randomeventsolver.data.Grave;
 import randomeventsolver.data.RandomEventItem;
+import randomeventsolver.randomevents.surpriseexam.SurpriseExamHelper;
+import randomeventsolver.randomevents.surpriseexam.SurpriseExamOverlay;
 
 @Slf4j
 @PluginDescriptor(
@@ -94,6 +98,9 @@ public class RandomEventSolverPlugin extends Plugin
 
 	@Inject
 	private RandomEventSolverItemOverlay itemOverlay;
+
+	@Inject
+	private SurpriseExamHelper surpriseExamHelper;
 
 	@Getter
 	private ImmutableList<Widget> beehiveAnswerWidgets;
@@ -124,6 +131,10 @@ public class RandomEventSolverPlugin extends Plugin
 	{
 		this.overlayManager.add(overlay);
 		this.overlayManager.add(itemOverlay);
+		if (config.isSurpriseExamEnabled())
+		{
+			surpriseExamHelper.startUp();
+		}
 	}
 
 	@Override
@@ -134,7 +145,28 @@ public class RandomEventSolverPlugin extends Plugin
 		this.exerciseMatsAnswerList.clear();
 		this.exerciseMatsMultimap.clear();
 		this.exerciseVarbitMatMultimap.clear();
+		log.debug("Config isSurpriseExamEnabled: {}", config.isSurpriseExamEnabled());
+		surpriseExamHelper.shutDown();
+	}
 
+	@Subscribe
+	public void onConfigChanged(ConfigChanged configChanged)
+	{
+		if (configChanged.getGroup().equals("randomeventhelper"))
+		{
+			log.debug("Config changed: {} | New value: {}", configChanged.getKey(), configChanged.getNewValue());
+			if (configChanged.getKey().equals("isSurpriseExamEnabled"))
+			{
+				if (config.isSurpriseExamEnabled())
+				{
+					surpriseExamHelper.startUp();
+				}
+				else
+				{
+					surpriseExamHelper.shutDown();
+				}
+			}
+		}
 	}
 
 	@Subscribe

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import net.runelite.api.Client;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.game.SpriteManager;
@@ -14,13 +15,14 @@ import net.runelite.client.ui.overlay.OverlayUtil;
 import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
 import randomeventsolver.RandomEventSolverPlugin;
 
+@Singleton
 public class SurpriseExamOverlay extends Overlay
 {
 	private final Client client;
 	private final SurpriseExamHelper plugin;
 
 	@Inject
-	public SurpriseExamOverlay(Client client, SurpriseExamHelper plugin, ModelOutlineRenderer modelOutlineRenderer, SpriteManager spriteManager)
+	public SurpriseExamOverlay(Client client, SurpriseExamHelper plugin)
 	{
 		this.client = client;
 		this.plugin = plugin;
