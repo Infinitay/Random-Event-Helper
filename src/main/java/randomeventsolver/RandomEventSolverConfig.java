@@ -27,4 +27,14 @@ public interface RandomEventSolverConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		keyName = "isFreakyForesterEnabled",
+		name = "Freaky Forester",
+		description = "Helps highlight the answers for the Freaky Forester random event."
+	)
+	default boolean isFreakyForesterEnabled()
+	{
+		return true;
+	}
 }
