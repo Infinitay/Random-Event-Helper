@@ -19,7 +19,6 @@ import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.ObjectID;
 import net.runelite.api.gameval.VarbitID;
-import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -35,9 +34,6 @@ public class DrillDemonHelper
 
 	@Inject
 	private Client client;
-
-	@Inject
-	private ClientThread clientThread;
 
 	@Inject
 	private OverlayManager overlayManager;
