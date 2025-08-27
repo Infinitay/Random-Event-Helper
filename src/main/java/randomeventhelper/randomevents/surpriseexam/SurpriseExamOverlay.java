@@ -24,7 +24,7 @@ public class SurpriseExamOverlay extends Overlay
 		this.client = client;
 		this.plugin = plugin;
 		setPosition(OverlayPosition.DYNAMIC);
-		setLayer(OverlayLayer.ABOVE_SCENE);
+		setLayer(OverlayLayer.ABOVE_WIDGETS);
 	}
 
 	@Override
