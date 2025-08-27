@@ -57,4 +57,14 @@ public interface RandomEventSolverConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		keyName = "isGravediggerEnabled",
+		name = "Gravedigger",
+		description = "Helps highlight the answers for the Gravedigger random event."
+	)
+	default boolean isGravediggerEnabled()
+	{
+		return true;
+	}
 }
