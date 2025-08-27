@@ -54,6 +54,9 @@ public class GravediggerHelper
 	@Inject
 	private GravediggerOverlay gravediggerOverlay;
 
+	@Inject
+	private GravediggerItemOverlay gravediggerItemOverlay;
+
 	private boolean initiallyEnteredGraveDiggerArea;
 
 	// <Grave Number, Grave>
@@ -74,6 +77,7 @@ public class GravediggerHelper
 	{
 		this.eventBus.register(this);
 		this.overlayManager.add(gravediggerOverlay);
+		this.overlayManager.add(gravediggerItemOverlay);
 		this.initiallyEnteredGraveDiggerArea = false;
 		this.graveMap = Maps.newHashMapWithExpectedSize(5);
 		this.coffinItemImageMap = Maps.newHashMapWithExpectedSize(5);
@@ -86,6 +90,7 @@ public class GravediggerHelper
 	{
 		this.eventBus.unregister(this);
 		this.overlayManager.remove(gravediggerOverlay);
+		this.overlayManager.remove(gravediggerItemOverlay);
 		this.initiallyEnteredGraveDiggerArea = false;
 		this.graveMap = null;
 		this.coffinItemImageMap = null;
