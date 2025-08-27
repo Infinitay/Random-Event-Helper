@@ -44,12 +44,14 @@ public class BeekeeperHelper extends Plugin
 	{
 		this.eventBus.register(this);
 		this.overlayManager.add(beekeeperOverlay);
+		this.beehiveAnswerWidgets = null;
 	}
 
 	public void shutDown()
 	{
 		this.eventBus.unregister(this);
 		this.overlayManager.remove(beekeeperOverlay);
+		this.beehiveAnswerWidgets = null;
 	}
 
 	@Subscribe

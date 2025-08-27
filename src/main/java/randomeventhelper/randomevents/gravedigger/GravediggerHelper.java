@@ -29,7 +29,6 @@ import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.VarbitID;
-import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
@@ -47,9 +46,6 @@ public class GravediggerHelper
 	private Client client;
 
 	@Inject
-	private ClientThread clientThread;
-
-	@Inject
 	private ItemManager itemManager;
 
 	@Inject
@@ -62,7 +58,7 @@ public class GravediggerHelper
 
 	// <Grave Number, Grave>
 	@Getter
-	private Map<Grave.GraveNumber, Grave> graveMap;
+	private Map<GraveNumber, Grave> graveMap;
 
 	@Getter
 	private Map<Coffin, BufferedImage> coffinItemImageMap;
@@ -91,11 +87,11 @@ public class GravediggerHelper
 		this.eventBus.unregister(this);
 		this.overlayManager.remove(gravediggerOverlay);
 		this.initiallyEnteredGraveDiggerArea = false;
-		this.graveMap.clear();
-		this.coffinItemImageMap.clear();
-		this.previousInventory.clear();
-		this.currentInventoryItems.clear();
-		this.coffinsInInventory.clear();
+		this.graveMap = null;
+		this.coffinItemImageMap = null;
+		this.previousInventory = null;
+		this.currentInventoryItems = null;
+		this.coffinsInInventory = null;
 	}
 
 	@Subscribe
@@ -106,7 +102,7 @@ public class GravediggerHelper
 		// And by using a separate variable to make sure not to run this constantly every game tick
 		if (this.initiallyEnteredGraveDiggerArea)
 		{
-			for (Grave.GraveNumber graveNumber : Grave.GraveNumber.values())
+			for (GraveNumber graveNumber : GraveNumber.values())
 			{
 				VarbitChanged graveTypeVarbitChangedEvent = new VarbitChanged();
 				graveTypeVarbitChangedEvent.setVarbitId(graveNumber.getGraveTypeVarbitID());
@@ -127,34 +123,34 @@ public class GravediggerHelper
 		switch (varbitChanged.getVarbitId())
 		{
 			case VarbitID.MACRO_DIGGER_GRAVE_1: // Grave type/Gravestone
-				this.updateRequiredCoffin(Grave.GraveNumber.ONE, varbitChanged.getValue());
+				this.updateRequiredCoffin(GraveNumber.ONE, varbitChanged.getValue());
 				break;
 			case VarbitID.MACRO_DIGGER_COFFIN_1: // Placed coffin into the grave
-				this.updatePlacedCoffin(Grave.GraveNumber.ONE, varbitChanged.getValue());
+				this.updatePlacedCoffin(GraveNumber.ONE, varbitChanged.getValue());
 				break;
 			case VarbitID.MACRO_DIGGER_GRAVE_2:
-				this.updateRequiredCoffin(Grave.GraveNumber.TWO, varbitChanged.getValue());
+				this.updateRequiredCoffin(GraveNumber.TWO, varbitChanged.getValue());
 				break;
 			case VarbitID.MACRO_DIGGER_COFFIN_2:
-				this.updatePlacedCoffin(Grave.GraveNumber.TWO, varbitChanged.getValue());
+				this.updatePlacedCoffin(GraveNumber.TWO, varbitChanged.getValue());
 				break;
 			case VarbitID.MACRO_DIGGER_GRAVE_3:
-				this.updateRequiredCoffin(Grave.GraveNumber.THREE, varbitChanged.getValue());
+				this.updateRequiredCoffin(GraveNumber.THREE, varbitChanged.getValue());
 				break;
 			case VarbitID.MACRO_DIGGER_COFFIN_3:
-				this.updatePlacedCoffin(Grave.GraveNumber.THREE, varbitChanged.getValue());
+				this.updatePlacedCoffin(GraveNumber.THREE, varbitChanged.getValue());
 				break;
 			case VarbitID.MACRO_DIGGER_GRAVE_4:
-				this.updateRequiredCoffin(Grave.GraveNumber.FOUR, varbitChanged.getValue());
+				this.updateRequiredCoffin(GraveNumber.FOUR, varbitChanged.getValue());
 				break;
 			case VarbitID.MACRO_DIGGER_COFFIN_4:
-				this.updatePlacedCoffin(Grave.GraveNumber.FOUR, varbitChanged.getValue());
+				this.updatePlacedCoffin(GraveNumber.FOUR, varbitChanged.getValue());
 				break;
 			case VarbitID.MACRO_DIGGER_GRAVE_5:
-				this.updateRequiredCoffin(Grave.GraveNumber.FIVE, varbitChanged.getValue());
+				this.updateRequiredCoffin(GraveNumber.FIVE, varbitChanged.getValue());
 				break;
 			case VarbitID.MACRO_DIGGER_COFFIN_5:
-				this.updatePlacedCoffin(Grave.GraveNumber.FIVE, varbitChanged.getValue());
+				this.updatePlacedCoffin(GraveNumber.FIVE, varbitChanged.getValue());
 				break;
 			default:
 				break;
@@ -168,9 +164,9 @@ public class GravediggerHelper
 		// Pinball and grave digger random even locations are in region 7758
 		if (RandomEventHelperPlugin.isInRandomEventLocalInstance(this.client))
 		{
-			if (Grave.GraveNumber.isGravestoneObjectID(gameObject.getId()))
+			if (GraveNumber.isGravestoneObjectID(gameObject.getId()))
 			{
-				Grave.GraveNumber graveNumber = Grave.GraveNumber.getGraveNumberFromGravestoneObjectID(gameObject.getId());
+				GraveNumber graveNumber = GraveNumber.getGraveNumberFromGravestoneObjectID(gameObject.getId());
 				if (graveNumber != null)
 				{
 					log.debug("A new gravestone object ({}) spawned with ID: {}, updating grave map.", graveNumber.name(), gameObject.getId());
@@ -187,9 +183,9 @@ public class GravediggerHelper
 					log.warn("Gravestone object ID {} does not map to a known grave number.", gameObject.getId());
 				}
 			}
-			else if (Grave.GraveNumber.isEmptyGraveObjectID(gameObject.getId()))
+			else if (GraveNumber.isEmptyGraveObjectID(gameObject.getId()))
 			{
-				Grave.GraveNumber graveNumber = Grave.GraveNumber.getGraveNumberFromEmptyGraveObjectID(gameObject.getId());
+				GraveNumber graveNumber = GraveNumber.getGraveNumberFromEmptyGraveObjectID(gameObject.getId());
 				if (graveNumber != null)
 				{
 					log.debug("A new empty grave object ({}) spawned with ID: {}, updating grave map.", graveNumber.name(), gameObject.getId());
@@ -206,9 +202,9 @@ public class GravediggerHelper
 					log.warn("Empty grave object ID {} does not map to a known grave number.", gameObject.getId());
 				}
 			}
-			else if (Grave.GraveNumber.isFilledGraveObjectID(gameObject.getId()))
+			else if (GraveNumber.isFilledGraveObjectID(gameObject.getId()))
 			{
-				Grave.GraveNumber graveNumber = Grave.GraveNumber.getGraveNumberFromFilledGraveObjectID(gameObject.getId());
+				GraveNumber graveNumber = GraveNumber.getGraveNumberFromFilledGraveObjectID(gameObject.getId());
 				if (graveNumber != null)
 				{
 					log.debug("A new filled grave object ({}) spawned with ID: {}, updating grave map.", graveNumber.name(), gameObject.getId());
@@ -255,8 +251,10 @@ public class GravediggerHelper
 			log.debug("Grave Digger Leo NPC despawned, resetting grave digger area state.");
 			this.initiallyEnteredGraveDiggerArea = false;
 			this.graveMap.clear();
-			this.coffinsInInventory.clear();
 			this.coffinItemImageMap.clear();
+			this.previousInventory.clear();
+			this.currentInventoryItems.clear();
+			this.coffinsInInventory.clear();
 		}
 	}
 
@@ -305,7 +303,7 @@ public class GravediggerHelper
 		}
 	}
 
-	private void updateRequiredCoffin(Grave.GraveNumber graveNumber, int requiredCoffinVarbitValue)
+	private void updateRequiredCoffin(GraveNumber graveNumber, int requiredCoffinVarbitValue)
 	{
 		log.debug("Grave {} required coffin varbit changed to value: {}", graveNumber.name(), requiredCoffinVarbitValue);
 		Coffin coffin = Coffin.getCoffinFromVarbitValue(requiredCoffinVarbitValue);
@@ -322,7 +320,7 @@ public class GravediggerHelper
 		}
 	}
 
-	private void updatePlacedCoffin(Grave.GraveNumber graveNumber, int placedCoffinVarbitValue)
+	private void updatePlacedCoffin(GraveNumber graveNumber, int placedCoffinVarbitValue)
 	{
 		log.debug("Grave {} placed coffin varbit changed to value: {}", graveNumber.name(), placedCoffinVarbitValue);
 		Coffin coffin = Coffin.getCoffinFromVarbitValue(placedCoffinVarbitValue);

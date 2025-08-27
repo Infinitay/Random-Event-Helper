@@ -12,15 +12,16 @@ import javax.inject.Singleton;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.NpcID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
-import randomeventhelper.data.RandomEventItem;
 
 @Slf4j
 @Singleton
@@ -131,7 +132,6 @@ public class SurpriseExamHelper
 	{
 		if (widgetLoaded.getGroupId() == InterfaceID.PATTERN_CARDS)
 		{
-
 			this.clientThread.invokeLater(() -> {
 				Widget examHintWidget = this.client.getWidget(InterfaceID.PatternCards.HINT);
 				if (examHintWidget != null)
@@ -172,6 +172,7 @@ public class SurpriseExamHelper
 					{
 						log.warn("Exam hint widget text is empty or null.");
 						this.patternCardAnswers = null;
+						this.patternCardAnswerWidgets = null;
 					}
 				}
 			});
@@ -229,6 +230,18 @@ public class SurpriseExamHelper
 		if (widgetClosed.getGroupId() == InterfaceID.PATTERN_NEXT)
 		{
 			log.debug("Pattern next widget closed, resetting pattern next answer.");
+			this.patternNextAnswer = null;
+			this.patternNextAnswerWidget = null;
+		}
+	}
+
+	@Subscribe
+	public void onNpcDespawned(NpcDespawned npcDespawned)
+	{
+		if (npcDespawned.getNpc().getId() == NpcID.PATTERN_TEACHER) {
+			log.debug("Mr. Mordaut NPC despawned, resetting all answers.");
+			this.patternCardAnswers = null;
+			this.patternCardAnswerWidgets = null;
 			this.patternNextAnswer = null;
 			this.patternNextAnswerWidget = null;
 		}

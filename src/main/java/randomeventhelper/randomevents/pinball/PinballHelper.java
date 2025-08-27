@@ -1,7 +1,7 @@
 package randomeventhelper.randomevents.pinball;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.HashSet;
+import com.google.common.collect.Sets;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -17,7 +17,6 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.ObjectID;
-import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -35,9 +34,6 @@ public class PinballHelper
 	private Client client;
 
 	@Inject
-	private ClientThread clientThread;
-
-	@Inject
 	private OverlayManager overlayManager;
 
 	@Inject
@@ -47,18 +43,22 @@ public class PinballHelper
 	private GameObject activePinballPost;
 
 	private final Set<Integer> PINBALL_POST_OBJECTS_SET = ImmutableSet.of(ObjectID.PINBALL_POST_TREE_INACTIVE, ObjectID.PINBALL_POST_IRON_INACTIVE, ObjectID.PINBALL_POST_COAL_INACTIVE, ObjectID.PINBALL_POST_FISHING_INACTIVE, ObjectID.PINBALL_POST_ESSENCE_INACTIVE);
-	private Set<GameObject> pinballPostsSet = new HashSet<>();
+	private Set<GameObject> pinballPostsSet;
 
 	public void startUp()
 	{
 		this.eventBus.register(this);
 		this.overlayManager.add(pinballOverlay);
+		this.activePinballPost = null;
+		this.pinballPostsSet = Sets.newHashSet();
 	}
 
 	public void shutDown()
 	{
 		this.eventBus.unregister(this);
 		this.overlayManager.remove(pinballOverlay);
+		this.activePinballPost = null;
+		this.pinballPostsSet = null;
 	}
 
 	@Subscribe
@@ -89,7 +89,7 @@ public class PinballHelper
 		{
 			log.debug("A pinball troll despawned, resetting active pinball post.");
 			this.activePinballPost = null;
-			this.pinballPostsSet = new HashSet<>();
+			this.pinballPostsSet = Sets.newHashSet();
 		}
 	}
 
@@ -118,7 +118,7 @@ public class PinballHelper
 			{
 				log.debug("Pinball game has ended so resetting active pinball post and pinball posts set.");
 				this.activePinballPost = null;
-				this.pinballPostsSet = new HashSet<>();
+				this.pinballPostsSet = Sets.newHashSet();
 			}
 		}
 	}

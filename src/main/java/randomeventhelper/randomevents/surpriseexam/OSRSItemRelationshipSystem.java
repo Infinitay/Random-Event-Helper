@@ -8,94 +8,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.inject.Singleton;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.similarity.JaroWinklerDistance;
-import org.apache.commons.text.similarity.LevenshteinDistance;
-import randomeventhelper.data.RandomEventItem;
 
 /**
  * Comprehensive OSRS Item Relationship System
  * Supports both hint-based selection and missing item detection
  */
-
-/**
- * Comprehensive OSRS Item Relationship System
- * Supports both hint-based selection and missing item detection
- */
+@Slf4j
+@Singleton
 public class OSRSItemRelationshipSystem
 {
-
-	public enum RelationshipType
-	{
-		// Production chains
-		COMBAT_ECOSYSTEM("combat, prayer, bones, weapons, battle, fighting"),
-		FISHING_TO_COOKING("fishing, cooking, harpoon, fish, tuna, shark, food"),
-		MINING_SMITHING_CRAFTING("mining, smithing, crafting, pickaxe, ore, bar, hammer"),
-		WOODCUTTING_FLETCHING("woodcutting, fletching, axe, logs, bow, arrows, feather"),
-		FARMING_ECOSYSTEM("farming, agriculture, rake, seeds, crops, harvest, plants"),
-		COOKING_PRODUCTION("cooking, food, chef, kitchen, bread, cake, meals"),
-		ALCOHOL_PRODUCTION("alcohol, brewing, cocktail, beer, rum, gin, drinks"),
-		MAGIC_RUNECRAFTING("magic, runecrafting, runes, essence, spells, staff"),
-		JEWELRY_CRAFTING("jewelry, gems, necklace, ring, crafting, status"),
-		LIGHT_FIRE_SYSTEM("fire, light, candle, lantern, tinderbox, illumination"),
-		CONTAINER_STORAGE("container, storage, bottle, jug, pot, holding"),
-
-		// Thematic groups
-		PIRATE_THEME("pirate, sea, nautical, hook, eyepatch, boots, hat, yarr, crime"),
-		ENTERTAINMENT_THEME("entertainment, performance, jester, mime, mask, fun, clown, fool, mask, face"),
-		PROFESSIONAL_THEME("profession, work, chef, trade, job, occupation"),
-
-		// Equipment categories
-		MELEE_WEAPONS("melee, sword, axe, mace, scimitar, close, combat, sharp"),
-		RANGED_WEAPONS("ranged, bow, crossbow, arrows, ammunition, distance, sharp"),
-		MAGIC_RUNES("runes, elemental, air, earth, fire, water, magic"),
-		HEAD_ARMOR("head, helmet, hat, protection, headwear, skull, mask"),
-		BODY_ARMOR("body, chest, torso, platebody, apron, protection"),
-		LEG_ARMOR("legs, platelegs, protection, lower, body"),
-		FOOT_ARMOR("feet, boots, footwear, walking, protection"),
-		SHIELDS("shield, defense, blocking, protection, guard"),
-		JEWELRY_ACCESSORIES("jewelry, accessories, necklace, ring, cape, status"),
-		FACE_ACCESSORIES("face, mask, eyepatch, hook, covering, facial"),
-
-		// Skill-based groupings
-		ALL_SKILLING_TOOLS("tools, skills, gathering, resources, equipment, utility"),
-		MINING_TOOLS("mining, pickaxe, ore, rocks, gems, underground"),
-		FISHING_TOOLS("fishing, harpoon, fish, water, catching, sea"),
-		FARMING_TOOLS("farming, gardening, rake, spade, plants, agriculture"),
-		CRAFTING_TOOLS("crafting, needle, thread, making, creating, tailoring"),
-
-		// Food categories
-		RAW_FISH("fish, raw, uncooked, seafood, fishing, water"),
-		FRUITS("fruits, berries, fresh, healthy, vitamins, nature"),
-		COOKED_FOODS("cooked, food, meals, prepared, baked, ready"),
-		ALCOHOLIC_DRINKS("alcohol, drinks, beer, spirits, intoxicating, beverages"),
-
-		// Functional groupings
-		COMBAT_CONSUMABLES("combat, consumable, potion, bones, prayer, aid"),
-		LIGHT_SOURCES("light, illumination, candle, lantern, brightness, glow"),
-		RESOURCE_MATERIALS("resources, materials, raw, crafting, essence, components");
-
-		private final String keywords;
-
-		RelationshipType(String keywords)
-		{
-			this.keywords = keywords;
-		}
-
-		public String getKeywords()
-		{
-			return keywords;
-		}
-
-		public String[] getKeywordArray()
-		{
-			return keywords.split(", ");
-		}
-	}
-
 	// Relationship mappings and similarity calculators
 	private final Map<RelationshipType, Set<RandomEventItem>> relationships;
 	private final JaroWinklerDistance jaroWinklerDistance;
-	private final LevenshteinDistance levenshtein;
 
 	// Similarity thresholds
 	private static final double EXACT_MATCH_THRESHOLD = 1.0;
@@ -149,7 +76,6 @@ public class OSRSItemRelationshipSystem
 	{
 		this.relationships = initializeRelationships();
 		this.jaroWinklerDistance = new JaroWinklerDistance();
-		this.levenshtein = new LevenshteinDistance();
 	}
 
 	private Map<RelationshipType, Set<RandomEventItem>> initializeRelationships()
@@ -573,19 +499,22 @@ public class OSRSItemRelationshipSystem
 					double distance = jaroWinklerDistance.apply(cleanRiddleKeyword, cleanRelKeyword);
 					double similarity = 1.0 - distance; // Convert distance to similarity
 					// Log similarity for debugging
-					 System.out.println("Similarity between '" + cleanRiddleKeyword + "' and '" + cleanRelKeyword + "': " + similarity);
+					log.debug("Similarity between '{}' and '{}': {}", cleanRiddleKeyword, cleanRelKeyword, similarity);
 
-
-					if (similarity <= (1.0 - EXACT_MATCH_THRESHOLD)) {
+					if (similarity <= (1.0 - EXACT_MATCH_THRESHOLD))
+					{
 						bestMatchScore = Math.max(bestMatchScore, 5.0);
 					}
-					else if (similarity <= (1.0 - HIGH_SIMILARITY_THRESHOLD)) {
+					else if (similarity <= (1.0 - HIGH_SIMILARITY_THRESHOLD))
+					{
 						bestMatchScore = Math.max(bestMatchScore, 4.0 * similarity);
 					}
-					else if (similarity <= (1.0 - MEDIUM_SIMILARITY_THRESHOLD)) {
+					else if (similarity <= (1.0 - MEDIUM_SIMILARITY_THRESHOLD))
+					{
 						bestMatchScore = Math.max(bestMatchScore, 3.0 * similarity);
 					}
-					else if (similarity <= (1.0 - LOW_SIMILARITY_THRESHOLD)) {
+					else if (similarity <= (1.0 - LOW_SIMILARITY_THRESHOLD))
+					{
 						bestMatchScore = Math.max(bestMatchScore, 2.0 * similarity);
 					}
 
@@ -813,15 +742,15 @@ public class OSRSItemRelationshipSystem
 	 */
 	public void analyzeRiddle(String riddle)
 	{
-		System.out.println("=== Riddle Analysis for: \"" + riddle + "\" ===");
+		log.debug("Analyzing riddle: {}", riddle);
 
 		// Show extracted keywords
 		Set<String> riddleKeywords = extractRiddleKeywords(riddle);
-		System.out.println("Extracted Keywords: " + riddleKeywords);
+		log.debug("Extracted Keywords: {}", riddleKeywords);
 
 		// Show expanded keywords
 		Set<String> expandedKeywords = expandWithContextAndSynonyms(riddleKeywords);
-		System.out.println("Expanded Keywords: " + expandedKeywords);
+		log.debug("Expanded Keywords: {}", expandedKeywords);
 
 		// Show top relationship matches
 		Map<RelationshipType, Double> scores = new HashMap<>();
@@ -834,12 +763,12 @@ public class OSRSItemRelationshipSystem
 			}
 		}
 
-		System.out.println("Top Relationship Matches:");
+		log.debug("Top Relationship Matches:");
 		scores.entrySet().stream()
 			.sorted(Map.Entry.<RelationshipType, Double>comparingByValue().reversed())
 			.limit(5)
 			.forEach(entry ->
-				System.out.printf("  %.2f - %s%n", entry.getValue(), entry.getKey().name())
+				log.debug("  {} - {}", String.format("%.2f", entry.getValue()), entry.getKey().name())
 			);
 	}
 
@@ -848,11 +777,10 @@ public class OSRSItemRelationshipSystem
 	 */
 	public void testRiddle(String riddle, List<RandomEventItem> availableItems)
 	{
-		System.out.println("Testing riddle: \"" + riddle + "\"");
+		log.debug("--- Debug Analysis ---");
 		analyzeRiddle(riddle);
 
 		List<RandomEventItem> results = findItemsByHint(riddle, availableItems, 3);
-		System.out.println("Recommended items: " + results);
-		System.out.println();
+		log.debug("Recommended items: {}", results);
 	}
 }

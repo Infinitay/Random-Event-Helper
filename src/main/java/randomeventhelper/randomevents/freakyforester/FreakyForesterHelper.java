@@ -1,6 +1,7 @@
 package randomeventhelper.randomevents.freakyforester;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -63,12 +64,16 @@ public class FreakyForesterHelper
 	{
 		this.eventBus.register(this);
 		this.overlayManager.add(freakyForesterOverlay);
+		this.pheasantTailFeathers = 0;
+		this.pheasantNPC = Sets.newHashSet();
 	}
 
 	public void shutDown()
 	{
 		this.eventBus.unregister(this);
 		this.overlayManager.remove(freakyForesterOverlay);
+		this.pheasantTailFeathers = 0;
+		this.pheasantNPC = null;
 	}
 
 	@Subscribe
@@ -100,14 +105,14 @@ public class FreakyForesterHelper
 					else
 					{
 						log.warn("Chatbox text is empty or null.");
-						this.pheasantNPC = new HashSet<>();
+						this.pheasantNPC = Sets.newHashSet();
 						this.pheasantTailFeathers = 0;
 					}
 				}
 				else
 				{
 					log.warn("Chatbox text widget is null.");
-					this.pheasantNPC = new HashSet<>();
+					this.pheasantNPC = Sets.newHashSet();
 					this.pheasantTailFeathers = 0;
 				}
 			});
@@ -141,8 +146,8 @@ public class FreakyForesterHelper
 		if (npcDespawned.getNpc().getId() == NpcID.MACRO_FORESTER_M)
 		{
 			log.debug("Freaky Forester NPC despawned, resetting pheasant NPCs.");
-			this.pheasantNPC = new HashSet<>();
 			this.pheasantTailFeathers = 0;
+			this.pheasantNPC.clear();
 		}
 	}
 }

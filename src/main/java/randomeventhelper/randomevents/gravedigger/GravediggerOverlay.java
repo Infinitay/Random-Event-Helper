@@ -54,9 +54,9 @@ public class GravediggerOverlay extends Overlay
 			{
 				this.crossBufferedImage = this.spriteManager.getSprite(SpriteID.OptionsRadioButtons.CROSS_RED, 0);
 			}
-			for (Map.Entry<Grave.GraveNumber, Grave> graveEntry : plugin.getGraveMap().entrySet())
+			for (Map.Entry<GraveNumber, Grave> graveEntry : plugin.getGraveMap().entrySet())
 			{
-				Grave.GraveNumber graveNumber = graveEntry.getKey();
+				GraveNumber graveNumber = graveEntry.getKey();
 				Grave grave = graveEntry.getValue();
 				if (grave != null)
 				{
