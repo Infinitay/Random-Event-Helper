@@ -1,18 +1,14 @@
-package randomeventsolver.data;
+package randomeventsolver.randomevents.gravedigger;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.Map;
-import javax.inject.Inject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.runelite.api.gameval.ItemID;
-import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.game.ItemManager;
-import randomeventsolver.RandomEventSolverPlugin;
 
 @Getter
 @AllArgsConstructor

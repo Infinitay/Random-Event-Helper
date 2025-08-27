@@ -1,10 +1,8 @@
-package randomeventsolver.data;
+package randomeventsolver.randomevents.gravedigger;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
