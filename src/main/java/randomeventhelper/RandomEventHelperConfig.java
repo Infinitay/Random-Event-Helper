@@ -20,7 +20,7 @@ public interface RandomEventHelperConfig extends Config
 	@ConfigItem(
 		keyName = "isBeekeeperEnabled",
 		name = "Beekeeper",
-		description = "Helps highlight the answers for the Beekeeper random event."
+		description = "Helps highlight the correct order for the Beekeeper random event."
 	)
 	default boolean isBeekeeperEnabled()
 	{
@@ -30,7 +30,7 @@ public interface RandomEventHelperConfig extends Config
 	@ConfigItem(
 		keyName = "isFreakyForesterEnabled",
 		name = "Freaky Forester",
-		description = "Helps highlight the answers for the Freaky Forester random event."
+		description = "Helps highlight the correct pheasant to kill for the Freaky Forester random event."
 	)
 	default boolean isFreakyForesterEnabled()
 	{
@@ -40,7 +40,7 @@ public interface RandomEventHelperConfig extends Config
 	@ConfigItem(
 		keyName = "isPinballEnabled",
 		name = "Pinball",
-		description = "Helps highlight the answers for the Pinball random event."
+		description = "Helps highlight the correct pillars to touch for the Pinball random event."
 	)
 	default boolean isPinballEnabled()
 	{
@@ -50,7 +50,7 @@ public interface RandomEventHelperConfig extends Config
 	@ConfigItem(
 		keyName = "isDrillDemonEnabled",
 		name = "Drill Demon",
-		description = "Helps highlight the answers for the Drill Demon random event."
+		description = "Helps highlight the correct exercise mat for the Drill Demon random event."
 	)
 	default boolean isDrillDemonEnabled()
 	{
@@ -60,7 +60,7 @@ public interface RandomEventHelperConfig extends Config
 	@ConfigItem(
 		keyName = "isGravediggerEnabled",
 		name = "Gravedigger",
-		description = "Helps highlight the answers for the Gravedigger random event."
+		description = "Helps highlight where each coffin belongs to each grave for the Gravedigger random event."
 	)
 	default boolean isGravediggerEnabled()
 	{
