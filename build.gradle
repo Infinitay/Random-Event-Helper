@@ -26,8 +26,8 @@ dependencies {
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 }
 
-group = 'randomeventsolver'
-version = '1.5'
+group = 'randomeventhelper'
+version = '2.0'
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'
@@ -37,7 +37,7 @@ tasks.withType(JavaCompile).configureEach {
 tasks.register('shadowJar', Jar) {
 	dependsOn configurations.testRuntimeClasspath
 	manifest {
-		attributes('Main-Class': 'randomeventsolver.RandomEventSolverPluginTest.java', 'Multi-Release': true)
+		attributes('Main-Class': 'randomeventhelper.RandomEventHelperPluginTest.java', 'Multi-Release': true)
 	}
 
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
