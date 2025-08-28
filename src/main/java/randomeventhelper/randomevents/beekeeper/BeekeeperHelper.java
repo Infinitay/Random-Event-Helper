@@ -8,9 +8,11 @@ import javax.inject.Singleton;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.NpcID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.EventBus;
@@ -141,6 +143,16 @@ public class BeekeeperHelper extends Plugin
 		if (widgetClosed.getGroupId() == InterfaceID.BEEHIVE)
 		{
 			log.debug("Beehive widget closed, resetting beehive answer widgets.");
+			this.beehiveAnswerWidgets = null;
+		}
+	}
+
+	@Subscribe
+	public void onNpcDespawned(NpcDespawned npcDespawned)
+	{
+		if (npcDespawned.getNpc().getId() == NpcID.MACRO_BEEKEEPER)
+		{
+			log.debug("Beekeeper NPC despawned, resetting beehive answer widgets.");
 			this.beehiveAnswerWidgets = null;
 		}
 	}
