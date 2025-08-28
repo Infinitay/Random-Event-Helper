@@ -66,4 +66,14 @@ public interface RandomEventHelperConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		keyName = "isMimeEnabled",
+		name = "Mime",
+		description = "Helps highlight the answers for the Mime random event."
+	)
+	default boolean isMimeEnabled()
+	{
+		return true;
+	}
 }
