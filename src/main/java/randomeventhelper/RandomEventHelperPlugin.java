@@ -34,6 +34,7 @@ import randomeventhelper.randomevents.beekeeper.BeekeeperHelper;
 import randomeventhelper.randomevents.drilldemon.DrillDemonHelper;
 import randomeventhelper.randomevents.freakyforester.FreakyForesterHelper;
 import randomeventhelper.randomevents.gravedigger.GravediggerHelper;
+import randomeventhelper.randomevents.maze.MazeHelper;
 import randomeventhelper.randomevents.mime.MimeHelper;
 import randomeventhelper.randomevents.pinball.PinballHelper;
 import randomeventhelper.randomevents.surpriseexam.SurpriseExamHelper;
@@ -86,6 +87,9 @@ public class RandomEventHelperPlugin extends Plugin
 	@Inject
 	private MimeHelper mimeHelper;
 
+	@Inject
+	private MazeHelper mazeHelper;
+
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -119,6 +123,10 @@ public class RandomEventHelperPlugin extends Plugin
 		{
 			mimeHelper.startUp();
 		}
+		if (config.isMazeEnabled())
+		{
+			mazeHelper.startUp();
+		}
 	}
 
 	@Override
@@ -133,6 +141,7 @@ public class RandomEventHelperPlugin extends Plugin
 		drillDemonHelper.shutDown();
 		gravediggerHelper.shutDown();
 		mimeHelper.shutDown();
+		mazeHelper.shutDown();
 	}
 
 	@Subscribe
@@ -216,6 +225,17 @@ public class RandomEventHelperPlugin extends Plugin
 				else
 				{
 					mimeHelper.shutDown();
+				}
+			}
+			else if (configChanged.getKey().equals("isMazeEnabled"))
+			{
+				if (config.isMazeEnabled())
+				{
+					mazeHelper.startUp();
+				}
+				else
+				{
+					mazeHelper.shutDown();
 				}
 			}
 		}

@@ -57,9 +57,13 @@ A RuneLite plugin to help solve random events by displaying solutions for each r
 <details>
   <Summary>Video</Summary>
 
-
 https://github.com/user-attachments/assets/0260b0c0-3024-403b-8fcb-c24da748b03b
 </details>
 
 - Highlights the correct emote to perform
 - Displays the emote being performed above the mime's head
+
+### [Maze](https://oldschool.runescape.wiki/w/Maze)
+_REQUIRES [SHORTEST PATH](https://runelite.net/plugin-hub/show/shortest-path) PLUGIN TO BE INSTALLED_
+
+- Automatically sets the shortest path to the Strange Shrine where the maze exits

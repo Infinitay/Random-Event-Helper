@@ -76,4 +76,14 @@ public interface RandomEventHelperConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		keyName = "isMazeEnabled",
+		name = "Maze",
+		description = "Automatically sets path of Shortest Path plugin to the Strange Shrine in the Maze random event."
+	)
+	default boolean isMazeEnabled()
+	{
+		return false;
+	}
 }
