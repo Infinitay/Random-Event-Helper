@@ -34,6 +34,7 @@ import randomeventhelper.randomevents.beekeeper.BeekeeperHelper;
 import randomeventhelper.randomevents.drilldemon.DrillDemonHelper;
 import randomeventhelper.randomevents.freakyforester.FreakyForesterHelper;
 import randomeventhelper.randomevents.gravedigger.GravediggerHelper;
+import randomeventhelper.randomevents.mime.MimeHelper;
 import randomeventhelper.randomevents.pinball.PinballHelper;
 import randomeventhelper.randomevents.surpriseexam.SurpriseExamHelper;
 
@@ -82,6 +83,9 @@ public class RandomEventHelperPlugin extends Plugin
 	@Inject
 	private GravediggerHelper gravediggerHelper;
 
+	@Inject
+	private MimeHelper mimeHelper;
+
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -111,6 +115,10 @@ public class RandomEventHelperPlugin extends Plugin
 		{
 			gravediggerHelper.startUp();
 		}
+		if (config.isMimeEnabled())
+		{
+			mimeHelper.startUp();
+		}
 	}
 
 	@Override
@@ -124,6 +132,7 @@ public class RandomEventHelperPlugin extends Plugin
 		pinballHelper.shutDown();
 		drillDemonHelper.shutDown();
 		gravediggerHelper.shutDown();
+		mimeHelper.shutDown();
 	}
 
 	@Subscribe
@@ -196,6 +205,17 @@ public class RandomEventHelperPlugin extends Plugin
 				else
 				{
 					gravediggerHelper.shutDown();
+				}
+			}
+			else if (configChanged.getKey().equals("isMimeEnabled"))
+			{
+				if (config.isMimeEnabled())
+				{
+					mimeHelper.startUp();
+				}
+				else
+				{
+					mimeHelper.shutDown();
 				}
 			}
 		}
