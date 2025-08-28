@@ -50,6 +50,16 @@ A RuneLite plugin to help solve random events by displaying solutions for each r
 - Swaps "Use" to be the first option on a coffin
 
 ### [Mime](https://oldschool.runescape.wiki/w/Mime_(Random_Event))
+<details>
+  <summary>Screenshot</summary>
+  <img width="966" height="700" alt="image" src="https://github.com/user-attachments/assets/f7c8422c-8aa6-4123-9171-aaeb7afe42a7" />
+</details>
+<details>
+  <Summary>Video</Summary>
+
+
+https://github.com/user-attachments/assets/0260b0c0-3024-403b-8fcb-c24da748b03b
+</details>
 
 - Highlights the correct emote to perform
 - Displays the emote being performed above the mime's head
