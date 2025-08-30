@@ -125,6 +125,10 @@ public class GravediggerHelper
 	@Subscribe
 	public void onVarbitChanged(VarbitChanged varbitChanged)
 	{
+		if (!RandomEventHelperPlugin.isInRandomEventLocalInstance(this.client))
+		{
+			return;
+		}
 		switch (varbitChanged.getVarbitId())
 		{
 			case VarbitID.MACRO_DIGGER_GRAVE_1: // Grave type/Gravestone
@@ -165,10 +169,10 @@ public class GravediggerHelper
 	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned gameObjectSpawned)
 	{
-		GameObject gameObject = gameObjectSpawned.getGameObject();
 		// Pinball and grave digger random even locations are in region 7758
 		if (RandomEventHelperPlugin.isInRandomEventLocalInstance(this.client))
 		{
+			GameObject gameObject = gameObjectSpawned.getGameObject();
 			if (GraveNumber.isGravestoneObjectID(gameObject.getId()))
 			{
 				GraveNumber graveNumber = GraveNumber.getGraveNumberFromGravestoneObjectID(gameObject.getId());
@@ -267,7 +271,7 @@ public class GravediggerHelper
 	public void onItemContainerChanged(ItemContainerChanged itemContainerChanged)
 	{
 		// In case of unequipping an item -> INVENTORY -> EQUIPMENT changes
-		if (itemContainerChanged.getContainerId() == InventoryID.INV)
+		if (itemContainerChanged.getContainerId() == InventoryID.INV && RandomEventHelperPlugin.isInRandomEventLocalInstance(this.client))
 		{
 			this.currentInventoryItems.clear();
 			List<Item> itemStream = Arrays.stream(itemContainerChanged.getItemContainer().getItems()).filter(item -> item.getId() != -1).collect(Collectors.toList());
