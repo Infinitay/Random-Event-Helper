@@ -88,6 +88,16 @@ public interface RandomEventHelperConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "isSandwichLadyEnabled",
+		name = "Sandwich Lady",
+		description = "Helps highlight the correct food to take from the Sandwich Lady random event."
+	)
+	default boolean isSandwichLadyEnabled()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "isQuizMasterEnabled",
 		name = "Quiz Master",
 		description = "Helps highlight the correct odd item for the Quiz Master random event."
