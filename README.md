@@ -76,3 +76,6 @@ https://github.com/user-attachments/assets/b9d810ba-be0b-4b09-a009-9aa5c2be8fb4
 </details>
 
 - Automatically sets the shortest path to the Strange Shrine where the maze exits
+
+### [Quiz Master](https://oldschool.runescape.wiki/w/Quiz_Master)
+- Highlights the correct answer indicating the odd item out of the given options

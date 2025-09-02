@@ -37,6 +37,8 @@ import randomeventhelper.randomevents.gravedigger.GravediggerHelper;
 import randomeventhelper.randomevents.maze.MazeHelper;
 import randomeventhelper.randomevents.mime.MimeHelper;
 import randomeventhelper.randomevents.pinball.PinballHelper;
+import randomeventhelper.randomevents.pirate.PirateHelper;
+import randomeventhelper.randomevents.quizmaster.QuizMasterHelper;
 import randomeventhelper.randomevents.surpriseexam.SurpriseExamHelper;
 
 @Slf4j
@@ -90,6 +92,12 @@ public class RandomEventHelperPlugin extends Plugin
 	@Inject
 	private MazeHelper mazeHelper;
 
+	@Inject
+	private QuizMasterHelper quizMasterHelper;
+
+	@Inject
+	private PirateHelper pirateHelper;
+
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -127,6 +135,10 @@ public class RandomEventHelperPlugin extends Plugin
 		{
 			mazeHelper.startUp();
 		}
+		if (config.isQuizMasterEnabled())
+		{
+			quizMasterHelper.startUp();
+		}
 	}
 
 	@Override
@@ -142,6 +154,7 @@ public class RandomEventHelperPlugin extends Plugin
 		gravediggerHelper.shutDown();
 		mimeHelper.shutDown();
 		mazeHelper.shutDown();
+		quizMasterHelper.shutDown();
 	}
 
 	@Subscribe
@@ -236,6 +249,17 @@ public class RandomEventHelperPlugin extends Plugin
 				else
 				{
 					mazeHelper.shutDown();
+				}
+			}
+			else if (configChanged.getKey().equals("isQuizMasterEnabled"))
+			{
+				if (config.isQuizMasterEnabled())
+				{
+					quizMasterHelper.startUp();
+				}
+				else
+				{
+					quizMasterHelper.shutDown();
 				}
 			}
 		}
