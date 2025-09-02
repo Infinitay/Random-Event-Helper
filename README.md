@@ -78,6 +78,16 @@ https://github.com/user-attachments/assets/b9d810ba-be0b-4b09-a009-9aa5c2be8fb4
 - Automatically sets the shortest path to the Strange Shrine where the maze exits
 
 ### [Sandwich Lady](https://oldschool.runescape.wiki/w/Sandwich_lady)
+<details>
+  <summary>Screenshot</summary>
+  <img width="966" height="700" alt="image" src="https://github.com/user-attachments/assets/62ab89fc-96ec-471b-901f-d1cde0a5c4cf" />
+</details>
+<details>
+  <summary>Video</summary>
+  
+  https://github.com/user-attachments/assets/79ddfb8c-0022-4c3c-8258-4f1179eb3c91
+</details>
+
 - Highlights the correct food offered by the Sandwich Lady and available to take
 
 ### [Quiz Master](https://oldschool.runescape.wiki/w/Quiz_Master)
