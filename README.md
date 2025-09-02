@@ -15,6 +15,16 @@ A RuneLite plugin to help solve random events by displaying solutions for each r
 - Displays the correct order to place the different hive piece
 
 ### [Pinball](https://oldschool.runescape.wiki/w/Pinball)
+<details>
+  <summary>Screenshot</summary>
+  <img width="966" height="700" alt="image" src="https://github.com/user-attachments/assets/291a38f9-9c3d-49f8-8be6-218925076cc9" />
+</details>
+<details>
+  <summary>Video</summary>
+  
+  https://github.com/user-attachments/assets/221ee9a1-2557-4ef8-8ee1-7c6dc9361878
+</details>
+
 - Highlights the correct pillar to tag
   - The current event already tags the correct pillar, but this highlight will make it more obvious
 
