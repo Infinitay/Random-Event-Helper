@@ -86,4 +86,14 @@ public interface RandomEventHelperConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+		keyName = "isQuizMasterEnabled",
+		name = "Quiz Master",
+		description = "Helps highlight the correct odd item for the Quiz Master random event."
+	)
+	default boolean isQuizMasterEnabled()
+	{
+		return true;
+	}
 }
