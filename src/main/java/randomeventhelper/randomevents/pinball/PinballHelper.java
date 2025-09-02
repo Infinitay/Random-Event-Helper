@@ -1,22 +1,20 @@
 package randomeventhelper.randomevents.pinball;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-import java.util.Set;
+import com.google.common.collect.Maps;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
-import net.runelite.api.DynamicObject;
 import net.runelite.api.GameObject;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameObjectSpawned;
-import net.runelite.api.events.GameTick;
 import net.runelite.api.events.NpcDespawned;
+import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.NpcID;
-import net.runelite.api.gameval.ObjectID;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -42,15 +40,18 @@ public class PinballHelper
 	@Getter
 	private GameObject activePinballPost;
 
-	private final Set<Integer> PINBALL_POST_OBJECTS_SET = ImmutableSet.of(ObjectID.PINBALL_POST_TREE_INACTIVE, ObjectID.PINBALL_POST_IRON_INACTIVE, ObjectID.PINBALL_POST_COAL_INACTIVE, ObjectID.PINBALL_POST_FISHING_INACTIVE, ObjectID.PINBALL_POST_ESSENCE_INACTIVE);
-	private Set<GameObject> pinballPostsSet;
+	// <Varbit value, Object ID>
+	private Map<Integer, GameObject> pinballPostsMap;
+
+	private boolean initial = false;
 
 	public void startUp()
 	{
 		this.eventBus.register(this);
 		this.overlayManager.add(pinballOverlay);
 		this.activePinballPost = null;
-		this.pinballPostsSet = Sets.newHashSet();
+		this.pinballPostsMap = Maps.newHashMap();
+		this.initial = false;
 	}
 
 	public void shutDown()
@@ -58,28 +59,8 @@ public class PinballHelper
 		this.eventBus.unregister(this);
 		this.overlayManager.remove(pinballOverlay);
 		this.activePinballPost = null;
-		this.pinballPostsSet = null;
-	}
-
-	@Subscribe
-	public void onGameTick(GameTick gameTick)
-	{
-		if (RandomEventHelperPlugin.isInRandomEventLocalInstance(this.client))
-		{
-			for (GameObject pinballObject : this.pinballPostsSet)
-			{
-				if (pinballObject != null && pinballObject.getRenderable() instanceof DynamicObject)
-				{
-					DynamicObject dynamicPinballObject = (DynamicObject) pinballObject.getRenderable();
-					if (dynamicPinballObject != null && dynamicPinballObject.getAnimation().getId() == 4005)
-					{
-						this.activePinballPost = pinballObject;
-						log.debug("Active pinball post found with ID: {}", this.activePinballPost.getId());
-						break; // Exit the loop once we find the active post
-					}
-				}
-			}
-		}
+		this.pinballPostsMap = null;
+		this.initial = false;
 	}
 
 	@Subscribe
@@ -89,7 +70,7 @@ public class PinballHelper
 		{
 			log.debug("A pinball troll despawned, resetting active pinball post.");
 			this.activePinballPost = null;
-			this.pinballPostsSet = Sets.newHashSet();
+			this.pinballPostsMap = Maps.newHashMap();
 		}
 	}
 
@@ -100,10 +81,44 @@ public class PinballHelper
 		// Pinball and grave digger random even locations are in region 7758
 		if (RandomEventHelperPlugin.isInRandomEventLocalInstance(this.client))
 		{
-			if (PINBALL_POST_OBJECTS_SET.contains(gameObject.getId()))
+			PinballPost pinballPost = PinballPost.fromObjectID(gameObject.getId());
+			if (pinballPost != null)
 			{
-				log.debug("A new pinball post object spawned with ID: {}, adding to the set.", gameObject.getId());
-				this.pinballPostsSet.add(gameObject);
+				log.debug("A pinball post has spawned: {}", pinballPost);
+				this.pinballPostsMap.put(pinballPost.getVarbitValue(), gameObject);
+
+				if (!this.initial)
+				{
+					int currentPostVarbitValue = this.client.getVarbitValue(VarbitID.MACRO_PINBALL_CURRENT);
+					if (currentPostVarbitValue != 0)
+					{
+						VarbitChanged temp = new VarbitChanged();
+						temp.setVarbitId(VarbitID.MACRO_PINBALL_CURRENT);
+						temp.setValue(currentPostVarbitValue);
+						this.onVarbitChanged(temp);
+						this.initial = true;
+					}
+				}
+			}
+		}
+	}
+
+	@Subscribe
+	public void onVarbitChanged(VarbitChanged varbitChanged)
+	{
+		if (RandomEventHelperPlugin.isInRandomEventLocalInstance(this.client) && varbitChanged.getVarbitId() == VarbitID.MACRO_PINBALL_CURRENT)
+		{
+			int value = varbitChanged.getValue();
+			PinballPost pinballPost = PinballPost.fromVarbitValue(value);
+			if (pinballPost != null)
+			{
+				log.debug("The active pinball post has changed to: {}", pinballPost);
+				this.activePinballPost = this.pinballPostsMap.get(value);
+			}
+			else
+			{
+				log.debug("The active pinball post varbit changed to an invalid value: {}", value);
+				this.activePinballPost = null;
 			}
 		}
 	}
@@ -118,7 +133,8 @@ public class PinballHelper
 			{
 				log.debug("Pinball game has ended so resetting active pinball post and pinball posts set.");
 				this.activePinballPost = null;
-				this.pinballPostsSet = Sets.newHashSet();
+				this.pinballPostsMap = Maps.newHashMap();
+				this.initial = false;
 			}
 		}
 	}
