@@ -10,8 +10,11 @@ import javax.inject.Singleton;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.events.NpcDespawned;
+import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.NpcID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.EventBus;
@@ -103,9 +106,9 @@ public class QuizMasterHelper
 	}
 
 	@Subscribe
-	public void onWidgetClosed(WidgetLoaded widgetLoaded)
+	public void onWidgetClosed(WidgetClosed widgetClosed)
 	{
-		if (widgetLoaded.getGroupId() == InterfaceID.MACRO_QUIZSHOW)
+		if (widgetClosed.getGroupId() == InterfaceID.MACRO_QUIZSHOW)
 		{
 			log.debug("Quiz Master widget closed - Event ended");
 			this.quizAnswerWidget = null;
@@ -113,9 +116,9 @@ public class QuizMasterHelper
 	}
 
 	@Subscribe
-	public void onNpcDespawned(WidgetLoaded widgetLoaded)
+	public void onNpcDespawned(NpcDespawned npcDespawned)
 	{
-		if (widgetLoaded.getGroupId() == InterfaceID.MACRO_QUIZSHOW)
+		if (npcDespawned.getNpc().getId() == NpcID.MACRO_MAGNESON)
 		{
 			log.debug("Quiz Master NPC despawned - Event ended");
 			this.quizAnswerWidget = null;
