@@ -37,6 +37,7 @@ import randomeventhelper.randomevents.gravedigger.GravediggerHelper;
 import randomeventhelper.randomevents.maze.MazeHelper;
 import randomeventhelper.randomevents.mime.MimeHelper;
 import randomeventhelper.randomevents.pinball.PinballHelper;
+import randomeventhelper.randomevents.pirate.PirateHelper;
 import randomeventhelper.randomevents.sandwichlady.SandwichLadyHelper;
 import randomeventhelper.randomevents.quizmaster.QuizMasterHelper;
 import randomeventhelper.randomevents.surpriseexam.SurpriseExamHelper;
@@ -98,6 +99,9 @@ public class RandomEventHelperPlugin extends Plugin
 	@Inject
 	private QuizMasterHelper quizMasterHelper;
 
+	@Inject
+	private PirateHelper pirateHelper;
+
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -143,6 +147,10 @@ public class RandomEventHelperPlugin extends Plugin
 		{
 			quizMasterHelper.startUp();
 		}
+		if (config.isCaptArnavChestEnabled())
+		{
+			pirateHelper.startUp();
+		}
 	}
 
 	@Override
@@ -160,6 +168,7 @@ public class RandomEventHelperPlugin extends Plugin
 		mazeHelper.shutDown();
 		sandwichLadyHelper.shutDown();
 		quizMasterHelper.shutDown();
+		pirateHelper.shutDown();
 	}
 
 	@Subscribe
@@ -276,6 +285,17 @@ public class RandomEventHelperPlugin extends Plugin
 				else
 				{
 					quizMasterHelper.shutDown();
+				}
+			}
+			else if (configChanged.getKey().equals("isCaptArnavChestEnabled"))
+			{
+				if (config.isCaptArnavChestEnabled())
+				{
+					pirateHelper.startUp();
+				}
+				else
+				{
+					pirateHelper.shutDown();
 				}
 			}
 		}
