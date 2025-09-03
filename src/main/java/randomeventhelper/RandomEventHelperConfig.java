@@ -106,4 +106,14 @@ public interface RandomEventHelperConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		keyName = "isCaptArnavChestEnabled",
+		name = "Capt' Arnav's Chest",
+		description = "Helps with aligning the chest slots to unlock Capt' Arnav's Chest random event."
+	)
+	default boolean isCaptArnavChestEnabled()
+	{
+		return true;
+	}
 }
