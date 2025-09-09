@@ -15,6 +15,7 @@ import net.runelite.api.GroundObject;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GroundObjectSpawned;
 import net.runelite.api.events.NpcDespawned;
+import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.ObjectID;
@@ -50,6 +51,8 @@ public class DrillDemonHelper
 	// <Exercise Varbit, Mat>
 	private Multimap<Integer, GroundObject> exerciseVarbitMatMultimap;
 
+	private boolean initialRun;
+
 	public void startUp()
 	{
 		this.eventBus.register(this);
@@ -57,6 +60,7 @@ public class DrillDemonHelper
 		this.exerciseMatsAnswerList = Lists.newArrayListWithExpectedSize(4);
 		this.exerciseMatsMultimap = HashMultimap.create(4, 2);
 		this.exerciseVarbitMatMultimap = HashMultimap.create(4, 2);
+		this.initialRun = true;
 	}
 
 	public void shutDown()
@@ -66,6 +70,28 @@ public class DrillDemonHelper
 		this.exerciseMatsAnswerList = null;
 		this.exerciseMatsMultimap = null;
 		this.exerciseVarbitMatMultimap = null;
+		this.initialRun = true;
+	}
+
+	@Subscribe
+	public void onNpcSpawned(NpcSpawned npcSpawned)
+	{
+		if (npcSpawned.getNpc().getId() == NpcID.MACRO_DRILLDEMON && this.isInDrillDemonLocalInstance())
+		{
+			if (this.initialRun)
+			{
+				log.debug("Initializing varbits for Drill Demon exercise mappings in case plugin was enabled mid-event.");
+				int post1Varbit = client.getVarbitValue(VarbitID.MACRO_DRILLDEMON_POST_1);
+				int post2Varbit = client.getVarbitValue(VarbitID.MACRO_DRILLDEMON_POST_2);
+				int post3Varbit = client.getVarbitValue(VarbitID.MACRO_DRILLDEMON_POST_3);
+				int post4Varbit = client.getVarbitValue(VarbitID.MACRO_DRILLDEMON_POST_4);
+				this.updateExerciseMappings(post1Varbit, 1);
+				this.updateExerciseMappings(post2Varbit, 2);
+				this.updateExerciseMappings(post3Varbit, 3);
+				this.updateExerciseMappings(post4Varbit, 4);
+				this.initialRun = false;
+			}
+		}
 	}
 
 	@Subscribe
@@ -77,6 +103,7 @@ public class DrillDemonHelper
 			this.exerciseMatsAnswerList.clear();
 			this.exerciseMatsMultimap.clear();
 			this.exerciseVarbitMatMultimap.clear();
+			this.initialRun = true;
 		}
 	}
 
@@ -120,6 +147,10 @@ public class DrillDemonHelper
 				}
 				else
 				{
+					if (sanitizedChatMessage.endsWith("Private! Follow my orders and you may, just may, leave here in a fit state for my corps!"))
+					{
+						return;
+					}
 					log.warn("Drill Demon requested unknown exercise: {}", sanitizedChatMessage);
 					this.exerciseMatsAnswerList.clear();
 				}
