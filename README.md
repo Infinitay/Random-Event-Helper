@@ -43,6 +43,16 @@ A RuneLite plugin to help solve random events by displaying solutions for each r
 - No support for highlighting the raw pheasant drop itself
 
 ### [Drill Demon](https://oldschool.runescape.wiki/w/Drill%20Demon)
+<details>
+  <summary>Screenshot</summary>
+  <img width="966" height="700" alt="image" src="https://github.com/user-attachments/assets/c35c23cc-5ae5-4d93-b185-a2cbf9bf7577" />
+</details>
+<details>
+  <summary>Video</summary>
+
+  https://github.com/user-attachments/assets/c1cdc8f9-1aec-40b2-ae08-8397c138139f
+</details>
+
 - Highlights the correct exercise mat to step on
 
 ### [Gravedigger](https://oldschool.runescape.wiki/w/Gravedigger)
