@@ -32,7 +32,7 @@ public class FreakyForesterOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics2D)
 	{
-		if (plugin.getPheasantNPC() != null && !plugin.getPheasantNPC().isEmpty())
+		if (plugin.getPheasantTailFeathers() != 0 || plugin.getPheasantNPC() != null && !plugin.getPheasantNPC().isEmpty())
 		{
 			for (NPC pheasantNPC : plugin.getPheasantNPC())
 			{
