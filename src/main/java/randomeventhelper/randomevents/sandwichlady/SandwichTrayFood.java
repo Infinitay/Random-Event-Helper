@@ -9,7 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum SandwichTrayFood
 {
-	MEAT_PIE(10730, "Meat pie"),
+	MEAT_PIE(10730, "Pie"),
 	KEBAB(10729, "Kebab"),
 	CHOCOLATE_BAR(10728, "Chocolate bar"),
 	BAGUETTE(10726, "Baguette"),
