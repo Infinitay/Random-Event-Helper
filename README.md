@@ -6,6 +6,16 @@ A RuneLite plugin to help solve random events by displaying solutions for each r
 
 ## Supported Random Events
 ### [Surprise Exam](https://oldschool.runescape.wiki/w/Surprise%20Exam)
+<details>
+  <summary>Screenshot</summary>
+  <img width="1932" height="698" alt="image" src="https://github.com/user-attachments/assets/94df8805-414d-48fb-a7fb-7d4535080d6a" />
+</details>
+<details>
+  <summary>Video</summary>
+  
+  https://github.com/user-attachments/assets/793d3d0c-b31d-42fc-ae44-2891fc67f37a
+</details>
+
 - Highlights the correct answer for both the matching cards and next item sequence
   - Implemented via relations and keywords to hopefully support any variation of the questions/answers
     - As a result of using keywords, there could be a chance the solutions are incorrect. If this is the case, please open an issue on the [GitHub repository](https://github.com/Infinitay/Random-Event-Solver/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen) with a screenshot of the random event question.
