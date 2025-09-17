@@ -74,10 +74,14 @@ public class PirateHelper
 			case VarbitID.PIRATE_COMBILOCK_LEFT:
 			case VarbitID.PIRATE_COMBILOCK_CENTRE:
 			case VarbitID.PIRATE_COMBILOCK_RIGHT:
+				if (this.pirateChestSolver == null)
+				{
+					this.pirateChestSolver = new PirateChestSolver();
+				}
 				this.pirateChestSolver.updateActiveItem(varbitChanged.getVarbitId(), varbitChanged.getValue());
 				if (!this.pirateChestSolver.isChestCorrectlySet())
 				{
-					log.debug("Attempting to solve pirate chest lock");
+					log.debug("[#onVarbitChanged] Attempting to solve pirate chest lock");
 					this.pirateChestSolver.solve();
 				}
 		}
@@ -95,6 +99,10 @@ public class PirateHelper
 				if (this.pirateChestSolver != null)
 				{
 					this.pirateChestSolver.reset();
+				}
+				else
+				{
+					this.pirateChestSolver = new PirateChestSolver();
 				}
 				VarbitChanged tempLeft = new VarbitChanged();
 				tempLeft.setVarbitId(VarbitID.PIRATE_COMBILOCK_LEFT);
@@ -131,7 +139,7 @@ public class PirateHelper
 							this.pirateChestSolver.updateRequiredItem(ChestLockSlot.RIGHT, rightChestLockItem);
 							if (!this.pirateChestSolver.isChestCorrectlySet())
 							{
-								log.debug("Attempting to solve pirate chest lock");
+								log.debug("[#onWidgetLoaded] Attempting to solve pirate chest lock");
 								this.pirateChestSolver.solve();
 							}
 						}
@@ -158,6 +166,7 @@ public class PirateHelper
 			if (this.pirateChestSolver != null)
 			{
 				this.pirateChestSolver.reset();
+				this.pirateChestSolver = null;
 			}
 		}
 	}

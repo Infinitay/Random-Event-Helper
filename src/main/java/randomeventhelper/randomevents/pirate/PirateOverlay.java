@@ -37,7 +37,7 @@ public class PirateOverlay extends Overlay
 		{
 			return null;
 		}
-		if (!plugin.getPirateChestSolver().isSolved())
+		if (plugin.getPirateChestSolver().isSolved())
 		{
 			OverlayUtil.renderPolygon(graphics2D, plugin.getWidgetMap().get(PirateHelper.CONFIRM_BUTTON_WIDGET_ID).getBounds(), Color.GREEN);
 		}

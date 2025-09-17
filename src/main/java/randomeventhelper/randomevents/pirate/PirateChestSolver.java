@@ -51,6 +51,8 @@ public class PirateChestSolver
 			default:
 				break;
 		}
+
+		log.debug("Updated required chest lock item: {} to {}", chestLockSlot, chestLockItem);
 	}
 
 	public void updateActiveItem(int varbitID, int varbitValue)
@@ -76,6 +78,7 @@ public class PirateChestSolver
 			default:
 				break;
 		}
+		log.debug("Updated current active chest lock item: {} to {}", chestLockSlot, chestLockItem);
 	}
 
 	public boolean isChestCorrectlySet()
@@ -109,6 +112,16 @@ public class PirateChestSolver
 			log.debug("Pirate chest is already solved.");
 			return;
 		}
+		if (this.requiredLeftItem == null || this.requiredCenterItem == null || this.requiredRightItem == null)
+		{
+			log.debug("Cannot solve the pirate chest puzzle, required items are not all set.");
+			return;
+		}
+		if (this.activeLeftItem == null || this.activeCenterItem == null || this.activeRightItem == null)
+		{
+			log.debug("Cannot solve the pirate chest puzzle, active items are not all set.");
+			return;
+		}
 		int size = ChestLockItem.values().length;
 		if (this.activeLeftItem != this.requiredLeftItem)
 		{
@@ -122,6 +135,12 @@ public class PirateChestSolver
 			{
 				this.leftSlotUseWidget = ChestLockSlot.LEFT.getSubtractWidgetID();
 			}
+			String widgetToUse = (this.leftSlotUseWidget == ChestLockSlot.LEFT.getAddWidgetID()) ? "Add" : "Subtract";
+			log.debug("Left slot: Active item {} -> Required item {}, Should use {} Widget ({})", this.activeLeftItem, this.requiredLeftItem, widgetToUse, this.leftSlotUseWidget);
+		}
+		else
+		{
+			this.leftSlotUseWidget = -1;
 		}
 		if (this.activeCenterItem != this.requiredCenterItem)
 		{
@@ -135,6 +154,12 @@ public class PirateChestSolver
 			{
 				this.centerSlotUseWidget = ChestLockSlot.CENTER.getSubtractWidgetID();
 			}
+			String widgetToUse = (this.centerSlotUseWidget == ChestLockSlot.CENTER.getAddWidgetID()) ? "Add" : "Subtract";
+			log.debug("Center slot: Active item {} -> Required item {}, Should use {} Widget ({})", this.activeCenterItem, this.requiredCenterItem, widgetToUse, this.centerSlotUseWidget);
+		}
+		else
+		{
+			this.centerSlotUseWidget = -1;
 		}
 		if (this.activeRightItem != this.requiredRightItem)
 		{
@@ -148,6 +173,12 @@ public class PirateChestSolver
 			{
 				this.rightSlotUseWidget = ChestLockSlot.RIGHT.getSubtractWidgetID();
 			}
+			String widgetToUse = (this.rightSlotUseWidget == ChestLockSlot.RIGHT.getAddWidgetID()) ? "Add" : "Subtract";
+			log.debug("Right slot: Active item {} -> Required item {}, Should use {} Widget ({})", this.activeRightItem, this.requiredRightItem, widgetToUse, this.rightSlotUseWidget);
+		}
+		else
+		{
+			this.rightSlotUseWidget = -1;
 		}
 	}
 
