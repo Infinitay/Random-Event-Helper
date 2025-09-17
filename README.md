@@ -12,6 +12,15 @@ A RuneLite plugin to help solve random events by displaying solutions for each r
     - _Disclaimer, the **relation matching system** was generated with AI, with me fixing the bugs and building upon the keywords._
 
 ### [Beekeeper](https://oldschool.runescape.wiki/w/Beekeeper_(Random_Event))
+<details>
+  <summary>Screenshot</summary>
+  <img width="966" height="700" alt="image" src="https://github.com/user-attachments/assets/061a19ec-73bc-4841-8312-f362e99cc3a9" />
+</details>
+<details>
+  <summary>Video</summary>
+  
+  https://github.com/user-attachments/assets/23a1c491-03dd-44f5-886b-7875647be379
+</details>
 - Displays the correct order to place the different hive piece
 
 ### [Pinball](https://oldschool.runescape.wiki/w/Pinball)
