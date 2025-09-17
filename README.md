@@ -103,5 +103,15 @@ https://github.com/user-attachments/assets/b9d810ba-be0b-4b09-a009-9aa5c2be8fb4
 
 - Highlights the correct answer indicating the odd item out of the given options
 
-[Capt' Arnav's Chest](https://oldschool.runescape.wiki/w/Capt%27_Arnav%27s_Chest)
+### [Capt' Arnav's Chest](https://oldschool.runescape.wiki/w/Capt%27_Arnav%27s_Chest)
+<details>
+  <summary>Screenshot</summary>
+  <img width="966" height="700" alt="image" src="https://github.com/user-attachments/assets/137f3580-5db4-48bb-a5ba-7569bd3c289e" />
+</details>
+<details>
+  <summary>Video</summary>
+  
+  https://github.com/user-attachments/assets/d6430888-785e-4d43-90bb-ab98b8b08415
+</details>
+
 - Helps unlock the chest by highlighting which rotating dial align to the correct item
