@@ -245,7 +245,7 @@ public class OSRSItemRelationshipSystem
 		));
 
 		// Food categories
-		map.put(RelationshipType.RAW_FISH, Set.of(
+		map.put(RelationshipType.FISH, Set.of(
 			RandomEventItem.TUNA, RandomEventItem.TROUT_COD_PIKE_SALMON_1,
 			RandomEventItem.TROUT_COD_PIKE_SALMON_2, RandomEventItem.TROUT_COD_PIKE_SALMON_3,
 			RandomEventItem.TROUT_COD_PIKE_SALMON_4, RandomEventItem.HERRING_OR_MACKEREL,
@@ -257,7 +257,7 @@ public class OSRSItemRelationshipSystem
 			RandomEventItem.STRAWBERRY, RandomEventItem.WATERMELON_SLICE
 		));
 
-		map.put(RelationshipType.COOKED_FOODS, Set.of(
+		map.put(RelationshipType.BAKING_FOOD, Set.of(
 			RandomEventItem.BREAD, RandomEventItem.CAKE, RandomEventItem.CHEESE,
 			RandomEventItem.PIE, RandomEventItem.PIZZA
 		));

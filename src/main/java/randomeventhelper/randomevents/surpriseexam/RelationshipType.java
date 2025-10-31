@@ -10,7 +10,7 @@ public enum RelationshipType
 	FARMING_ECOSYSTEM("farming, agriculture, rake, seeds, crops, harvest, plants"),
 	COOKING_PRODUCTION("cooking, food, chef, kitchen, bread, cake, meals"),
 	ALCOHOL_PRODUCTION("alcohol, brewing, cocktail, beer, rum, gin, drinks"),
-	MAGIC_RUNECRAFTING("magic, runecrafting, runes, essence, spells, staff"),
+	MAGIC_RUNECRAFTING("magic, runecrafting, runes, essence, spells, staff, abracadabra, hocus pocus"),
 	JEWELRY_CRAFTING("jewelry, gems, necklace, ring, crafting, status"),
 	LIGHT_FIRE_SYSTEM("fire, light, candle, lantern, tinderbox, illumination"),
 	CONTAINER_STORAGE("container, storage, bottle, jug, pot, holding"),
@@ -23,7 +23,7 @@ public enum RelationshipType
 	// Equipment categories
 	MELEE_WEAPONS("melee, sword, axe, mace, scimitar, close, combat, sharp"),
 	RANGED_WEAPONS("ranged, bow, crossbow, arrows, ammunition, distance, sharp"),
-	MAGIC_RUNES("runes, elemental, air, earth, fire, water, magic"),
+	MAGIC_RUNES("runes, elemental, air, earth, fire, water, magic, abracadabra, hocus pocus"),
 	HEAD_ARMOR("head, helmet, hat, protection, headwear, skull, mask"),
 	BODY_ARMOR("body, chest, torso, platebody, apron, protection"),
 	LEG_ARMOR("legs, platelegs, protection, lower, body"),
@@ -35,14 +35,14 @@ public enum RelationshipType
 	// Skill-based groupings
 	ALL_SKILLING_TOOLS("tools, skills, gathering, resources, equipment, utility"),
 	MINING_TOOLS("mining, pickaxe, ore, rocks, gems, underground"),
-	FISHING_TOOLS("fishing, harpoon, fish, water, catching, sea"),
+	FISHING_TOOLS("fishing, harpoon, fish, water, catching, sea, sea food"),
 	FARMING_TOOLS("farming, gardening, rake, spade, plants, agriculture"),
 	CRAFTING_TOOLS("crafting, needle, thread, making, creating, tailoring"),
 
 	// Food categories
-	RAW_FISH("fish, raw, uncooked, seafood, fishing, water"),
+	FISH("fish, raw, uncooked, sea, food, sea food, seafood, fishing, water"),
 	FRUITS("fruits, berries, fresh, healthy, vitamins, nature"),
-	COOKED_FOODS("cooked, food, meals, prepared, baked, ready"),
+	BAKING_FOOD("cooked, food, meals, prepared, baked, ready"),
 	ALCOHOLIC_DRINKS("alcohol, drinks, beer, spirits, intoxicating, beverages"),
 
 	// Functional groupings
