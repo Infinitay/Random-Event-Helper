@@ -51,9 +51,8 @@ public class MazeHelper
 		{
 			if (!pluginManager.isPluginEnabled(shortestPathPlugin.get()))
 			{
-				log.warn("[#onStartUp] ShortestPathPlugin is not enabled, turning it on to ensure functionality");
-				this.client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Enabling Shortest Path plugin for Maze Helper functionality.", null);
-				pluginManager.setPluginEnabled(shortestPathPlugin.get(), true);
+				log.warn("[#onStartUp] ShortestPathPlugin is not enabled. Please enable it manually to ensure maze helper's functionality.");
+				this.client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "[Random Event Helper] You've enabled the maze helper module but have the Shortest Path plugin disabled. Please enable it manually to ensure functionality.", null);
 			}
 		}
 		else
