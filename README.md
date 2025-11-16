@@ -1,5 +1,8 @@
-# Random Event Helper
+# [Random Event Helper](https://runelite.net/plugin-hub/show/random-event-helper)
 A RuneLite plugin to help solve random events by displaying solutions for each random event.
+
+![image](https://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/installs/plugin/random-event-helper)
+![image](https://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/rank/plugin/random-event-helper)
 
 ## Features
 - Highlights the solution for each supported random event
