@@ -18,12 +18,29 @@ def runeLiteVersion = 'latest.release'
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
 
-	compileOnly 'org.projectlombok:lombok:1.18.30'
-	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    testCompileOnly 'org.projectlombok:lombok:1.18.30'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
 
-	testImplementation 'junit:junit:4.12'
-	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
+    // Credit to Dink Plugin
+    // max version before junit-bom was added to pom files, due to runelite restrictions
+    def junitVersion = "5.5.2"
+
+    testImplementation group: "org.junit.jupiter", name: "junit-jupiter-api", version: junitVersion
+    testImplementation group: "org.junit.jupiter", name: "junit-jupiter-params", version: junitVersion
+    testImplementation group: "org.junit.jupiter", name: "junit-jupiter-engine", version: junitVersion
+    testRuntimeOnly group: "org.junit.platform", name: "junit-platform-launcher", version: "1.5.2"
+
+    // For RelationshipSystem testing - specifically for list comparisons
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+
+    testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
+}
+
+test {
+    useJUnitPlatform()
 }
 
 group = 'randomeventhelper'
