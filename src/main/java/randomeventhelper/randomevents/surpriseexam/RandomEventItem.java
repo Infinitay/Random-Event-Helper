@@ -87,7 +87,7 @@ public enum RandomEventItem
 	SHEARS(41227),
 	SHORT_BOW(41171),
 	SHRIMP(41147),
-	BOOTS(27104),
+	INSULATED_BOOTS(27104),
 	FIGHTER_BOOTS(41160),
 	SPADE(41155),
 	SQUARE_SHIELD_2(41169),
@@ -127,5 +127,11 @@ public enum RandomEventItem
 		}
 
 		ITEM_MODEL_ID_MAP = itemModelIDBuilder.build();
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.name() + " ("+ modelID + ")";
 	}
 }

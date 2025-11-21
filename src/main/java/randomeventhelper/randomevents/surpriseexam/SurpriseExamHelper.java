@@ -140,6 +140,7 @@ public class SurpriseExamHelper
 					log.debug("Exam hint widget loaded with text: {}", examHint);
 					if (examHint != null && !examHint.isEmpty())
 					{
+						log.debug("Exam available pattern card items: {}", this.getPatternCardMap().values().asList());
 						List<RandomEventItem> answerItems = this.relationshipSystem.findItemsByHint(examHint, this.getPatternCardMap().values().asList(), 3);
 						log.debug("Found answer items for exam hint '{}': {}", examHint, answerItems);
 						if (answerItems.size() >= 3)
@@ -159,7 +160,6 @@ public class SurpriseExamHelper
 								.filter(Objects::nonNull)
 								.collect(ImmutableSet.toImmutableSet());
 							log.debug("Pattern card answers set to: {}", this.patternCardAnswers);
-							log.debug("Pattern card answer widgets set to: {}", this.patternCardAnswerWidgets);
 						}
 						else
 						{
@@ -197,7 +197,6 @@ public class SurpriseExamHelper
 							Integer interfaceID = getKeyForValue(this.getPatternNextChoicesMap(), answerItem);
 							this.patternNextAnswerWidget = interfaceID != null ? this.client.getWidget(interfaceID) : null;
 							log.debug("Pattern next answer set to: {}", this.patternNextAnswer);
-							log.debug("Pattern next answer widget set to: {}", this.patternNextAnswerWidget);
 						}
 						else
 						{
@@ -326,4 +325,3 @@ public class SurpriseExamHelper
 		return null;
 	}
 }
-
