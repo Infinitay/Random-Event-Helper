@@ -196,7 +196,7 @@ public class OSRSItemRelationshipSystem
 		));
 
 		map.put(RelationshipType.FOOT_ARMOR, Set.of(
-			RandomEventItem.BOOTS, RandomEventItem.PIRATE_BOOTS, RandomEventItem.LEATHER_BOOTS,
+			RandomEventItem.INSULATED_BOOTS, RandomEventItem.PIRATE_BOOTS, RandomEventItem.LEATHER_BOOTS,
 			RandomEventItem.FIGHTER_BOOTS
 		));
 
