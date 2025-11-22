@@ -194,6 +194,8 @@ public class SurpriseExamHelper
 					{
 						List<RandomEventItem> initialSelectionItems = this.getPatternNextInitialSelectionMap().values().asList();
 						List<RandomEventItem> choicesItems = this.getPatternNextChoicesMap().values().asList();
+						log.debug("Exam next initial selection items: {}", initialSelectionItems);
+						log.debug("Exam next choice items: {}", choicesItems);
 						RandomEventItem answerItem = this.relationshipSystem.findMissingItem(initialSelectionItems, choicesItems);
 						if (answerItem != null)
 						{
@@ -257,19 +259,19 @@ public class SurpriseExamHelper
 		if (executedCommand.getCommand().equalsIgnoreCase("exportexampuzzle"))
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.append("Pattern Card Available Items: ");
+			sb.append("Pattern Card Matching Available Items: ");
 			sb.append(this.getPatternCardMap() != null ? this.getPatternCardMap().values().asList().toString() : "NULL");
 			sb.append("\n");
-			sb.append("Pattern Card Calculated Answers: ");
+			sb.append("Pattern Card Matching Calculated Answers: ");
 			sb.append(this.patternCardAnswers != null ? this.patternCardAnswers.toString() : "NULL");
 			sb.append("\n");
-			sb.append("Pattern Next Initial Items: ");
+			sb.append("Pattern Next Item Initial Items: ");
 			sb.append(this.getPatternNextInitialSelectionMap() != null ? this.getPatternNextInitialSelectionMap().values().asList().toString() : "NULL");
 			sb.append("\n");
-			sb.append("Pattern Next Choices: ");
+			sb.append("Pattern Next Item Choices: ");
 			sb.append(this.getPatternNextChoicesMap() != null ? this.getPatternNextChoicesMap().values().asList().toString() : "NULL");
 			sb.append("\n");
-			sb.append("Pattern Next Calculated Answer: ");
+			sb.append("Pattern Next Item Calculated Answer: ");
 			sb.append(this.patternNextAnswer != null ? this.patternNextAnswer.toString() : "NULL");
 			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 			clipboard.setContents(new StringSelection(sb.toString()), null);
