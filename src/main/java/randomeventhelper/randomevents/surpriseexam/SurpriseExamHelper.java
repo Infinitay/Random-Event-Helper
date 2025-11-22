@@ -4,6 +4,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -12,6 +15,7 @@ import javax.inject.Singleton;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.events.CommandExecuted;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
@@ -237,7 +241,8 @@ public class SurpriseExamHelper
 	@Subscribe
 	public void onNpcDespawned(NpcDespawned npcDespawned)
 	{
-		if (npcDespawned.getNpc().getId() == NpcID.PATTERN_TEACHER) {
+		if (npcDespawned.getNpc().getId() == NpcID.PATTERN_TEACHER)
+		{
 			log.debug("Mr. Mordaut NPC despawned, resetting all answers.");
 			this.patternCardAnswers = null;
 			this.patternCardAnswerWidgets = null;
@@ -246,11 +251,42 @@ public class SurpriseExamHelper
 		}
 	}
 
+	@Subscribe
+	public void onCommandExecuted(CommandExecuted executedCommand)
+	{
+		if (executedCommand.getCommand().equalsIgnoreCase("exportexampuzzle"))
+		{
+			StringBuilder sb = new StringBuilder();
+			sb.append("Pattern Card Available Items: ");
+			sb.append(this.getPatternCardMap() != null ? this.getPatternCardMap().values().asList().toString() : "NULL");
+			sb.append("\n");
+			sb.append("Pattern Card Calculated Answers: ");
+			sb.append(this.patternCardAnswers != null ? this.patternCardAnswers.toString() : "NULL");
+			sb.append("\n");
+			sb.append("Pattern Next Initial Items: ");
+			sb.append(this.getPatternNextInitialSelectionMap() != null ? this.getPatternNextInitialSelectionMap().values().asList().toString() : "NULL");
+			sb.append("\n");
+			sb.append("Pattern Next Choices: ");
+			sb.append(this.getPatternNextChoicesMap() != null ? this.getPatternNextChoicesMap().values().asList().toString() : "NULL");
+			sb.append("\n");
+			sb.append("Pattern Next Calculated Answer: ");
+			sb.append(this.patternNextAnswer != null ? this.patternNextAnswer.toString() : "NULL");
+			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			clipboard.setContents(new StringSelection(sb.toString()), null);
+			log.info(sb.toString());
+		}
+	}
+
 	private ImmutableMultimap<Integer, RandomEventItem> getPatternCardMap()
 	{
 		ImmutableMultimap.Builder<Integer, RandomEventItem> builder = ImmutableMultimap.builder();
 		for (int patternCardSelectionInterfaceID : PATTERNCARDS_INTERFACEIDS_AVAILABLE_CARD_MODELS)
 		{
+			if (this.client.getWidget(InterfaceID.PatternCards.HINT) == null)
+			{
+				log.warn("Widget for matching pattern puzzle hint is null");
+				return null;
+			}
 			int modelID = Objects.requireNonNull(this.client.getWidget(patternCardSelectionInterfaceID)).getModelId();
 			RandomEventItem randomEventItem = RandomEventItem.fromModelID(modelID);
 			if (randomEventItem == null)
@@ -268,6 +304,11 @@ public class SurpriseExamHelper
 		ImmutableMap.Builder<Integer, RandomEventItem> builder = ImmutableMap.builder();
 		for (int patternNextInitialPatternInterfaceID : PATTERNNEXT_INTERFACEIDS_INITIAL_PATTERN)
 		{
+			if (this.client.getWidget(InterfaceID.PatternNext.UNIVERSE_TEXT12) == null)
+			{
+				log.warn("Widget for next missing item puzzle text is null");
+				return null;
+			}
 			int modelID = Objects.requireNonNull(this.client.getWidget(patternNextInitialPatternInterfaceID)).getModelId();
 			RandomEventItem randomEventItem = RandomEventItem.fromModelID(modelID);
 			if (randomEventItem == null)
@@ -285,6 +326,11 @@ public class SurpriseExamHelper
 		ImmutableMultimap.Builder<Integer, RandomEventItem> builder = ImmutableMultimap.builder();
 		for (int patternNextChoiceInterfaceID : PATTERNNEXT_INTERFACEIDS_CHOICES)
 		{
+			if (this.client.getWidget(InterfaceID.PatternNext.UNIVERSE_TEXT12) == null)
+			{
+				log.warn("Widget for next missing item puzzle text is null");
+				return null;
+			}
 			int modelID = Objects.requireNonNull(this.client.getWidget(patternNextChoiceInterfaceID)).getModelId();
 			RandomEventItem randomEventItem = RandomEventItem.fromModelID(modelID);
 			if (randomEventItem == null)
