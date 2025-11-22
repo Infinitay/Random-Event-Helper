@@ -33,7 +33,7 @@ dependencies {
     testRuntimeOnly group: "org.junit.platform", name: "junit-platform-launcher", version: "1.5.2"
 
     // For RelationshipSystem testing - specifically for list comparisons
-    testImplementation 'org.assertj:assertj-core:3.24.2'
+    testImplementation 'org.assertj:assertj-core:3.27.6'
 
     testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
