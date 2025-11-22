@@ -27,7 +27,7 @@ dependencies {
 }
 
 group = 'randomeventhelper'
-version = '2.5.3'
+version = '2.5.4'
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'

@@ -62,6 +62,13 @@ A RuneLite plugin to help solve random events by displaying solutions for each r
 </details>
 
 - Highlights the correct [pheasant](https://oldschool.runescape.wiki/w/Pheasant) to kill
+  - Three various modes depending on user preference [since you're no longer required to kill a specific pheasant](https://oldschool.runescape.wiki/w/Pheasant#:~:text=Despite%20the%20Freaky%20Forester%20asking%20for%20the%20raw%20pheasant%20from%20a%20pheasant%20with%20a%20specific%20number%20of%20tails%2C%20all%20pheasants%20will%20drop%20the%20same%20raw%20pheasant%20as%20if%20it%20was%20correct%2C%20which%20the%20Freaky%20Forester%20will%20accept%20for%20a%20reward)
+
+      | Mode     | Description                                                       |
+      |----------|-------------------------------------------------------------------|
+      | Specific | Highlights the pheasant with the required tail-feather count      |
+      | Nearest  | Highlights any nearest pheasant (disregarding tail-feather count) |
+      | All      | Highlights any and all pheasants                                  |
 - No support for highlighting the raw pheasant drop itself
 
 ### [Drill Demon](https://oldschool.runescape.wiki/w/Drill%20Demon)

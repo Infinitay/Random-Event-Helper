@@ -32,15 +32,31 @@ public class FreakyForesterOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics2D)
 	{
-		if (plugin.getPheasantTailFeathers() != 0 || plugin.getPheasantNPC() != null && !plugin.getPheasantNPC().isEmpty())
+		switch (plugin.getPheasantHighlightMode())
 		{
-			for (NPC pheasantNPC : plugin.getPheasantNPC())
-			{
-				if (pheasantNPC != null && !pheasantNPC.isDead())
+			case SPECIFIC:
+				if (plugin.getSpecificPheasantNPC() != null && !plugin.getSpecificPheasantNPC().isDead())
 				{
-					OverlayUtil.renderPolygon(graphics2D, pheasantNPC.getConvexHull(), Color.GREEN);
+					OverlayUtil.renderPolygon(graphics2D, plugin.getSpecificPheasantNPC().getConvexHull(), Color.RED);
 				}
-			}
+				break;
+			case NEAREST:
+				if (plugin.getNearestPheasantNPC() != null && !plugin.getNearestPheasantNPC().isDead())
+				{
+					OverlayUtil.renderPolygon(graphics2D, plugin.getNearestPheasantNPC().getConvexHull(), Color.ORANGE);
+				}
+				break;
+			case ALL:
+				for (NPC pheasantNPC : plugin.getPheasantNPCSet())
+				{
+					if (pheasantNPC != null && !pheasantNPC.isDead())
+					{
+						OverlayUtil.renderPolygon(graphics2D, pheasantNPC.getConvexHull(), Color.GREEN);
+					}
+				}
+				break;
+			default:
+				break;
 		}
 		return null;
 	}
