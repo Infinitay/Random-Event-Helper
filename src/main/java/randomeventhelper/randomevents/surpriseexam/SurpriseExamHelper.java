@@ -46,6 +46,8 @@ public class SurpriseExamHelper
 	@Inject
 	private SurpriseExamOverlay overlay;
 
+	private String patternCardHint;
+
 	@Getter
 	private ImmutableSet<RandomEventItem> patternCardAnswers;
 
@@ -113,6 +115,7 @@ public class SurpriseExamHelper
 	{
 		this.eventBus.register(this);
 		this.overlayManager.add(overlay);
+		this.patternCardHint = null;
 		this.patternCardAnswers = null;
 		this.patternCardAnswerWidgets = null;
 		this.patternNextAnswer = null;
@@ -124,6 +127,7 @@ public class SurpriseExamHelper
 	{
 		this.eventBus.unregister(this);
 		this.overlayManager.remove(overlay);
+		this.patternCardHint = null;
 		this.patternCardAnswers = null;
 		this.patternCardAnswerWidgets = null;
 		this.patternNextAnswer = null;
@@ -140,13 +144,13 @@ public class SurpriseExamHelper
 				Widget examHintWidget = this.client.getWidget(InterfaceID.PatternCards.HINT);
 				if (examHintWidget != null)
 				{
-					String examHint = examHintWidget.getText();
-					log.debug("Exam hint widget loaded with text: {}", examHint);
-					if (examHint != null && !examHint.isEmpty())
+					this.patternCardHint = examHintWidget.getText();
+					log.debug("Exam hint widget loaded with text: {}", this.patternCardHint);
+					if (this.patternCardHint != null && !this.patternCardHint.isEmpty())
 					{
 						log.debug("Exam available pattern card items: {}", this.getPatternCardMap().values().asList());
-						List<RandomEventItem> answerItems = this.relationshipSystem.findItemsByHint(examHint, this.getPatternCardMap().values().asList(), 3);
-						log.debug("Found answer items for exam hint '{}': {}", examHint, answerItems);
+						List<RandomEventItem> answerItems = this.relationshipSystem.findItemsByHint(this.patternCardHint, this.getPatternCardMap().values().asList(), 3);
+						log.debug("Found answer items for exam hint '{}': {}", this.patternCardHint, answerItems);
 						if (answerItems.size() >= 3)
 						{
 							this.patternCardAnswers = ImmutableSet.copyOf(answerItems);
@@ -167,7 +171,7 @@ public class SurpriseExamHelper
 						}
 						else
 						{
-							log.warn("Found {} items for exam hint '{}', expected 3.", answerItems.size(), examHint);
+							log.warn("Found {} items for exam hint '{}', expected 3.", answerItems.size(), this.patternCardHint);
 							this.patternCardAnswers = null;
 							this.patternCardAnswerWidgets = null;
 						}
@@ -175,6 +179,7 @@ public class SurpriseExamHelper
 					else
 					{
 						log.warn("Exam hint widget text is empty or null.");
+						this.patternCardHint = null;
 						this.patternCardAnswers = null;
 						this.patternCardAnswerWidgets = null;
 					}
@@ -228,6 +233,7 @@ public class SurpriseExamHelper
 		if (widgetClosed.getGroupId() == InterfaceID.PATTERN_CARDS)
 		{
 			log.debug("Pattern cards widget closed, resetting pattern card answers.");
+			this.patternCardHint = null;
 			this.patternCardAnswers = null;
 			this.patternCardAnswerWidgets = null;
 		}
@@ -246,6 +252,7 @@ public class SurpriseExamHelper
 		if (npcDespawned.getNpc().getId() == NpcID.PATTERN_TEACHER)
 		{
 			log.debug("Mr. Mordaut NPC despawned, resetting all answers.");
+			this.patternCardHint = null;
 			this.patternCardAnswers = null;
 			this.patternCardAnswerWidgets = null;
 			this.patternNextAnswer = null;
@@ -259,6 +266,9 @@ public class SurpriseExamHelper
 		if (executedCommand.getCommand().equalsIgnoreCase("exportexampuzzle"))
 		{
 			StringBuilder sb = new StringBuilder();
+			sb.append("Pattern Card Matching Hint: ");
+			sb.append(this.patternCardHint != null ? this.patternCardHint : "NULL");
+			sb.append("\n");
 			sb.append("Pattern Card Matching Available Items: ");
 			sb.append(this.getPatternCardMap() != null ? this.getPatternCardMap().values().asList().toString() : "NULL");
 			sb.append("\n");
