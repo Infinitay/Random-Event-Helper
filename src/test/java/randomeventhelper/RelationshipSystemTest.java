@@ -22,6 +22,14 @@ public class RelationshipSystemTest
 		);
 		List<RandomEventItem> puzzle1ActualItems = relationshipSystem.findItemsByHint(puzzle1.getHint(), puzzle1.getGivenItems(), 3).subList(0, 3);
 		Assertions.assertThat(puzzle1ActualItems).containsExactlyInAnyOrderElementsOf(puzzle1.getExpectedMatchingItems());
+
+		RelationshipSystemTestMatchingData puzzle2 = new RelationshipSystemTestMatchingData(
+			"Some professions use such strange headgear.",
+			"[CAKE (41202), TROUT_COD_PIKE_SALMON_4 (41217), SHARK (41166), ARROWS (41177), TINDERBOX (41154), HERRING_OR_MACKEREL (41193), PLATELEGS (41179), ORE (41170), LEDERHOSEN_HAT (41164), LONGSWORD (41150), BONES (2674), POT (41223), PIRATE_HAT (41187), JESTER_HAT (41196), AXE (41184)]",
+			List.of(RandomEventItem.LEDERHOSEN_HAT, RandomEventItem.PIRATE_HAT, RandomEventItem.JESTER_HAT)
+		);
+		List<RandomEventItem> puzzle2ActualItems = relationshipSystem.findItemsByHint(puzzle2.getHint(), puzzle2.getGivenItems(), 3).subList(0, 3);
+		Assertions.assertThat(puzzle2ActualItems).containsExactlyInAnyOrderElementsOf(puzzle2.getExpectedMatchingItems());
 	}
 
 	@Test
@@ -35,6 +43,14 @@ public class RelationshipSystemTest
 		);
 		RandomEventItem puzzle1ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle1.getInitialSequenceItems(), puzzle1.getItemChoices());
 		Assertions.assertThat(puzzle1ActualNextMissingItem).isEqualTo(puzzle1.getExpectedNextMissingItem());
+
+		RelationshipSystemTestNextMissingItemData puzzle2 = new RelationshipSystemTestNextMissingItemData(
+			"[LONGSWORD (41150), FULL_HELM (41178), KITESHIELD (41200)]",
+			"[EARTH_RUNE (41157), BAR (41153), PLATEBODY (27094), CAKE (41202)]",
+			RandomEventItem.PLATEBODY
+		);
+		RandomEventItem puzzle2ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle2.getInitialSequenceItems(), puzzle2.getItemChoices());
+		Assertions.assertThat(puzzle2ActualNextMissingItem).isEqualTo(puzzle2.getExpectedNextMissingItem());
 	}
 
 	@Data

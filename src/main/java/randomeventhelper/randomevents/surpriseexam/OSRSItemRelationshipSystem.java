@@ -205,6 +205,13 @@ public class OSRSItemRelationshipSystem
 			RandomEventItem.KITESHIELD, RandomEventItem.WOODEN_SHIELD
 		));
 
+		map.put(RelationshipType.MELEE_GEAR, Set.of(
+			RandomEventItem.BATTLE_AXE, RandomEventItem.LONGSWORD, RandomEventItem.MACE,
+			RandomEventItem.SCIMITAR, RandomEventItem.FULL_HELM, RandomEventItem.MED_HELM, RandomEventItem.PLATEBODY,
+			RandomEventItem.PLATELEGS, RandomEventItem.SQUARE_SHIELD_1, RandomEventItem.SQUARE_SHIELD_2,
+			RandomEventItem.KITESHIELD, RandomEventItem.WOODEN_SHIELD
+		));
+
 		map.put(RelationshipType.JEWELRY_ACCESSORIES, Set.of(
 			RandomEventItem.NECKLACE, RandomEventItem.RING, RandomEventItem.HOLY_SYMBOL,
 			RandomEventItem.CAPE_OF_LEGENDS

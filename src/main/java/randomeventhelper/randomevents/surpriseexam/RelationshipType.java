@@ -16,19 +16,20 @@ public enum RelationshipType
 	CONTAINER_STORAGE("container, storage, bottle, jug, pot, holding"),
 
 	// Thematic groups
-	PIRATE_THEME("pirate, sea, nautical, hook, eyepatch, boots, hat, yarr, crime"),
-	ENTERTAINMENT_THEME("entertainment, performance, jester, mime, mask, fun, clown, fool, mask, face"),
+	PIRATE_THEME("pirate, sea, nautical, hook, eyepatch, boots, hat, yarr, crime, strange"),
+	ENTERTAINMENT_THEME("entertainment, performance, jester, mime, mask, fun, clown, fool, mask, face, strange"),
 	PROFESSIONAL_THEME("profession, work, chef, trade, job, occupation"),
 
 	// Equipment categories
 	MELEE_WEAPONS("melee, sword, axe, mace, scimitar, close, combat, sharp"),
 	RANGED_WEAPONS("ranged, bow, crossbow, arrows, ammunition, distance, sharp"),
 	MAGIC_RUNES("runes, elemental, air, earth, fire, water, magic, abracadabra, hocus pocus"),
-	HEAD_ARMOR("head, helmet, hat, protection, headwear, skull, mask"),
+	HEAD_ARMOR("head, helmet, hat, protection, headwear, skull, mask, headgear"),
 	BODY_ARMOR("body, chest, torso, platebody, apron, protection"),
 	LEG_ARMOR("legs, platelegs, protection, lower, body"),
 	FOOT_ARMOR("feet, boots, footwear, walking, protection"),
 	SHIELDS("shield, defense, blocking, protection, guard"),
+	MELEE_GEAR("melee, sword, scimitar, axe, mace, combat, sharp, helmet, platebody, platelegs, shield"),
 	JEWELRY_ACCESSORIES("jewelry, accessories, necklace, ring, cape, status"),
 	FACE_ACCESSORIES("face, mask, eyepatch, hook, covering, facial"),
 
