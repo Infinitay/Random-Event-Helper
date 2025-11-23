@@ -105,7 +105,6 @@ public enum RandomEventItem
 	WATERMELON_SLICE(41156),
 	WATER_RUNE(41231),
 	BONES(2674),
-
 	KEY(29232);
 
 	private final int modelID;
