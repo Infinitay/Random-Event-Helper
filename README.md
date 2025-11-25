@@ -58,7 +58,7 @@ A RuneLite plugin to help solve random events by displaying solutions for each r
 <details>
   <summary>Video</summary>
   
-  https://github.com/user-attachments/assets/60f2df8f-1bbf-406a-a430-8f4f69887376
+  https://github.com/user-attachments/assets/38dfbc15-d007-44e0-8661-8e501f6e7797
 </details>
 
 - Highlights the correct [pheasant](https://oldschool.runescape.wiki/w/Pheasant) to kill
