@@ -228,7 +228,12 @@ public class FreakyForesterHelper
 
 	private void updateSpecificPheasant()
 	{
-		this.specificPheasantNPC = this.pheasantNPCSet.stream().filter(npc -> !npc.isDead() && npc.getId() == PHEASANT_TAIL_NPCID_MAP.get(this.pheasantTailFeathers)).min((pheasant1, pheasant2) -> {
+		if (this.pheasantTailFeathers == 0)
+		{
+			this.specificPheasantNPC = null;
+			return;
+		}
+		this.specificPheasantNPC = this.pheasantNPCSet.stream().filter(npc -> !npc.isDead() && npc.getId() == PHEASANT_TAIL_NPCID_MAP.getOrDefault(this.pheasantTailFeathers, -1)).min((pheasant1, pheasant2) -> {
 			WorldPoint localPlayerWorldPoint = this.client.getLocalPlayer().getWorldLocation();
 			return Double.compare(localPlayerWorldPoint.distanceTo2D(pheasant1.getWorldLocation()), localPlayerWorldPoint.distanceTo2D(pheasant2.getWorldLocation()));
 		}).orElse(null);
