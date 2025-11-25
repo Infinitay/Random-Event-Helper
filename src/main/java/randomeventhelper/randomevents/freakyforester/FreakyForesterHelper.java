@@ -66,6 +66,11 @@ public class FreakyForesterHelper
 	@Getter
 	private NPC specificPheasantNPC;
 
+	@Getter
+	private NPC freakyForesterNPC;
+
+	private boolean initialRun;
+
 	private final Map<Integer, Integer> PHEASANT_TAIL_NPCID_MAP = ImmutableMap.<Integer, Integer>builder()
 		.put(1, NpcID.MACRO_PHEASANT_MODEL_1)
 		.put(2, NpcID.MACRO_PHEASANT_MODEL_2)
@@ -86,6 +91,8 @@ public class FreakyForesterHelper
 		this.pheasantHighlightMode = config.pheasantHighlightMode();
 		this.pheasantTailFeathers = 0;
 		this.pheasantNPCSet = Sets.newHashSet();
+		this.initialRun = true;
+		this.freakyForesterNPC = null;
 	}
 
 	public void shutDown()
@@ -96,6 +103,8 @@ public class FreakyForesterHelper
 		this.pheasantNPCSet = null;
 		this.nearestPheasantNPC = null;
 		this.specificPheasantNPC = null;
+		this.initialRun = true;
+		this.freakyForesterNPC = null;
 	}
 
 	@Subscribe
@@ -159,11 +168,11 @@ public class FreakyForesterHelper
 		NPC npc = npcSpawned.getNpc();
 		if (this.isInFreakyForesterInstance())
 		{
-			if (npc.getId() == PHEASANT_TAIL_NPCID_MAP.get(this.pheasantTailFeathers))
+			if (PHEASANT_TAIL_NPCID_MAP.containsValue(npc.getId()))
 			{
-				log.debug("A new pheasant NPC spawned with {} tail feathers, adding to the set.", this.pheasantTailFeathers);
 				if (this.pheasantNPCSet != null)
 				{
+					log.debug("A new pheasant NPC spawned, adding to the set.");
 					this.pheasantNPCSet.add(npc);
 					this.updateSpecificPheasant();
 				}
@@ -171,6 +180,11 @@ public class FreakyForesterHelper
 				{
 					log.warn("Pheasant NPC set is null, skipping it.");
 				}
+			}
+			else if (npc.getId() == NpcID.MACRO_FORESTER_M)
+			{
+				log.debug("Freaky Forester NPC spawned");
+				this.freakyForesterNPC = npc;
 			}
 		}
 	}
@@ -185,12 +199,13 @@ public class FreakyForesterHelper
 			this.pheasantNPCSet.clear();
 			this.specificPheasantNPC = null;
 			this.nearestPheasantNPC = null;
+			this.freakyForesterNPC = null;
 		}
 		else if (this.PHEASANT_TAIL_NPCID_MAP.containsValue(npcDespawned.getNpc().getId()) && this.isInFreakyForesterInstance())
 		{
-			log.debug("A pheasant NPC despawned, removing from the set.");
 			if (this.pheasantNPCSet != null && this.pheasantNPCSet.contains(npcDespawned.getNpc()))
 			{
+				log.debug("A pheasant NPC despawned, removing from the set.");
 				this.pheasantNPCSet.remove(npcDespawned.getNpc());
 				this.updateSpecificPheasant();
 			}
@@ -200,6 +215,12 @@ public class FreakyForesterHelper
 	@Subscribe
 	public void onGameTick(GameTick gameTick)
 	{
+		// In case the player is already in the Freaky Forester instance when the plugin is started
+		if (this.initialRun && this.isInFreakyForesterInstance() && this.pheasantNPCSet.isEmpty())
+		{
+			this.initialRun = false;
+			this.client.getTopLevelWorldView().npcs().stream().filter(npc -> !npc.isDead()).forEach(npc -> this.onNpcSpawned(new NpcSpawned(npc)));
+		}
 		if (this.pheasantHighlightMode == PheasantMode.NEAREST && !this.pheasantNPCSet.isEmpty())
 		{
 			this.updateNearestPheasant();
