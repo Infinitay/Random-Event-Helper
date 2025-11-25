@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Actor;
 import net.runelite.api.Client;
 import net.runelite.api.NPC;
 import net.runelite.client.ui.overlay.Overlay;
@@ -37,13 +38,17 @@ public class FreakyForesterOverlay extends Overlay
 			case SPECIFIC:
 				if (plugin.getSpecificPheasantNPC() != null && !plugin.getSpecificPheasantNPC().isDead())
 				{
-					OverlayUtil.renderPolygon(graphics2D, plugin.getSpecificPheasantNPC().getConvexHull(), Color.RED);
+					OverlayUtil.renderPolygon(graphics2D, plugin.getSpecificPheasantNPC().getConvexHull(), Color.GREEN);
+				}
+				else if (plugin.getSpecificPheasantNPC() == null && plugin.getFreakyForesterNPC() != null)
+				{
+					OverlayUtil.renderActorOverlay(graphics2D, (Actor) plugin.getFreakyForesterNPC(), "Talk to Freaky Forester to determine pheasant", Color.YELLOW);
 				}
 				break;
 			case NEAREST:
 				if (plugin.getNearestPheasantNPC() != null && !plugin.getNearestPheasantNPC().isDead())
 				{
-					OverlayUtil.renderPolygon(graphics2D, plugin.getNearestPheasantNPC().getConvexHull(), Color.ORANGE);
+					OverlayUtil.renderPolygon(graphics2D, plugin.getNearestPheasantNPC().getConvexHull(), Color.GREEN);
 				}
 				break;
 			case ALL:
