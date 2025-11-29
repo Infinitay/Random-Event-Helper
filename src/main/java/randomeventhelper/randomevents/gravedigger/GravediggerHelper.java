@@ -19,6 +19,7 @@ import net.runelite.api.Client;
 import net.runelite.api.GameObject;
 import net.runelite.api.Item;
 import net.runelite.api.NPC;
+import net.runelite.api.Tile;
 import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
@@ -78,7 +79,7 @@ public class GravediggerHelper
 		this.eventBus.register(this);
 		this.overlayManager.add(gravediggerOverlay);
 		this.overlayManager.add(gravediggerItemOverlay);
-		this.initiallyEnteredGraveDiggerArea = false;
+		this.initiallyEnteredGraveDiggerArea = true;
 		this.graveMap = Maps.newHashMapWithExpectedSize(5);
 		this.coffinItemImageMap = Maps.newHashMapWithExpectedSize(5);
 		this.previousInventory = HashMultiset.create();
@@ -91,7 +92,7 @@ public class GravediggerHelper
 		this.eventBus.unregister(this);
 		this.overlayManager.remove(gravediggerOverlay);
 		this.overlayManager.remove(gravediggerItemOverlay);
-		this.initiallyEnteredGraveDiggerArea = false;
+		this.initiallyEnteredGraveDiggerArea = true;
 		this.graveMap = null;
 		this.coffinItemImageMap = null;
 		this.previousInventory = null;
@@ -107,6 +108,39 @@ public class GravediggerHelper
 		// And by using a separate variable to make sure not to run this constantly every game tick
 		if (this.initiallyEnteredGraveDiggerArea)
 		{
+			if (this.currentInventoryItems.isEmpty())
+			{
+				ItemContainerChanged itemContainerChangedEvent = new ItemContainerChanged(InventoryID.INV, this.client.getItemContainer(InventoryID.INV));
+				this.onItemContainerChanged(itemContainerChangedEvent);
+			}
+
+			if (this.graveMap.isEmpty())
+			{
+				Tile[][][] sceneTiles = this.client.getTopLevelWorldView().getScene().getTiles(); // [Plane][x][y]
+				Tile[][] tilesInZ = sceneTiles[this.client.getTopLevelWorldView().getPlane()]; // Tiles at [z]
+
+				for (Tile[] tilesInZX : tilesInZ) // Tiles at [z][x]
+				{
+					for (Tile tile : tilesInZX) // Tiles at [z][x][y]
+					{
+						if (tile != null && tile.getGameObjects() != null)
+						{
+							for (GameObject gameObject : tile.getGameObjects())
+							{
+								// There seemed to be some case where the game object was null
+								if (gameObject == null)
+								{
+									continue;
+								}
+								GameObjectSpawned gameObjectSpawnedEvent = new GameObjectSpawned();
+								gameObjectSpawnedEvent.setGameObject(gameObject);
+								this.onGameObjectSpawned(gameObjectSpawnedEvent);
+							}
+						}
+					}
+				}
+			}
+
 			for (GraveNumber graveNumber : GraveNumber.values())
 			{
 				VarbitChanged graveTypeVarbitChangedEvent = new VarbitChanged();
@@ -117,8 +151,17 @@ public class GravediggerHelper
 				placedCoffinVarbitChangedEvent.setValue(this.client.getVarbitValue(graveNumber.getPlacedCoffinVarbitID()));
 				this.onVarbitChanged(graveTypeVarbitChangedEvent);
 				this.onVarbitChanged(placedCoffinVarbitChangedEvent);
-				this.initiallyEnteredGraveDiggerArea = false;
 			}
+
+			if (this.coffinItemImageMap.isEmpty())
+			{
+				for (Coffin coffin : Coffin.values())
+				{
+					coffinItemImageMap.put(coffin, coffin.getItemImage(this.itemManager));
+				}
+			}
+
+			this.initiallyEnteredGraveDiggerArea = false;
 		}
 	}
 
@@ -243,11 +286,6 @@ public class GravediggerHelper
 			{
 				log.debug("Grave Digger Leo NPC spawned in grave digger random event area.");
 				this.initiallyEnteredGraveDiggerArea = true;
-				// Take this opportunity to initialize the BufferedImage for the coffin items
-				for (Coffin coffin : Coffin.values())
-				{
-					coffinItemImageMap.put(coffin, coffin.getItemImage(this.itemManager));
-				}
 			}
 		}
 	}
