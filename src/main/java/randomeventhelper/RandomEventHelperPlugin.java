@@ -34,6 +34,7 @@ import randomeventhelper.randomevents.beekeeper.BeekeeperHelper;
 import randomeventhelper.randomevents.drilldemon.DrillDemonHelper;
 import randomeventhelper.randomevents.freakyforester.FreakyForesterHelper;
 import randomeventhelper.randomevents.gravedigger.GravediggerHelper;
+import randomeventhelper.randomevents.gravedigger.GravediggerOverlay;
 import randomeventhelper.randomevents.maze.MazeHelper;
 import randomeventhelper.randomevents.mime.MimeHelper;
 import randomeventhelper.randomevents.pinball.PinballHelper;
@@ -88,6 +89,9 @@ public class RandomEventHelperPlugin extends Plugin
 	private GravediggerHelper gravediggerHelper;
 
 	@Inject
+	private GravediggerOverlay gravediggerOverlay;
+
+	@Inject
 	private MimeHelper mimeHelper;
 
 	@Inject
@@ -129,7 +133,7 @@ public class RandomEventHelperPlugin extends Plugin
 		}
 		if (config.isGravediggerEnabled())
 		{
-			gravediggerHelper.startUp();
+			gravediggerHelper.startUp(gravediggerOverlay);
 		}
 		if (config.isMimeEnabled())
 		{
@@ -236,7 +240,7 @@ public class RandomEventHelperPlugin extends Plugin
 			{
 				if (config.isGravediggerEnabled())
 				{
-					gravediggerHelper.startUp();
+					gravediggerHelper.startUp(gravediggerOverlay);
 				}
 				else
 				{
