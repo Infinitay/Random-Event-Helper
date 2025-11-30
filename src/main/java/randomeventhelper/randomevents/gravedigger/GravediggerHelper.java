@@ -70,6 +70,9 @@ public class GravediggerHelper
 	@Getter
 	private Map<Coffin, BufferedImage> coffinItemImageMap;
 
+	@Getter
+	private Map<Coffin, BufferedImage> coffinSkillImageMap;
+
 	private Multiset<Integer> previousInventory;
 	private Multiset<Integer> currentInventoryItems;
 
@@ -85,6 +88,7 @@ public class GravediggerHelper
 		this.initiallyEnteredGraveDiggerArea = true;
 		this.graveMap = Maps.newHashMapWithExpectedSize(5);
 		this.coffinItemImageMap = Maps.newHashMapWithExpectedSize(5);
+		this.coffinSkillImageMap = Maps.newHashMapWithExpectedSize(5);
 		this.previousInventory = HashMultiset.create();
 		this.currentInventoryItems = HashMultiset.create();
 		this.coffinsInInventory = Sets.newHashSetWithExpectedSize(5);
@@ -102,6 +106,7 @@ public class GravediggerHelper
 		this.initiallyEnteredGraveDiggerArea = true;
 		this.graveMap = null;
 		this.coffinItemImageMap = null;
+		this.coffinSkillImageMap = null;
 		this.previousInventory = null;
 		this.currentInventoryItems = null;
 		this.coffinsInInventory = null;
@@ -164,7 +169,15 @@ public class GravediggerHelper
 			{
 				for (Coffin coffin : Coffin.values())
 				{
-					coffinItemImageMap.put(coffin, coffin.getItemImage(this.itemManager));
+					this.coffinItemImageMap.put(coffin, coffin.getItemImage(this.itemManager));
+				}
+			}
+
+			if (this.coffinSkillImageMap.isEmpty())
+			{
+				for (Coffin coffin : Coffin.values())
+				{
+					this.coffinSkillImageMap.put(coffin, coffin.getSkillIconImage(this.spriteManager));
 				}
 			}
 
