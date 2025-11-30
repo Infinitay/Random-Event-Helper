@@ -33,6 +33,7 @@ import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.game.SpriteManager;
 import net.runelite.client.ui.overlay.OverlayManager;
 import randomeventhelper.RandomEventHelperPlugin;
 
@@ -50,9 +51,11 @@ public class GravediggerHelper
 	private ItemManager itemManager;
 
 	@Inject
-	private OverlayManager overlayManager;
+	private SpriteManager spriteManager;
 
 	@Inject
+	private OverlayManager overlayManager;
+
 	private GravediggerOverlay gravediggerOverlay;
 
 	@Inject
@@ -73,11 +76,11 @@ public class GravediggerHelper
 	@Getter
 	private Set<Integer> coffinsInInventory;
 
-
-	public void startUp()
+	public void startUp(GravediggerOverlay gravediggerOverlay)
 	{
+		this.gravediggerOverlay = gravediggerOverlay;
 		this.eventBus.register(this);
-		this.overlayManager.add(gravediggerOverlay);
+		this.overlayManager.add(this.gravediggerOverlay);
 		this.overlayManager.add(gravediggerItemOverlay);
 		this.initiallyEnteredGraveDiggerArea = true;
 		this.graveMap = Maps.newHashMapWithExpectedSize(5);
@@ -90,7 +93,11 @@ public class GravediggerHelper
 	public void shutDown()
 	{
 		this.eventBus.unregister(this);
-		this.overlayManager.remove(gravediggerOverlay);
+		if (this.gravediggerOverlay != null)
+		{
+			this.overlayManager.remove(gravediggerOverlay);
+			this.gravediggerOverlay = null;
+		}
 		this.overlayManager.remove(gravediggerItemOverlay);
 		this.initiallyEnteredGraveDiggerArea = true;
 		this.graveMap = null;
