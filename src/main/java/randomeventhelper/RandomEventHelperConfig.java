@@ -42,11 +42,20 @@ public interface RandomEventHelperConfig extends Config
 		return true;
 	}
 
+	@ConfigSection(
+		name = "Freaky Forester",
+		description = "Freaky Forester random event options",
+		position = 3,
+		closedByDefault = true
+	)
+	String SECTION_FREAKY_FORESTER = "sectionFreakyForester";
+
 	@ConfigItem(
 		keyName = "isFreakyForesterEnabled",
 		name = "Freaky Forester",
 		description = "Helps highlight the correct pheasant to kill for the Freaky Forester random event.",
-		position = 3
+		section = SECTION_FREAKY_FORESTER,
+		position = 0
 	)
 	default boolean isFreakyForesterEnabled()
 	{
@@ -54,12 +63,45 @@ public interface RandomEventHelperConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "pheasantHighlightMode",
+		name = "Pheasant Highlight Mode",
+		description = "Configures how to highlight the pheasant(s) for the Freaky Forester random event.",
+		section = SECTION_FREAKY_FORESTER,
+		position = 1
+	)
+	default PheasantMode pheasantHighlightMode()
+	{
+		return PheasantMode.SPECIFIC;
+	}
+
+	@ConfigSection(
+		name = "Gravedigger",
+		description = "Gravedigger random event options",
+		position = 4,
+		closedByDefault = true
+	)
+	String SECTION_GRAVEDIGGER = "sectionGravedigger";
+
+	@ConfigItem(
 		keyName = "isGravediggerEnabled",
 		name = "Gravedigger",
 		description = "Helps highlight where each coffin belongs to each grave for the Gravedigger random event.",
-		position = 4
+		section = SECTION_GRAVEDIGGER,
+		position = 0
 	)
 	default boolean isGravediggerEnabled()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "gravediggerUseSkillIcons",
+		name = "Use skill icons instead of item icons",
+		description = "Use the associated skill icons instead of item icons for gravestones and coffins in the Gravedigger random event.",
+		section = SECTION_GRAVEDIGGER,
+		position = 1
+	)
+	default boolean gravediggerUseSkillIcons()
 	{
 		return true;
 	}
@@ -128,25 +170,5 @@ public interface RandomEventHelperConfig extends Config
 	default boolean isQuizMasterEnabled()
 	{
 		return true;
-	}
-
-	@ConfigSection(
-		name = "Options",
-		description = "Further configure various options",
-		position = 11,
-		closedByDefault = true
-	)
-	String SECTION_OPTIONS = "sectionOptions";
-
-	@ConfigItem(
-		keyName = "pheasantHighlightMode",
-		name = "Pheasant Highlight Mode",
-		description = "Configures how to highlight the pheasant(s) for the Freaky Forester random event.",
-		section = SECTION_OPTIONS,
-		position = 0
-	)
-	default PheasantMode pheasantHighlightMode()
-	{
-		return PheasantMode.SPECIFIC;
 	}
 }

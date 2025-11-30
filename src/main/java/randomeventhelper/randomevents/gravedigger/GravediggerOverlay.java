@@ -30,7 +30,6 @@ public class GravediggerOverlay extends Overlay
 	private final RandomEventHelperConfig config;
 	private final GravediggerHelper gravediggerHelper;
 	private final SpriteManager spriteManager;
-	private final GravediggerHelper plugin;
 	private BufferedImage checkBufferedImage;
 	private BufferedImage crossBufferedImage;
 
@@ -64,7 +63,7 @@ public class GravediggerOverlay extends Overlay
 				Grave grave = graveEntry.getValue();
 				if (grave != null)
 				{
-					BufferedImage coffinImage = this.gravediggerHelper.getCoffinItemImageMap().get(grave.getRequiredCoffin());
+					BufferedImage coffinImage = this.config.gravediggerUseSkillIcons() ? this.gravediggerHelper.getCoffinSkillImageMap().get(grave.getRequiredCoffin()) : this.gravediggerHelper.getCoffinItemImageMap().get(grave.getRequiredCoffin());
 					Coffin requiredCoffin = grave.getRequiredCoffin();
 					Coffin placedCoffin = grave.getPlacedCoffin();
 					if (requiredCoffin == null || placedCoffin == null)
