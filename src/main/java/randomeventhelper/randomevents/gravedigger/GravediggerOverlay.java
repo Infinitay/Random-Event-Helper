@@ -20,23 +20,27 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
+import randomeventhelper.RandomEventHelperConfig;
 
 @Slf4j
 @Singleton
 public class GravediggerOverlay extends Overlay
 {
 	private final Client client;
+	private final RandomEventHelperConfig config;
+	private final GravediggerHelper gravediggerHelper;
 	private final SpriteManager spriteManager;
 	private final GravediggerHelper plugin;
 	private BufferedImage checkBufferedImage;
 	private BufferedImage crossBufferedImage;
 
 	@Inject
-	public GravediggerOverlay(Client client, GravediggerHelper plugin, SpriteManager spriteManager)
+	public GravediggerOverlay(Client client, RandomEventHelperConfig config, GravediggerHelper gravediggerHelper, SpriteManager spriteManager)
 	{
 		this.client = client;
+		this.config = config;
 		this.spriteManager = spriteManager;
-		this.plugin = plugin;
+		this.gravediggerHelper = gravediggerHelper;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_SCENE);
 	}
@@ -44,7 +48,7 @@ public class GravediggerOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics2D)
 	{
-		if (plugin.getGraveMap() != null && !plugin.getGraveMap().isEmpty())
+		if (this.gravediggerHelper.getGraveMap() != null && !this.gravediggerHelper.getGraveMap().isEmpty())
 		{
 			if (checkBufferedImage == null)
 			{
@@ -54,13 +58,13 @@ public class GravediggerOverlay extends Overlay
 			{
 				this.crossBufferedImage = this.spriteManager.getSprite(SpriteID.OptionsRadioButtons.CROSS_RED, 0);
 			}
-			for (Map.Entry<GraveNumber, Grave> graveEntry : plugin.getGraveMap().entrySet())
+			for (Map.Entry<GraveNumber, Grave> graveEntry : this.gravediggerHelper.getGraveMap().entrySet())
 			{
 				GraveNumber graveNumber = graveEntry.getKey();
 				Grave grave = graveEntry.getValue();
 				if (grave != null)
 				{
-					BufferedImage coffinImage = plugin.getCoffinItemImageMap().get(grave.getRequiredCoffin());
+					BufferedImage coffinImage = this.gravediggerHelper.getCoffinItemImageMap().get(grave.getRequiredCoffin());
 					Coffin requiredCoffin = grave.getRequiredCoffin();
 					Coffin placedCoffin = grave.getPlacedCoffin();
 					if (requiredCoffin == null || placedCoffin == null)
