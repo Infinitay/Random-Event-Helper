@@ -44,7 +44,7 @@ test {
 }
 
 group = 'randomeventhelper'
-version = '2.5.11'
+version = '2.5.12'
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'
