@@ -97,6 +97,7 @@ A RuneLite plugin to help solve random events by displaying solutions for each r
 
 - Displays the correct coffin solution for all the graves via color-coded highlights
 - Swaps "Use" to be the first option on a coffin
+- View either skill icons or item icons related to the grave
 
 ### [Mime](https://oldschool.runescape.wiki/w/Mime_(Random_Event))
 <details>

@@ -20,23 +20,26 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
+import randomeventhelper.RandomEventHelperConfig;
 
 @Slf4j
 @Singleton
 public class GravediggerOverlay extends Overlay
 {
 	private final Client client;
+	private final RandomEventHelperConfig config;
+	private final GravediggerHelper gravediggerHelper;
 	private final SpriteManager spriteManager;
-	private final GravediggerHelper plugin;
 	private BufferedImage checkBufferedImage;
 	private BufferedImage crossBufferedImage;
 
 	@Inject
-	public GravediggerOverlay(Client client, GravediggerHelper plugin, SpriteManager spriteManager)
+	public GravediggerOverlay(Client client, RandomEventHelperConfig config, GravediggerHelper gravediggerHelper, SpriteManager spriteManager)
 	{
 		this.client = client;
+		this.config = config;
 		this.spriteManager = spriteManager;
-		this.plugin = plugin;
+		this.gravediggerHelper = gravediggerHelper;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_SCENE);
 	}
@@ -44,7 +47,7 @@ public class GravediggerOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics2D)
 	{
-		if (plugin.getGraveMap() != null && !plugin.getGraveMap().isEmpty())
+		if (this.gravediggerHelper.getGraveMap() != null && !this.gravediggerHelper.getGraveMap().isEmpty())
 		{
 			if (checkBufferedImage == null)
 			{
@@ -54,13 +57,13 @@ public class GravediggerOverlay extends Overlay
 			{
 				this.crossBufferedImage = this.spriteManager.getSprite(SpriteID.OptionsRadioButtons.CROSS_RED, 0);
 			}
-			for (Map.Entry<GraveNumber, Grave> graveEntry : plugin.getGraveMap().entrySet())
+			for (Map.Entry<GraveNumber, Grave> graveEntry : this.gravediggerHelper.getGraveMap().entrySet())
 			{
 				GraveNumber graveNumber = graveEntry.getKey();
 				Grave grave = graveEntry.getValue();
 				if (grave != null)
 				{
-					BufferedImage coffinImage = plugin.getCoffinItemImageMap().get(grave.getRequiredCoffin());
+					BufferedImage coffinImage = this.config.gravediggerUseSkillIcons() ? this.gravediggerHelper.getCoffinSkillImageMap().get(grave.getRequiredCoffin()) : this.gravediggerHelper.getCoffinItemImageMap().get(grave.getRequiredCoffin());
 					Coffin requiredCoffin = grave.getRequiredCoffin();
 					Coffin placedCoffin = grave.getPlacedCoffin();
 					if (requiredCoffin == null || placedCoffin == null)
@@ -75,57 +78,84 @@ public class GravediggerOverlay extends Overlay
 					{
 						continue;
 					}
-					if (grave.getGraveStone() != null)
-					{
-						Point location = grave.getGraveStone().getCanvasLocation();
-						LocalPoint localPoint = grave.getGraveStone().getLocalLocation();
-						if (location != null)
-						{
-							OverlayUtil.renderImageLocation(client, graphics2D, localPoint, coffinImage, 50);
-						}
-						// Also outline the gravestone
-						Shape graveStoneHull = grave.getGraveStone().getConvexHull();
-						if (graveStoneHull != null)
-						{
-							OverlayUtil.renderPolygon(graphics2D, graveStoneHull, requiredCoffinColor);
-						}
-					}
+
+					renderGravestoneIcon(graphics2D, grave, coffinImage, requiredCoffinColor);
+					renderHighlightGravestone(graphics2D, grave, coffinImage, requiredCoffinColor);
+
 					// If the grave is empty, then highlight it according to
 					if (placedCoffin == Coffin.EMPTY)
 					{
-						Shape emptyGraveHull = grave.getEmptyGrave().getConvexHull();
-						if (emptyGraveHull != null)
-						{
-							OverlayUtil.renderPolygon(graphics2D, emptyGraveHull, requiredCoffinColor, requiredCoffinTransparentColor, new BasicStroke(2));
-						}
+						renderHighlightEmptyGrave(graphics2D, grave, requiredCoffinColor, requiredCoffinTransparentColor, 2);
 					}
 					else
 					{
-						Shape filledGraveHull = grave.getFilledGrave().getConvexHull();
-						if (filledGraveHull != null)
-						{
-							OverlayUtil.renderPolygon(graphics2D, filledGraveHull, placedCoffinColor, placedCoffinTransparentColor, new BasicStroke(2));
-							Point centeredSpritePoint = Perspective.getCanvasImageLocation(client, grave.getFilledGrave().getLocalLocation(), checkBufferedImage, 0);
-							if (placedCoffin != requiredCoffin)
-							{
-								if (centeredSpritePoint != null)
-								{
-									OverlayUtil.renderImageLocation(graphics2D, centeredSpritePoint, crossBufferedImage);
-								}
-							}
-							else
-							{
-								if (centeredSpritePoint != null)
-								{
-									OverlayUtil.renderImageLocation(graphics2D, centeredSpritePoint, checkBufferedImage);
-								}
-							}
-						}
+						renderHighlightFilledGrave(graphics2D, grave, placedCoffinColor, placedCoffinTransparentColor, placedCoffin, requiredCoffin, 2);
 					}
 				}
 			}
 		}
 		return null;
+	}
+
+	private void renderGravestoneIcon(Graphics2D graphics2D, Grave grave, BufferedImage coffinImage, Color requiredCoffinColor)
+	{
+		if (grave.getGraveStone() != null)
+		{
+			Point location = grave.getGraveStone().getCanvasLocation();
+			LocalPoint localPoint = grave.getGraveStone().getLocalLocation();
+			if (location != null)
+			{
+				OverlayUtil.renderImageLocation(client, graphics2D, localPoint, coffinImage, 50);
+			}
+		}
+	}
+
+	private void renderHighlightGravestone(Graphics2D graphics2D, Grave grave, BufferedImage coffinImage, Color requiredCoffinColor)
+	{
+		if (grave.getGraveStone() != null)
+		{
+			Shape graveStoneHull = grave.getGraveStone().getConvexHull();
+			if (graveStoneHull != null)
+			{
+				OverlayUtil.renderPolygon(graphics2D, graveStoneHull, requiredCoffinColor);
+			}
+		}
+	}
+
+	private void renderHighlightEmptyGrave(Graphics2D graphics2D, Grave grave, Color requiredCoffinColor, Color requiredCoffinTransparentColor, int strokeWidth)
+	{
+		if (grave.getEmptyGrave() != null)
+		{
+			Shape emptyGraveHull = grave.getEmptyGrave().getConvexHull();
+			if (emptyGraveHull != null)
+			{
+				OverlayUtil.renderPolygon(graphics2D, emptyGraveHull, requiredCoffinColor, requiredCoffinTransparentColor, new BasicStroke(strokeWidth));
+			}
+		}
+	}
+
+	private void renderHighlightFilledGrave(Graphics2D graphics2D, Grave grave, Color placedCoffinColor, Color placedCoffinTransparentColor, Coffin placedCoffin, Coffin requiredCoffin, int strokeWidth)
+	{
+		if (grave.getFilledGrave() != null)
+		{
+			Shape filledGraveHull = grave.getFilledGrave().getConvexHull();
+			if (filledGraveHull != null)
+			{
+				OverlayUtil.renderPolygon(graphics2D, filledGraveHull, placedCoffinColor, placedCoffinTransparentColor, new BasicStroke(strokeWidth));
+				Point centeredSpritePoint = Perspective.getCanvasImageLocation(client, grave.getFilledGrave().getLocalLocation(), checkBufferedImage, 0);
+				if (centeredSpritePoint != null)
+				{
+					if (placedCoffin != requiredCoffin)
+					{
+						OverlayUtil.renderImageLocation(graphics2D, centeredSpritePoint, crossBufferedImage);
+					}
+					else
+					{
+						OverlayUtil.renderImageLocation(graphics2D, centeredSpritePoint, checkBufferedImage);
+					}
+				}
+			}
+		}
 	}
 
 	private Color getTransparentColor(Color color, int alpha)
