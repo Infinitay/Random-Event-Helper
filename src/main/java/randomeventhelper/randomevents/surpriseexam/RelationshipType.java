@@ -44,7 +44,8 @@ public enum RelationshipType
 	FISH("fish, raw, uncooked, sea, food, sea food, seafood, fishing, water"),
 	FRUITS("fruits, berries, fresh, healthy, vitamins, nature"),
 	BAKING_FOOD("cooked, food, meals, prepared, baked, ready"),
-	ALCOHOLIC_DRINKS("alcohol, drinks, beer, spirits, intoxicating, beverages"),
+	ALCOHOLIC_DRINKS("alcohol, drinks, beer, spirits, intoxicating, beverages, thirsty"),
+	DRINKS("drink, beverage, refreshing, hydrate, quench, thirsty, liquid, sip"),
 
 	// Functional groupings
 	COMBAT_CONSUMABLES("combat, consumable, potion, bones, prayer, aid"),
