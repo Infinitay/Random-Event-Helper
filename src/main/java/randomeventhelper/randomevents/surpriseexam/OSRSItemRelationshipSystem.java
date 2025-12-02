@@ -52,7 +52,7 @@ public class OSRSItemRelationshipSystem
 		Map.entry("grow", Set.of("farming", "plants", "crops", "agriculture")),
 		Map.entry("mine", Set.of("mining", "pickaxe", "ore", "rocks")),
 		Map.entry("protection", Set.of("armor", "helmet", "shield", "defense")),
-		Map.entry("drink", Set.of("alcohol", "beverage", "beer", "cocktail")),
+		Map.entry("drink", Set.of("alcohol", "beverage", "beer", "cocktail", "thirsty")),
 		Map.entry("light", Set.of("fire", "candle", "lantern", "tinder", "illuminate")),
 		Map.entry("jewel", Set.of("jewelry", "gem", "necklace", "ring", "crafting", "amulet")),
 		Map.entry("pirate", Set.of("sea", "yarr", "piracy", "treasure", "chest", "loot", "gold", "crime")),
@@ -67,7 +67,7 @@ public class OSRSItemRelationshipSystem
 		"armor", Set.of("protection", "gear", "equipment", "defense", "guard"),
 		"magic", Set.of("spell", "enchantment", "sorcery", "wizardry", "mystical"),
 		"pirate", Set.of("buccaneer", "seafarer", "mariner", "sailor", "nautical"),
-		"drink", Set.of("beverage", "liquid", "fluid", "potion", "brew"),
+		"drink", Set.of("beverage", "liquid", "fluid", "potion", "brew", "sip"),
 		"tool", Set.of("equipment", "implement", "instrument", "utility", "gear"),
 		"bow", Set.of("archery", "ranged", "range", "arrow", "archer", "crossbow")
 	);
@@ -272,6 +272,12 @@ public class OSRSItemRelationshipSystem
 		map.put(RelationshipType.ALCOHOLIC_DRINKS, Set.of(
 			RandomEventItem.BEER, RandomEventItem.GIN_OR_RUM, RandomEventItem.COCKTAIL_1,
 			RandomEventItem.COCKTAIL_2
+		));
+
+		map.put(RelationshipType.DRINKS, Set.of(
+			RandomEventItem.BEER, RandomEventItem.GIN_OR_RUM, RandomEventItem.COCKTAIL_1,
+			RandomEventItem.COCKTAIL_2, RandomEventItem.CUP_OF_TEA, RandomEventItem.BOTTLE, RandomEventItem.JUG,
+			RandomEventItem.POTION
 		));
 
 		// Functional groupings
