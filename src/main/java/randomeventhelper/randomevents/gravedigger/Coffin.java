@@ -16,17 +16,19 @@ import net.runelite.client.game.SpriteManager;
 @AllArgsConstructor
 public enum Coffin
 {
-	CRAFTING(0, ItemID.MACRO_DIGGER_COFFIN_OBJECT_1, ItemID.POT_EMPTY, SpriteID.Staticons.CRAFTING, new Color(88, 58, 12)),
-	MINING(1, ItemID.MACRO_DIGGER_COFFIN_OBJECT_2, ItemID.BRONZE_PICKAXE, SpriteID.Staticons.MINING, Color.LIGHT_GRAY),
-	COOKING(2, ItemID.MACRO_DIGGER_COFFIN_OBJECT_3, ItemID.CHEFS_HAT, SpriteID.Staticons.COOKING, Color.ORANGE),
-	FARMING(3, ItemID.MACRO_DIGGER_COFFIN_OBJECT_4, ItemID.DIBBER, SpriteID.Staticons2.FARMING, Color.BLUE),
-	WOODCUTTING(4, ItemID.MACRO_DIGGER_COFFIN_OBJECT_5, ItemID.BRONZE_AXE, SpriteID.Staticons.WOODCUTTING, Color.GREEN),
-	EMPTY(5, -1, -1, -1, Color.BLACK); // No item ID for empty coffin
+	CRAFTING(0, ItemID.MACRO_DIGGER_COFFIN_OBJECT_1, ItemID.POT_EMPTY, "Pot", SpriteID.Staticons.CRAFTING, "Craft", new Color(88, 58, 12)),
+	MINING(1, ItemID.MACRO_DIGGER_COFFIN_OBJECT_2, ItemID.BRONZE_PICKAXE, "Pickaxe", SpriteID.Staticons.MINING, "Mine", Color.LIGHT_GRAY),
+	COOKING(2, ItemID.MACRO_DIGGER_COFFIN_OBJECT_3, ItemID.CHEFS_HAT, "Cook", SpriteID.Staticons.COOKING, "Cook", Color.ORANGE),
+	FARMING(3, ItemID.MACRO_DIGGER_COFFIN_OBJECT_4, ItemID.DIBBER, "Seed", SpriteID.Staticons2.FARMING, "Farm", Color.BLUE),
+	WOODCUTTING(4, ItemID.MACRO_DIGGER_COFFIN_OBJECT_5, ItemID.BRONZE_AXE, "Axe", SpriteID.Staticons.WOODCUTTING, "Woodcut", Color.GREEN),
+	EMPTY(5, -1, -1, "", -1, "", Color.BLACK); // No item ID for empty coffin
 
 	private final int varbitValue; // Value for both MACRO_DIGGER_GRAVE and MACRO_DIGGER_COFFIN
 	private final int itemID; // Item ID of the coffin item itself
 	private final int associatedItemID; // An item ID associated with the coffin's contents
+	private final String associatedItemName; // Name of the associated item
 	private final int associatedSkillSpriteID; // Skill sprite ID associated with the coffin's contents
+	private final String associatedSkillName; // Name of the associated skill
 	private final Color color; // A color associated with the coffin and the skill it represents based on its contents
 
 	private static final Map<Integer, Coffin> VARBIT_COFFIN_MAP;

@@ -1,10 +1,12 @@
 package randomeventhelper;
 
+import java.util.Set;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 import randomeventhelper.randomevents.freakyforester.PheasantMode;
+import randomeventhelper.randomevents.gravedigger.GravediggerHighlightMode;
 
 @ConfigGroup("randomeventhelper")
 public interface RandomEventHelperConfig extends Config
@@ -95,11 +97,27 @@ public interface RandomEventHelperConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "gravediggerHighlightMode",
+		name = "Gravedigger Highlight Mode",
+		description = "Configures how to highlight the graves and coffins for the Gravedigger random event.<br>Hold CTRL to select multiple options.",
+		section = SECTION_GRAVEDIGGER,
+		position = 1
+	)
+	default Set<GravediggerHighlightMode> gravediggerHighlightMode()
+	{
+		return Set.of(
+			GravediggerHighlightMode.GRAVESTONE_ICON,
+			GravediggerHighlightMode.HIGHLIGHT_GRAVE,
+			GravediggerHighlightMode.HIGHLIGHT_COFFIN
+		);
+	}
+
+	@ConfigItem(
 		keyName = "gravediggerUseSkillIcons",
 		name = "Use skill icons instead of item icons",
 		description = "Use the associated skill icons instead of item icons for gravestones and coffins in the Gravedigger random event.",
 		section = SECTION_GRAVEDIGGER,
-		position = 1
+		position = 2
 	)
 	default boolean gravediggerUseSkillIcons()
 	{

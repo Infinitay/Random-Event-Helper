@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.GameObject;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
@@ -70,26 +71,50 @@ public class GravediggerOverlay extends Overlay
 					{
 						continue;
 					}
+
 					Color requiredCoffinColor = requiredCoffin.getColor();
 					Color requiredCoffinTransparentColor = this.getTransparentColor(requiredCoffin.getColor(), 50);
 					Color placedCoffinColor = placedCoffin.getColor();
 					Color placedCoffinTransparentColor = this.getTransparentColor(placedCoffin.getColor(), 50);
-					if (coffinImage == null)
+
+					// Renders the check or cross above the grave depending on if the correct coffin is placed
+					Point centeredSpritePoint = Perspective.getCanvasImageLocation(client, grave.getFilledGrave().getLocalLocation(), checkBufferedImage, 0);
+					if (centeredSpritePoint != null)
 					{
-						continue;
+						if (placedCoffin != requiredCoffin)
+						{
+							OverlayUtil.renderImageLocation(graphics2D, centeredSpritePoint, crossBufferedImage);
+						}
+						else
+						{
+							OverlayUtil.renderImageLocation(graphics2D, centeredSpritePoint, checkBufferedImage);
+						}
 					}
 
-					renderGravestoneIcon(graphics2D, grave, coffinImage, requiredCoffinColor);
-					renderHighlightGravestone(graphics2D, grave, coffinImage, requiredCoffinColor);
-
-					// If the grave is empty, then highlight it according to
-					if (placedCoffin == Coffin.EMPTY)
+					if (coffinImage != null && config.gravediggerHighlightMode().contains(GravediggerHighlightMode.GRAVESTONE_ICON))
 					{
-						renderHighlightEmptyGrave(graphics2D, grave, requiredCoffinColor, requiredCoffinTransparentColor, 2);
+						renderGravestoneIcon(graphics2D, grave, coffinImage, requiredCoffinColor);
 					}
-					else
+
+					if (coffinImage != null && config.gravediggerHighlightMode().contains(GravediggerHighlightMode.HIGHLIGHT_GRAVE))
 					{
-						renderHighlightFilledGrave(graphics2D, grave, placedCoffinColor, placedCoffinTransparentColor, placedCoffin, requiredCoffin, 2);
+						// Highlight the gravestone/headstone
+						renderHighlightGravestone(graphics2D, grave, coffinImage, requiredCoffinColor);
+
+						// Highlight the grave itself based on whether it is filled or empty
+						if (placedCoffin == Coffin.EMPTY)
+						{
+							renderHighlightEmptyGrave(graphics2D, grave, requiredCoffinColor, requiredCoffinTransparentColor, 2);
+						}
+						else
+						{
+							renderHighlightFilledGrave(graphics2D, grave, placedCoffinColor, placedCoffinTransparentColor, placedCoffin, requiredCoffin, 2);
+						}
+					}
+
+					if (config.gravediggerHighlightMode().contains(GravediggerHighlightMode.TEXT_GRAVE))
+					{
+						renderTextGrave(graphics2D, grave, requiredCoffin);
 					}
 				}
 			}
@@ -142,19 +167,18 @@ public class GravediggerOverlay extends Overlay
 			if (filledGraveHull != null)
 			{
 				OverlayUtil.renderPolygon(graphics2D, filledGraveHull, placedCoffinColor, placedCoffinTransparentColor, new BasicStroke(strokeWidth));
-				Point centeredSpritePoint = Perspective.getCanvasImageLocation(client, grave.getFilledGrave().getLocalLocation(), checkBufferedImage, 0);
-				if (centeredSpritePoint != null)
-				{
-					if (placedCoffin != requiredCoffin)
-					{
-						OverlayUtil.renderImageLocation(graphics2D, centeredSpritePoint, crossBufferedImage);
-					}
-					else
-					{
-						OverlayUtil.renderImageLocation(graphics2D, centeredSpritePoint, checkBufferedImage);
-					}
-				}
 			}
+		}
+	}
+
+	private void renderTextGrave(Graphics2D graphics2D, Grave grave, Coffin requiredCoffin)
+	{
+		GameObject graveObject = grave.getFilledGrave() != null ? grave.getFilledGrave() : grave.getEmptyGrave();
+		if (graveObject != null)
+		{
+			String graveText = this.config.gravediggerUseSkillIcons() ? requiredCoffin.getAssociatedSkillName() : requiredCoffin.getAssociatedItemName();
+			Point textPoint = graveObject.getCanvasTextLocation(graphics2D, graveText, 100);
+			OverlayUtil.renderTextLocation(graphics2D, textPoint, graveText, Color.WHITE);
 		}
 	}
 

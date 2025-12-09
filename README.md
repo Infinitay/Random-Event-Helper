@@ -87,15 +87,27 @@ A RuneLite plugin to help solve random events by displaying solutions for each r
 ### [Gravedigger](https://oldschool.runescape.wiki/w/Gravedigger)
 <details>
   <summary>Screenshot</summary>
+
+  _Prior to highlight modes being added_
   <img width="966" height="700" alt="image" src="https://github.com/user-attachments/assets/14b231e7-2a89-462b-97ce-ec2192d7b889" />
 </details>
 <details>
   <summary>Video</summary>
-  
-  https://github.com/user-attachments/assets/98b599e4-1ba2-4ba8-a22f-ffc9934db0e7
+
+  https://github.com/user-attachments/assets/a911d686-5b0c-43c8-b6a6-9ba45bea7b63
 </details>
 
-- Displays the correct coffin solution for all the graves via color-coded highlights
+- Displays the correct coffin solution for all the graves
+
+    | Mode             | Description                                                 |
+    |------------------|-------------------------------------------------------------|
+    | Gravestone Icon  | Shows the respective skill/item icon related to the grave   |
+    | Coffin Icon      | Shows the respective skill/item icon related to the coffin  |
+    | Highlight Grave  | Highlights the grave and gravestone with a respective color |
+    | Highlight Coffin | Highlights the coffin with a respective color               |
+    | Grave Text       | Displays a text associated with the grave                   |
+    | Coffin Text      | Displays a text associated with the coffin                  |
+  - Keep in mind you are able to select none or multiple modes at once (CTRL + Click to select multiple or to deselect)
 - Swaps "Use" to be the first option on a coffin
 - View either skill icons or item icons related to the grave
 
