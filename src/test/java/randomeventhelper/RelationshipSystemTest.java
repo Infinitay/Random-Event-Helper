@@ -131,6 +131,15 @@ public class RelationshipSystemTest
 		);
 		RandomEventItem puzzle7ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle7.getInitialSequenceItems(), puzzle7.getItemChoices());
 		Assertions.assertThat(puzzle7ActualNextMissingItem).isEqualTo(puzzle7.getExpectedNextMissingItem());
+
+		// LONGBOW (41198), ARROWS (41177), CROSSBOW (41146) -> SHORT_BOW (41171)
+		RelationshipSystemTestNextMissingItemData puzzle8 = new RelationshipSystemTestNextMissingItemData(
+			"[LONGBOW (41198), ARROWS (41177), CROSSBOW (41146)]",
+			"[LONGSWORD (41150), FIRE_RUNE (41215), SHORT_BOW (41171), TROUT_COD_PIKE_SALMON_1 (41204)]",
+			RandomEventItem.SHORT_BOW
+		);
+		RandomEventItem puzzle8ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle8.getInitialSequenceItems(), puzzle8.getItemChoices());
+		Assertions.assertThat(puzzle8ActualNextMissingItem).isEqualTo(puzzle8.getExpectedNextMissingItem());
 	}
 
 	@Data
