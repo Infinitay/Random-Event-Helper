@@ -325,30 +325,6 @@ public class OSRSItemRelationshipSystem
 			throw new IllegalArgumentException("Expected exactly 3 known items");
 		}
 
-		// Try each candidate and see which one creates the best relationship
-		for (RandomEventItem candidate : candidates)
-		{
-			List<RandomEventItem> testGroup = new ArrayList<>(knownItems);
-			testGroup.add(candidate);
-
-			// Check if this combination matches any relationship
-			for (Map.Entry<RelationshipType, Set<RandomEventItem>> entry : relationships.entrySet())
-			{
-				Set<RandomEventItem> relationshipItems = entry.getValue();
-
-				// Count how many items from our test group are in this relationship
-				long matches = testGroup.stream()
-					.filter(relationshipItems::contains)
-					.count();
-
-				// If all 4 items are in the relationship, this is likely the answer
-				if (matches == 4)
-				{
-					return candidate;
-				}
-			}
-		}
-
 		// If no perfect match, try partial matching
 		return findMissingItemByPartialMatch(knownItems, candidates);
 	}
