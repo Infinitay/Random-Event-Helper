@@ -70,6 +70,30 @@ public class RelationshipSystemTest
 		);
 		List<RandomEventItem> puzzle7ActualItems = relationshipSystem.findItemsByHint(puzzle7.getHint(), puzzle7.getGivenItems(), 3).subList(0, 3);
 		Assertions.assertThat(puzzle7ActualItems).containsExactlyInAnyOrderElementsOf(puzzle7.getExpectedMatchingItems());
+
+		RelationshipSystemTestMatchingData puzzle8 = new RelationshipSystemTestMatchingData(
+			"Tools for warriors who hate ranging or magic.",
+			"[CROSSBOW (41146), LOGS (41232), RAKE (41212), INSULATED_BOOTS (27104), BONES (2674), BAR (41153), BATTLE_AXE (41176), NEEDLE (41199), SCIMITAR (41192), BEER (41152), RUNE_OR_ESSENCE (41182), BOTTLE (41175), LONGSWORD (41150), TROUT_COD_PIKE_SALMON_3 (41163), POT (41223)]",
+			List.of(RandomEventItem.BATTLE_AXE, RandomEventItem.SCIMITAR, RandomEventItem.LONGSWORD)
+		);
+		List<RandomEventItem> puzzle8ActualItems = relationshipSystem.findItemsByHint(puzzle8.getHint(), puzzle8.getGivenItems(), 3).subList(0, 3);
+		Assertions.assertThat(puzzle8ActualItems).containsExactlyInAnyOrderElementsOf(puzzle8.getExpectedMatchingItems());
+
+		RelationshipSystemTestMatchingData puzzle9 = new RelationshipSystemTestMatchingData(
+			"Tools for fighters who hate melee and magic.",
+			"[SCIMITAR (41192), LONGBOW (41198), BOTTLE (41175), SHEARS (41227), PIRATE_HAT (41187), ARROWS (41177), CROSSBOW (41146), LONGSWORD (41150), CAKE (41202), GARDENING_TROWEL (41210), JUG (41225), BATTLE_AXE (41176), TINDERBOX (41154), FROG_MASK (27101), COCKTAIL_1 (27097)]",
+			List.of(RandomEventItem.LONGBOW, RandomEventItem.ARROWS, RandomEventItem.CROSSBOW)
+		);
+		List<RandomEventItem> puzzle9ActualItems = relationshipSystem.findItemsByHint(puzzle9.getHint(), puzzle9.getGivenItems(), 3).subList(0, 3);
+		Assertions.assertThat(puzzle9ActualItems).containsExactlyInAnyOrderElementsOf(puzzle9.getExpectedMatchingItems());
+
+		RelationshipSystemTestMatchingData puzzle10 = new RelationshipSystemTestMatchingData(
+			"Abracadabra! Hocus pocus!",
+			"[FIRE_RUNE (41215), CUP_OF_TEA (41162), BOTTLE (41175), WATER_RUNE (41231), BATTLE_AXE (41176), INSULATED_BOOTS (27104), PIRATE_HAT (41187), TROUT_COD_PIKE_SALMON_3 (41163), MED_HELM (41189), TINDERBOX (41154), PIRATE_HOOK (41228), NEEDLE (41199), STAFF (41174), EYE_PATCH (41165), GARDENING_TROWEL (41210)]",
+			List.of(RandomEventItem.FIRE_RUNE, RandomEventItem.WATER_RUNE, RandomEventItem.STAFF)
+		);
+		List<RandomEventItem> puzzle10ActualItems = relationshipSystem.findItemsByHint(puzzle10.getHint(), puzzle10.getGivenItems(), 3).subList(0, 3);
+		Assertions.assertThat(puzzle10ActualItems).containsExactlyInAnyOrderElementsOf(puzzle10.getExpectedMatchingItems());
 	}
 
 	@Test
@@ -132,7 +156,6 @@ public class RelationshipSystemTest
 		RandomEventItem puzzle7ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle7.getInitialSequenceItems(), puzzle7.getItemChoices());
 		Assertions.assertThat(puzzle7ActualNextMissingItem).isEqualTo(puzzle7.getExpectedNextMissingItem());
 
-		// LONGBOW (41198), ARROWS (41177), CROSSBOW (41146) -> SHORT_BOW (41171)
 		RelationshipSystemTestNextMissingItemData puzzle8 = new RelationshipSystemTestNextMissingItemData(
 			"[LONGBOW (41198), ARROWS (41177), CROSSBOW (41146)]",
 			"[LONGSWORD (41150), FIRE_RUNE (41215), SHORT_BOW (41171), TROUT_COD_PIKE_SALMON_1 (41204)]",

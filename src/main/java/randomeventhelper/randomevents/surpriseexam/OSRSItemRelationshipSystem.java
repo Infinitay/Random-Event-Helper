@@ -24,11 +24,37 @@ public class OSRSItemRelationshipSystem
 	private final Map<RelationshipType, Set<RandomEventItem>> relationships;
 	private final JaroWinklerDistance jaroWinklerDistance;
 
-	// Similarity thresholds
-	private static final double EXACT_MATCH_THRESHOLD = 1.0;
-	private static final double HIGH_SIMILARITY_THRESHOLD = 0.75;
-	private static final double MEDIUM_SIMILARITY_THRESHOLD = 0.5;
-	private static final double LOW_SIMILARITY_THRESHOLD = 0.25;
+	// Similarity thresholds (value range: 0.0 .. 1.0)
+	private static final double EXACT_MATCH_THRESHOLD = 0.99; // treat near-exact as exact
+	private static final double HIGH_SIMILARITY_THRESHOLD = 0.85;
+	private static final double MEDIUM_SIMILARITY_THRESHOLD = 0.65;
+	private static final double LOW_SIMILARITY_THRESHOLD = 0.35;
+
+	// Scoring constants
+	private static final double SCORE_EXACT_MATCH = 5.0;
+	private static final double SCORE_SUBSTRING_MATCH = 3.0;
+	private static final double SCORE_FUZZY_HIGH_FACTOR = 4.0;
+	private static final double SCORE_FUZZY_MEDIUM_FACTOR = 3.0;
+	private static final double SCORE_FUZZY_LOW_FACTOR = 2.0;
+	private static final double ORIGINAL_EXACT_BONUS = 1.5;
+	private static final double ORIGINAL_PARTIAL_BONUS = 1.2;
+
+	// Negation multipliers
+	private static final double NEGATION_PENALTY_MULTIPLIER = 0.2;
+	private static final double NEGATION_OPPOSITE_BOOST_MULTIPLIER = 1.3;
+
+	// Missing item scoring constants
+	private static final double MISSING_KNOWN_3_IN_RELATIONSHIP = 10.0;
+	private static final double MISSING_KNOWN_3_NOT_IN_RELATIONSHIP = 4.0;
+	private static final double MISSING_KNOWN_2_IN_RELATIONSHIP = 8.0;
+	private static final double MISSING_KNOWN_2_NOT_IN_RELATIONSHIP = 2.0;
+	private static final double MISSING_KNOWN_1_IN_RELATIONSHIP = 3.0;
+	private static final double MISSING_KNOWN_1_NOT_IN_RELATIONSHIP = 0.5;
+	private static final double MISSING_KNOWN_0_IN_RELATIONSHIP = 1.0;
+	private static final double MISSING_KNOWN_0_NOT_IN_RELATIONSHIP = 0.0;
+
+	// Similarity scoring special-case
+	private static final double EXACT_MATCH_SIMILARITY_BONUS = 2.0;
 
 	// Riddle analysis patterns and keywords
 	private final Set<String> STOP_WORDS = Set.of(
@@ -72,10 +98,59 @@ public class OSRSItemRelationshipSystem
 		"bow", Set.of("archery", "ranged", "range", "arrow", "archer", "crossbow")
 	);
 
+	// Negation words and a small map to suggest opposite relationships for negated keywords
+	private final Set<String> NEGATION_WORDS = Set.of("not", "dont", "don't", "no", "never", "hate", "avoid", "against");
+
+	private final Map<String, Set<RelationshipType>> NEGATION_OPPOSITE_MAP = Map.ofEntries(
+		Map.entry("ranged", Set.of(RelationshipType.MELEE_WEAPONS, RelationshipType.MELEE_GEAR)),
+		Map.entry("ranging", Set.of(RelationshipType.MELEE_WEAPONS, RelationshipType.MELEE_GEAR)),
+		Map.entry("range", Set.of(RelationshipType.MELEE_WEAPONS, RelationshipType.MELEE_GEAR)),
+		Map.entry("melee", Set.of(RelationshipType.RANGED_WEAPONS)),
+		Map.entry("magic", Set.of(RelationshipType.MELEE_WEAPONS, RelationshipType.RANGED_WEAPONS)),
+		Map.entry("spell", Set.of(RelationshipType.MELEE_WEAPONS, RelationshipType.RANGED_WEAPONS))
+	);
+
 	public OSRSItemRelationshipSystem()
 	{
 		this.relationships = initializeRelationships();
 		this.jaroWinklerDistance = new JaroWinklerDistance();
+	}
+
+	private Set<String> detectNegatedTokens(String riddle)
+	{
+		Set<String> negated = new HashSet<>();
+		if (riddle == null || riddle.isEmpty())
+		{
+			return negated;
+		}
+
+		String cleanRiddle = riddle.toLowerCase().replaceAll("[^a-zA-Z\\s]", " ").replaceAll("\\s+", " ").trim();
+		String[] tokens = cleanRiddle.split("\\s+");
+
+		for (int i = 0; i < tokens.length; i++)
+		{
+			String t = tokens[i];
+			if (NEGATION_WORDS.contains(t))
+			{
+				// look forward up to 4 tokens for possible negated tokens
+				for (int j = i + 1; j < Math.min(tokens.length, i + 5); j++)
+				{
+					String nt = tokens[j];
+					if (STOP_WORDS.contains(nt) || NEGATION_WORDS.contains(nt) || nt.equals("or") || nt.equals("and"))
+					{
+						// skip connector words and break if we encounter another negation
+						if (nt.equals("or") || nt.equals("and"))
+						{
+							continue;
+						}
+						break;
+					}
+					negated.add(nt);
+				}
+			}
+		}
+
+		return negated;
 	}
 
 	private Map<RelationshipType, Set<RandomEventItem>> initializeRelationships()
@@ -375,10 +450,48 @@ public class OSRSItemRelationshipSystem
 		// Step 2: Expand keywords using context clues and synonyms
 		Set<String> expandedKeywords = expandWithContextAndSynonyms(riddleKeywords);
 
+		// Step 2.5: detect any negated tokens from hint (eg: "hate ranging or magic")
+		Set<String> negatedTokens = detectNegatedTokens(riddle);
+
 		// Step 3: Score each relationship type based on keyword matches
 		for (RelationshipType type : RelationshipType.values())
 		{
 			double score = calculateRelationshipScore(type, expandedKeywords, riddleKeywords);
+			// Apply negation handling: if the relationship contains a negated token, penalize it
+			if (!negatedTokens.isEmpty())
+			{
+				boolean containsNegated = false;
+				for (String neg : negatedTokens)
+				{
+					for (String relkw : type.getKeywordArray())
+					{
+						if (relkw.trim().equalsIgnoreCase(neg))
+						{
+							containsNegated = true;
+							break;
+						}
+					}
+					if (containsNegated)
+					{
+						break;
+					}
+				}
+				if (containsNegated)
+				{
+					score *= NEGATION_PENALTY_MULTIPLIER; // penalize
+				}
+
+				// For negated tokens, if we have an opposite relationship mapping, boost the opposite(s)
+				for (String neg : negatedTokens)
+				{
+					Set<RelationshipType> opposites = NEGATION_OPPOSITE_MAP.get(neg.toLowerCase());
+					if (opposites != null && opposites.contains(type))
+					{
+						score *= NEGATION_OPPOSITE_BOOST_MULTIPLIER; // mild boost
+						break;
+					}
+				}
+			}
 			if (score > 0)
 			{
 				relationshipScores.put(type, score);
@@ -426,13 +539,23 @@ public class OSRSItemRelationshipSystem
 	{
 		Set<String> expandedKeywords = new HashSet<>(keywords);
 
-		// Add context-based expansions
+		// Add context-based expansion for keys and inverse mapping
 		for (String keyword : keywords)
 		{
+			// direct key matches
 			Set<String> contextWords = CONTEXT_CLUES.get(keyword.toLowerCase());
 			if (contextWords != null)
 			{
 				expandedKeywords.addAll(contextWords);
+			}
+			// inverse matches: if the keyword is a value in a context set, add the context key
+			for (Map.Entry<String, Set<String>> entry : CONTEXT_CLUES.entrySet())
+			{
+				if (entry.getValue().contains(keyword.toLowerCase()))
+				{
+					expandedKeywords.add(entry.getKey());
+					expandedKeywords.addAll(entry.getValue());
+				}
 			}
 		}
 
@@ -480,37 +603,36 @@ public class OSRSItemRelationshipSystem
 
 				if (cleanRelKeyword.equals(cleanRiddleKeyword))
 				{
-					bestMatchScore = Math.max(bestMatchScore, 5.0); // Exact match
+					bestMatchScore = Math.max(bestMatchScore, SCORE_EXACT_MATCH); // Exact match
 				}
 				else
 				{
-					// Use similarity for partial matches - convert distance to similarity
-					double distance = jaroWinklerDistance.apply(cleanRiddleKeyword, cleanRelKeyword);
-					double similarity = 1.0 - distance; // Convert distance to similarity
+					// Use Jaro-Winkler similarity (0.0 - 1.0, higher is more similar)
+					double similarity = jaroWinklerDistance.apply(cleanRiddleKeyword, cleanRelKeyword);
 					// Log similarity for debugging
 					log.debug("Similarity between '{}' and '{}': {}", cleanRiddleKeyword, cleanRelKeyword, similarity);
 
-					if (similarity <= (1.0 - EXACT_MATCH_THRESHOLD))
+					if (similarity >= EXACT_MATCH_THRESHOLD)
 					{
-						bestMatchScore = Math.max(bestMatchScore, 5.0);
+						bestMatchScore = Math.max(bestMatchScore, SCORE_EXACT_MATCH);
 					}
-					else if (similarity <= (1.0 - HIGH_SIMILARITY_THRESHOLD))
+					else if (similarity >= HIGH_SIMILARITY_THRESHOLD)
 					{
-						bestMatchScore = Math.max(bestMatchScore, 4.0 * similarity);
+						bestMatchScore = Math.max(bestMatchScore, SCORE_FUZZY_HIGH_FACTOR * similarity);
 					}
-					else if (similarity <= (1.0 - MEDIUM_SIMILARITY_THRESHOLD))
+					else if (similarity >= MEDIUM_SIMILARITY_THRESHOLD)
 					{
-						bestMatchScore = Math.max(bestMatchScore, 3.0 * similarity);
+						bestMatchScore = Math.max(bestMatchScore, SCORE_FUZZY_MEDIUM_FACTOR * similarity);
 					}
-					else if (similarity <= (1.0 - LOW_SIMILARITY_THRESHOLD))
+					else if (similarity >= LOW_SIMILARITY_THRESHOLD)
 					{
-						bestMatchScore = Math.max(bestMatchScore, 2.0 * similarity);
+						bestMatchScore = Math.max(bestMatchScore, SCORE_FUZZY_LOW_FACTOR * similarity);
 					}
 
 					// Check substring matches
 					if (cleanRelKeyword.contains(cleanRiddleKeyword) || cleanRiddleKeyword.contains(cleanRelKeyword))
 					{
-						bestMatchScore = Math.max(bestMatchScore, 3.0);
+						bestMatchScore = Math.max(bestMatchScore, SCORE_SUBSTRING_MATCH);
 					}
 				}
 			}
@@ -521,11 +643,11 @@ public class OSRSItemRelationshipSystem
 				String cleanOriginal = originalKeyword.toLowerCase();
 				if (cleanRelKeyword.equals(cleanOriginal))
 				{
-					bestMatchScore *= 1.5; // 50% bonus for direct riddle word matches
+					bestMatchScore *= ORIGINAL_EXACT_BONUS; // 50% bonus for direct riddle word matches
 				}
 				else if (cleanRelKeyword.contains(cleanOriginal) || cleanOriginal.contains(cleanRelKeyword))
 				{
-					bestMatchScore *= 1.2; // 20% bonus for partial direct matches
+					bestMatchScore *= ORIGINAL_PARTIAL_BONUS; // 20% bonus for partial direct matches
 				}
 			}
 
@@ -603,42 +725,36 @@ public class OSRSItemRelationshipSystem
 			// Check each relationship for how well the 4-item group fits
 			for (Set<RandomEventItem> relationshipItems : relationships.values())
 			{
-				long matches = testGroup.stream()
+				long knownMatches = knownItems.stream()
 					.filter(relationshipItems::contains)
 					.count();
+				boolean candidateInRel = relationshipItems.contains(candidate);
 
-				// Score based on completeness and relationship strength
-				double relationshipScore = 0.0;
-				if (matches == 4)
+				// Score based on how many of the known items are in this relationship and whether
+				// the candidate is also in the relationship - clearer and avoids impossible branches
+				double relationshipScore;
+				if (knownMatches == 3)
 				{
-					relationshipScore = 10.0; // Perfect complete set
-				}
-				else if (matches == 3)
-				{
-					// Check if the candidate is the missing piece
-					long knownMatches = knownItems.stream()
-						.filter(relationshipItems::contains)
-						.count();
-					if (knownMatches == 2 && relationshipItems.contains(candidate))
+					if (candidateInRel)
 					{
-						relationshipScore = 8.0; // Good candidate for completion
-					}
-					else if (knownMatches == 3 && relationshipItems.contains(candidate))
-					{
-						relationshipScore = 6.0; // Candidate adds to existing strong group
+						relationshipScore = MISSING_KNOWN_3_IN_RELATIONSHIP; // everything belongs to the relationship
 					}
 					else
 					{
-						relationshipScore = 4.0; // Some connection
+						relationshipScore = MISSING_KNOWN_3_NOT_IN_RELATIONSHIP; // all known belong, but candidate does not
 					}
 				}
-				else if (matches == 2)
+				else if (knownMatches == 2)
 				{
-					relationshipScore = 2.0; // Weak connection
+					relationshipScore = candidateInRel ? MISSING_KNOWN_2_IN_RELATIONSHIP : MISSING_KNOWN_2_NOT_IN_RELATIONSHIP; // completes or not
 				}
-				else if (matches == 1)
+				else if (knownMatches == 1)
 				{
-					relationshipScore = 0.5; // Very weak connection
+					relationshipScore = candidateInRel ? MISSING_KNOWN_1_IN_RELATIONSHIP : MISSING_KNOWN_1_NOT_IN_RELATIONSHIP;
+				}
+				else
+				{
+					relationshipScore = candidateInRel ? MISSING_KNOWN_0_IN_RELATIONSHIP : MISSING_KNOWN_0_NOT_IN_RELATIONSHIP;
 				}
 
 				totalScore += relationshipScore;
@@ -671,15 +787,12 @@ public class OSRSItemRelationshipSystem
 		{
 			String cleanKeyword = keyword.trim().toLowerCase();
 
-			// Check for exact match first
-			if (cleanKeyword.equals(lowerHint))
+			// prefer exact string match (rare but useful), also allow near-exact hits
+			double similarity = jaroWinklerDistance.apply(lowerHint, cleanKeyword);
+			if (similarity >= EXACT_MATCH_THRESHOLD)
 			{
-				return 2.0; // Bonus for exact match
+				return EXACT_MATCH_SIMILARITY_BONUS; // Bonus for exact or near-exact match
 			}
-
-			// Calculate Jaro-Winkler similarity (convert distance to similarity)
-			double distance = jaroWinklerDistance.apply(lowerHint, cleanKeyword);
-			double similarity = 1.0 - distance;
 
 			// Boost partial matches
 			if (cleanKeyword.contains(lowerHint) || lowerHint.contains(cleanKeyword))
