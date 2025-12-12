@@ -163,6 +163,30 @@ public class RelationshipSystemTest
 		);
 		RandomEventItem puzzle8ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle8.getInitialSequenceItems(), puzzle8.getItemChoices());
 		Assertions.assertThat(puzzle8ActualNextMissingItem).isEqualTo(puzzle8.getExpectedNextMissingItem());
+
+		RelationshipSystemTestNextMissingItemData puzzle9 = new RelationshipSystemTestNextMissingItemData(
+			"[CUP_OF_TEA (41162), COCKTAIL_2 (28421), GIN_OR_RUM (41219)]",
+			"[LEDERHOSEN_HAT (41164), PIE (41205), BEER (41152), SHORT_BOW (41171)]",
+			RandomEventItem.BEER
+		);
+		RandomEventItem puzzle9ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle9.getInitialSequenceItems(), puzzle9.getItemChoices());
+		Assertions.assertThat(puzzle9ActualNextMissingItem).isEqualTo(puzzle9.getExpectedNextMissingItem());
+
+		RelationshipSystemTestNextMissingItemData puzzle10 = new RelationshipSystemTestNextMissingItemData(
+			"[KITESHIELD (41200), WOODEN_SHIELD (41221), SQUARE_SHIELD_1 (41188)]",
+			"[SQUARE_SHIELD_2 (41169), COCKTAIL_SHAKER (27096), ORE (41170), CAKE (41202)]",
+			RandomEventItem.SQUARE_SHIELD_2
+		);
+		RandomEventItem puzzle10ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle10.getInitialSequenceItems(), puzzle10.getItemChoices());
+		Assertions.assertThat(puzzle10ActualNextMissingItem).isEqualTo(puzzle10.getExpectedNextMissingItem());
+
+		RelationshipSystemTestNextMissingItemData puzzle11 = new RelationshipSystemTestNextMissingItemData(
+			"[TINDERBOX (41154), LOGS (41232), CANDLE_ON_STAND (27102)]",
+			"[CANDLE_LANTERN (41229), PICKAXE (41194), PINEAPPLE (41214), ARROWS (41177)]",
+			RandomEventItem.CANDLE_LANTERN
+		);
+		RandomEventItem puzzle11ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle11.getInitialSequenceItems(), puzzle11.getItemChoices());
+		Assertions.assertThat(puzzle11ActualNextMissingItem).isEqualTo(puzzle11.getExpectedNextMissingItem());
 	}
 
 	@Data
