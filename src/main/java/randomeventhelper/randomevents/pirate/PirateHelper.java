@@ -18,6 +18,7 @@ import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
+import randomeventhelper.RandomEventHelperPlugin;
 
 @Slf4j
 @Singleton
@@ -69,6 +70,12 @@ public class PirateHelper
 	@Subscribe
 	public void onVarbitChanged(VarbitChanged varbitChanged)
 	{
+		// For some reason, when the player is within the maze random event, the varbits for the pirate chest event fire/are modified
+		if (this.isInMazeLocalInstance())
+		{
+			return;
+		}
+
 		switch (varbitChanged.getVarbitId())
 		{
 			case VarbitID.PIRATE_COMBILOCK_LEFT:
@@ -203,5 +210,10 @@ public class PirateHelper
 		{
 			this.widgetMap.put(ChestLockSlot.RIGHT.getSubtractWidgetID(), rightSubtractWidget);
 		}
+	}
+
+	private boolean isInMazeLocalInstance()
+	{
+		return RandomEventHelperPlugin.getRegionIDFromCurrentLocalPointInstanced(client) == 11591;
 	}
 }

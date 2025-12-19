@@ -110,6 +110,12 @@ public class DrillDemonHelper
 	@Subscribe
 	public void onVarbitChanged(VarbitChanged varbitChanged)
 	{
+		// For some reason, when the player is within the maze random event, the varbits for the drill demon event fire/are modified
+		if (this.isInMazeLocalInstance())
+		{
+			return;
+		}
+
 		switch (varbitChanged.getVarbitId())
 		{
 			case VarbitID.MACRO_DRILLDEMON_POST_1:
@@ -205,5 +211,10 @@ public class DrillDemonHelper
 	private boolean isInDrillDemonLocalInstance()
 	{
 		return RandomEventHelperPlugin.getRegionIDFromCurrentLocalPointInstanced(client) == 12619;
+	}
+
+	private boolean isInMazeLocalInstance()
+	{
+		return RandomEventHelperPlugin.getRegionIDFromCurrentLocalPointInstanced(client) == 11591;
 	}
 }
