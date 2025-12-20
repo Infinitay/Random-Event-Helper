@@ -87,7 +87,9 @@ public class DrillDemonHelper
 	@Subscribe
 	public void onNpcSpawned(NpcSpawned npcSpawned)
 	{
-		if (npcSpawned.getNpc().getId() == NpcID.MACRO_DRILLDEMON && this.isInDrillDemonLocalInstance() && this.drillDemonNPC == null)
+		// We want to prio storing the Drill Demon NPC if it's interacting with the player because that one is the correct one in case of edge cases
+		boolean isNPCInteractingWithPlayer = npcSpawned.getNpc().getInteracting() != null && npcSpawned.getNpc().getInteracting().equals(client.getLocalPlayer());
+		if (npcSpawned.getNpc().getId() == NpcID.MACRO_DRILLDEMON && this.isInDrillDemonLocalInstance() && (this.drillDemonNPC == null || isNPCInteractingWithPlayer))
 		{
 			this.drillDemonNPC = npcSpawned.getNpc();
 			if (this.initialRun)
