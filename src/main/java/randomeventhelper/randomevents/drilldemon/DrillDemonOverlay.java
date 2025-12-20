@@ -8,6 +8,7 @@ import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Actor;
 import net.runelite.api.Client;
 import net.runelite.api.GroundObject;
 import net.runelite.client.ui.overlay.Overlay;
@@ -45,6 +46,18 @@ public class DrillDemonOverlay extends Overlay
 				{
 					OverlayUtil.renderPolygon(graphics2D, combinedMatHull, Color.GREEN);
 				}
+			}
+		}
+
+		if (plugin.getDrillDemonNPC() != null)
+		{
+			if (plugin.getRequestedExercise() != null)
+			{
+				OverlayUtil.renderActorOverlay(graphics2D, plugin.getDrillDemonNPC(), plugin.getRequestedExercise().name(), Color.WHITE);
+			}
+			else
+			{
+				OverlayUtil.renderActorOverlay(graphics2D, plugin.getDrillDemonNPC(), "Talk to Sergeant Damien to determine the required exercise", Color.YELLOW);
 			}
 		}
 		return null;

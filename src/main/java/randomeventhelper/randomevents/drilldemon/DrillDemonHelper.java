@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GroundObject;
+import net.runelite.api.NPC;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GroundObjectSpawned;
 import net.runelite.api.events.NpcDespawned;
@@ -53,6 +54,12 @@ public class DrillDemonHelper
 
 	private boolean initialRun;
 
+	@Getter
+	private NPC drillDemonNPC;
+
+	@Getter
+	private DrillExercise requestedExercise;
+
 	public void startUp()
 	{
 		this.eventBus.register(this);
@@ -61,6 +68,8 @@ public class DrillDemonHelper
 		this.exerciseMatsMultimap = HashMultimap.create(4, 2);
 		this.exerciseVarbitMatMultimap = HashMultimap.create(4, 2);
 		this.initialRun = true;
+		this.drillDemonNPC = null;
+		this.requestedExercise = null;
 	}
 
 	public void shutDown()
@@ -71,13 +80,16 @@ public class DrillDemonHelper
 		this.exerciseMatsMultimap = null;
 		this.exerciseVarbitMatMultimap = null;
 		this.initialRun = true;
+		this.drillDemonNPC = null;
+		this.requestedExercise = null;
 	}
 
 	@Subscribe
 	public void onNpcSpawned(NpcSpawned npcSpawned)
 	{
-		if (npcSpawned.getNpc().getId() == NpcID.MACRO_DRILLDEMON && this.isInDrillDemonLocalInstance())
+		if (npcSpawned.getNpc().getId() == NpcID.MACRO_DRILLDEMON && this.isInDrillDemonLocalInstance() && this.drillDemonNPC == null)
 		{
+			this.drillDemonNPC = npcSpawned.getNpc();
 			if (this.initialRun)
 			{
 				log.debug("Initializing varbits for Drill Demon exercise mappings in case plugin was enabled mid-event.");
@@ -97,13 +109,15 @@ public class DrillDemonHelper
 	@Subscribe
 	public void onNpcDespawned(NpcDespawned npcDespawned)
 	{
-		if (npcDespawned.getNpc().getId() == NpcID.MACRO_DRILLDEMON)
+		if (npcDespawned.getNpc().getId() == NpcID.MACRO_DRILLDEMON && !this.isInDrillDemonLocalInstance())
 		{
 			log.debug("Drill Demon NPC despawned, resetting exercise mats and mappings.");
 			this.exerciseMatsAnswerList.clear();
 			this.exerciseMatsMultimap.clear();
 			this.exerciseVarbitMatMultimap.clear();
 			this.initialRun = true;
+			this.drillDemonNPC = null;
+			this.requestedExercise = null;
 		}
 	}
 
@@ -144,10 +158,12 @@ public class DrillDemonHelper
 			if (this.isInDrillDemonLocalInstance())
 			{
 				this.exerciseMatsAnswerList.clear();
+				this.requestedExercise = null;
 				DrillExercise exercise = DrillExercise.getExerciseFromText(sanitizedChatMessage);
 				if (exercise != null)
 				{
 					log.debug("Drill Demon requested exercise: {}", exercise.name());
+					this.requestedExercise = exercise;
 					this.exerciseMatsAnswerList = Lists.newArrayList(this.exerciseVarbitMatMultimap.get(exercise.getVarbitValue()));
 					log.debug("Drill Demon exercise mats list set to: {}", this.exerciseMatsAnswerList);
 				}
@@ -159,6 +175,7 @@ public class DrillDemonHelper
 					}
 					log.warn("Drill Demon requested unknown exercise: {}", sanitizedChatMessage);
 					this.exerciseMatsAnswerList.clear();
+					this.requestedExercise = null;
 				}
 			}
 		}
