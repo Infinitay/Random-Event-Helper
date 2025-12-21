@@ -11,7 +11,7 @@ public enum RelationshipType
 	COOKING_PRODUCTION("cooking, food, chef, kitchen, bread, cake, meals"),
 	ALCOHOL_PRODUCTION("alcohol, brewing, cocktail, beer, rum, gin, drinks"),
 	MAGIC_RUNECRAFTING("magic, runecrafting, runes, essence, spells, staff, abracadabra, hocus pocus"),
-	JEWELRY_CRAFTING("jewelry, gems, necklace, ring, crafting, status"),
+	JEWELRY_CRAFTING("jewelry, gems, necklace, ring, crafting, status, shiny, precious"),
 	LIGHT_FIRE_SYSTEM("fire, light, candle, lantern, tinderbox, illumination"),
 	CONTAINER_STORAGE("container, storage, bottle, jug, pot, holding"),
 
@@ -30,7 +30,7 @@ public enum RelationshipType
 	FOOT_ARMOR("feet, boots, footwear, walking, protection"),
 	SHIELDS("shield, defense, blocking, protection, guard"),
 	MELEE_GEAR("melee, sword, scimitar, axe, mace, combat, sharp, helmet, platebody, platelegs, shield"),
-	JEWELRY_ACCESSORIES("jewelry, accessories, necklace, ring, cape, status"),
+	JEWELRY_ACCESSORIES("jewelry, accessories, necklace, ring, status, shiny, precious"),
 	FACE_ACCESSORIES("face, mask, eyepatch, hook, covering, facial"),
 
 	// Skill-based groupings

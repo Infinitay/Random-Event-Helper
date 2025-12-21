@@ -213,7 +213,7 @@ public class OSRSItemRelationshipSystem
 
 		map.put(RelationshipType.JEWELRY_CRAFTING, Set.of(
 			RandomEventItem.GEM_WITH_CROSS, RandomEventItem.NECKLACE, RandomEventItem.RING,
-			RandomEventItem.HOLY_SYMBOL, RandomEventItem.CAPE_OF_LEGENDS, RandomEventItem.TIARA
+			RandomEventItem.HOLY_SYMBOL, RandomEventItem.TIARA
 		));
 
 		map.put(RelationshipType.LIGHT_FIRE_SYSTEM, Set.of(
@@ -288,8 +288,7 @@ public class OSRSItemRelationshipSystem
 		));
 
 		map.put(RelationshipType.JEWELRY_ACCESSORIES, Set.of(
-			RandomEventItem.NECKLACE, RandomEventItem.RING, RandomEventItem.HOLY_SYMBOL,
-			RandomEventItem.CAPE_OF_LEGENDS
+			RandomEventItem.NECKLACE, RandomEventItem.RING, RandomEventItem.HOLY_SYMBOL
 		));
 
 		map.put(RelationshipType.FACE_ACCESSORIES, Set.of(
