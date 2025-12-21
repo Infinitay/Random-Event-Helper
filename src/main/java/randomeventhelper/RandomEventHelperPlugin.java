@@ -1,6 +1,8 @@
 package randomeventhelper;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Provides;
+import java.util.Map;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Actor;
@@ -30,6 +32,7 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 import randomeventhelper.randomevents.beekeeper.BeekeeperHelper;
 import randomeventhelper.randomevents.drilldemon.DrillDemonHelper;
 import randomeventhelper.randomevents.freakyforester.FreakyForesterHelper;
@@ -70,90 +73,24 @@ public class RandomEventHelperPlugin extends Plugin
 	@Inject
 	private RandomEventHelperItemOverlay itemOverlay;
 
-	@Inject
-	private SurpriseExamHelper surpriseExamHelper;
-
-	@Inject
-	private BeekeeperHelper beekeeperHelper;
-
-	@Inject
-	private FreakyForesterHelper freakyForesterHelper;
-
-	@Inject
-	private PinballHelper pinballHelper;
-
-	@Inject
-	private DrillDemonHelper drillDemonHelper;
-
-	@Inject
-	private GravediggerHelper gravediggerHelper;
-
-	@Inject
-	private GravediggerOverlay gravediggerOverlay;
-
-	@Inject
-	private MimeHelper mimeHelper;
-
-	@Inject
-	private MazeHelper mazeHelper;
-
-	@Inject
-	private SandwichLadyHelper sandwichLadyHelper;
-
-	@Inject
-	private QuizMasterHelper quizMasterHelper;
-
-	@Inject
-	private PirateHelper pirateHelper;
+	// <String, PluginModule> -> <configKeyForIsEnabled, PluginModuleInstance>
+	private Map<String, PluginModule> pluginModulesMap;
 
 	@Override
 	protected void startUp() throws Exception
 	{
 		this.overlayManager.add(overlay);
 		this.overlayManager.add(itemOverlay);
-		if (config.isSurpriseExamEnabled())
+
+		pluginModulesMap = ImmutableMap.<String, PluginModule>builder()
+			.build();
+		// Start only the enabled modules
+		for (PluginModule module : pluginModulesMap.values())
 		{
-			surpriseExamHelper.startUp();
-		}
-		if (config.isBeekeeperEnabled())
-		{
-			beekeeperHelper.startUp();
-		}
-		if (config.isFreakyForesterEnabled())
-		{
-			freakyForesterHelper.startUp();
-		}
-		if (config.isPinballEnabled())
-		{
-			pinballHelper.startUp();
-		}
-		if (config.isDrillDemonEnabled())
-		{
-			drillDemonHelper.startUp();
-		}
-		if (config.isGravediggerEnabled())
-		{
-			gravediggerHelper.startUp(gravediggerOverlay);
-		}
-		if (config.isMimeEnabled())
-		{
-			mimeHelper.startUp();
-		}
-		if (config.isMazeEnabled())
-		{
-			mazeHelper.startUp();
-		}
-		if (config.isSandwichLadyEnabled())
-		{
-			sandwichLadyHelper.startUp();
-		}
-		if (config.isQuizMasterEnabled())
-		{
-			quizMasterHelper.startUp();
-		}
-		if (config.isCaptArnavChestEnabled())
-		{
-			pirateHelper.startUp();
+			if (module.isEnabled())
+			{
+				module.startUp();
+			}
 		}
 	}
 
@@ -162,17 +99,11 @@ public class RandomEventHelperPlugin extends Plugin
 	{
 		this.overlayManager.remove(overlay);
 		this.overlayManager.remove(itemOverlay);
-		surpriseExamHelper.shutDown();
-		beekeeperHelper.shutDown();
-		freakyForesterHelper.shutDown();
-		pinballHelper.shutDown();
-		drillDemonHelper.shutDown();
-		gravediggerHelper.shutDown();
-		mimeHelper.shutDown();
-		mazeHelper.shutDown();
-		sandwichLadyHelper.shutDown();
-		quizMasterHelper.shutDown();
-		pirateHelper.shutDown();
+		// Shutdown all modules regardless of their enabled state
+		for (PluginModule module : pluginModulesMap.values())
+		{
+			module.shutdown();
+		}
 	}
 
 	@Subscribe
@@ -181,125 +112,17 @@ public class RandomEventHelperPlugin extends Plugin
 		if (configChanged.getGroup().equals("randomeventhelper"))
 		{
 			log.debug("Config changed: {} | New value: {}", configChanged.getKey(), configChanged.getNewValue());
-			if (configChanged.getKey().equals("isSurpriseExamEnabled"))
+			// Let's first handle plugin module updates - so lets first check to see if the changed config key is a mapped module
+			PluginModule module = pluginModulesMap.get(configChanged.getKey());
+			if (module != null)
 			{
-				if (config.isSurpriseExamEnabled())
+				if (module.isEnabled())
 				{
-					surpriseExamHelper.startUp();
+					module.startUp();
 				}
 				else
 				{
-					surpriseExamHelper.shutDown();
-				}
-			}
-			else if (configChanged.getKey().equals("isBeekeeperEnabled"))
-			{
-				if (config.isBeekeeperEnabled())
-				{
-					beekeeperHelper.startUp();
-				}
-				else
-				{
-					beekeeperHelper.shutDown();
-				}
-			}
-			else if (configChanged.getKey().equals("isFreakyForesterEnabled"))
-			{
-				if (config.isFreakyForesterEnabled())
-				{
-					freakyForesterHelper.startUp();
-				}
-				else
-				{
-					freakyForesterHelper.shutDown();
-				}
-			}
-			else if (configChanged.getKey().equals("isPinballEnabled"))
-			{
-				if (config.isPinballEnabled())
-				{
-					pinballHelper.startUp();
-				}
-				else
-				{
-					pinballHelper.shutDown();
-				}
-			}
-			else if (configChanged.getKey().equals("isDrillDemonEnabled"))
-			{
-				if (config.isDrillDemonEnabled())
-				{
-					drillDemonHelper.startUp();
-				}
-				else
-				{
-					drillDemonHelper.shutDown();
-				}
-			}
-			else if (configChanged.getKey().equals("isGravediggerEnabled"))
-			{
-				if (config.isGravediggerEnabled())
-				{
-					gravediggerHelper.startUp(gravediggerOverlay);
-				}
-				else
-				{
-					gravediggerHelper.shutDown();
-				}
-			}
-			else if (configChanged.getKey().equals("isMimeEnabled"))
-			{
-				if (config.isMimeEnabled())
-				{
-					mimeHelper.startUp();
-				}
-				else
-				{
-					mimeHelper.shutDown();
-				}
-			}
-			else if (configChanged.getKey().equals("isMazeEnabled"))
-			{
-				if (config.isMazeEnabled())
-				{
-					mazeHelper.startUp();
-				}
-				else
-				{
-					mazeHelper.shutDown();
-				}
-			}
-			else if (configChanged.getKey().equals("isSandwichLadyEnabled"))
-			{
-				if (config.isSandwichLadyEnabled())
-				{
-					sandwichLadyHelper.startUp();
-				}
-				else
-				{
-					sandwichLadyHelper.shutDown();
-				}
-			}
-			else if (configChanged.getKey().equals("isQuizMasterEnabled"))
-			{
-				if (config.isQuizMasterEnabled())
-				{
-					quizMasterHelper.startUp();
-				}
-				else
-				{
-					quizMasterHelper.shutDown();
-				}
-			}
-			else if (configChanged.getKey().equals("isCaptArnavChestEnabled"))
-			{
-				if (config.isCaptArnavChestEnabled())
-				{
-					pirateHelper.startUp();
-				}
-				else
-				{
-					pirateHelper.shutDown();
+					module.shutdown();
 				}
 			}
 		}

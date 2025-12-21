@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
-import net.runelite.client.callback.ClientThread;
-import net.runelite.client.config.Config;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.GameEventManager;
@@ -41,6 +39,7 @@ public abstract class PluginModule
 		if (client.getGameState().getState() >= GameState.LOGGED_IN.getState())
 		{
 			// Remember to pass in the instance (this) and not the class (#getClass)
+			// Re-posts NpcSpawned, PlayerSpawned, WallObjectSpawned, DecorativeObjectSpawned, GroundObjectSpawned, GameObjectSpawned, ItemSpawned, WorldEntitySpawned
 			this.gameEventManager.simulateGameEvents(this);
 		}
 		log.debug("Started the {} module", this.getClass().getSimpleName());
