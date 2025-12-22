@@ -203,6 +203,30 @@ public class RelationshipSystemTest
 		);
 		RandomEventItem puzzle11ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle11.getInitialSequenceItems(), puzzle11.getItemChoices());
 		Assertions.assertThat(puzzle11ActualNextMissingItem).isEqualTo(puzzle11.getExpectedNextMissingItem());
+
+		RelationshipSystemTestNextMissingItemData puzzle12 = new RelationshipSystemTestNextMissingItemData(
+			"[PLATEBODY (27094), BAR (41153), ORE (41170)]",
+			"[LONGBOW (41198), HERRING_OR_MACKEREL (41193), CAPE_OF_LEGENDS (41167), PICKAXE (41194)]",
+			RandomEventItem.PICKAXE
+		);
+		RandomEventItem puzzle12ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle12.getInitialSequenceItems(), puzzle12.getItemChoices());
+		Assertions.assertThat(puzzle12ActualNextMissingItem).isEqualTo(puzzle12.getExpectedNextMissingItem());
+
+		RelationshipSystemTestNextMissingItemData puzzle13 = new RelationshipSystemTestNextMissingItemData(
+			"[BANANA (41222), STRAWBERRY (41230), GRAPES (41207)]",
+			"[PINEAPPLE (41214), ARROWS (41177), RING (27091), HAMMER (41183)]",
+			RandomEventItem.PINEAPPLE
+		);
+		RandomEventItem puzzle13ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle13.getInitialSequenceItems(), puzzle13.getItemChoices());
+		Assertions.assertThat(puzzle13ActualNextMissingItem).isEqualTo(puzzle13.getExpectedNextMissingItem());
+
+		RelationshipSystemTestNextMissingItemData puzzle14 = new RelationshipSystemTestNextMissingItemData(
+			"[TUNA (41209), HARPOON (41158), TROUT_COD_PIKE_SALMON_2 (41206)]",
+			"[SHARK (41166), CAKE (41202), COCKTAIL_1 (27097), LONGSWORD (41150)]",
+			RandomEventItem.SHARK
+		);
+		RandomEventItem puzzle14ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle14.getInitialSequenceItems(), puzzle14.getItemChoices());
+		Assertions.assertThat(puzzle14ActualNextMissingItem).isEqualTo(puzzle14.getExpectedNextMissingItem());
 	}
 
 	@Data
