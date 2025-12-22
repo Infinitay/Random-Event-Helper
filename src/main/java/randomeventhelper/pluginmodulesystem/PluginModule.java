@@ -36,7 +36,7 @@ public abstract class PluginModule
 	{
 		this.eventBus.register(this);
 		this.onStartUp();
-		if (client.getGameState().getState() >= GameState.LOGGED_IN.getState())
+		if (this.client.getGameState().getState() >= GameState.LOGGED_IN.getState())
 		{
 			// Remember to pass in the instance (this) and not the class (#getClass)
 			// Re-posts NpcSpawned, PlayerSpawned, WallObjectSpawned, DecorativeObjectSpawned, GroundObjectSpawned, GameObjectSpawned, ItemSpawned, WorldEntitySpawned
@@ -50,5 +50,10 @@ public abstract class PluginModule
 		this.eventBus.unregister(this);
 		this.onShutdown();
 		log.debug("Shutdown the {} module", this.getClass().getSimpleName());
+	}
+
+	public boolean isLoggedIn()
+	{
+		return this.client.getGameState().getState() >= GameState.LOGGED_IN.getState();
 	}
 }
