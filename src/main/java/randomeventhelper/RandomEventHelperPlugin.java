@@ -73,6 +73,9 @@ public class RandomEventHelperPlugin extends Plugin
 	@Inject
 	private RandomEventHelperItemOverlay itemOverlay;
 
+	@Inject
+	private SurpriseExamHelper surpriseExamHelper;
+
 	// <String, PluginModule> -> <configKeyForIsEnabled, PluginModuleInstance>
 	private Map<String, PluginModule> pluginModulesMap;
 
@@ -83,6 +86,7 @@ public class RandomEventHelperPlugin extends Plugin
 		this.overlayManager.add(itemOverlay);
 
 		pluginModulesMap = ImmutableMap.<String, PluginModule>builder()
+			.put("isSurpriseExamEnabled", surpriseExamHelper)
 			.build();
 		// Start only the enabled modules
 		for (PluginModule module : pluginModulesMap.values())
