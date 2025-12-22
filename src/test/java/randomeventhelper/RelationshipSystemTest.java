@@ -102,6 +102,14 @@ public class RelationshipSystemTest
 		);
 		List<RandomEventItem> puzzle11ActualItems = relationshipSystem.findItemsByHint(puzzle11.getHint(), puzzle11.getGivenItems(), 3).subList(0, 3);
 		Assertions.assertThat(puzzle11ActualItems).containsExactlyInAnyOrderElementsOf(puzzle11.getExpectedMatchingItems());
+
+		RelationshipSystemTestMatchingData puzzle12 = new RelationshipSystemTestMatchingData(
+			"There is no better feeling than wearing all your bangles, bobbles and fineries.",
+			"[BONES (2674), AXE (41184), BOTTLE (41175), CHEESE (41161), RING (27091), HARPOON (41158), WATERING_CAN (41213), STAFF (41174), NECKLACE (41216), TROUT_COD_PIKE_SALMON_3 (41163), FIRE_RUNE (41215), WATER_RUNE (41231), HOLY_SYMBOL (41159), TINDERBOX (41154), PICKAXE (41194)]",
+			List.of(RandomEventItem.RING, RandomEventItem.NECKLACE, RandomEventItem.HOLY_SYMBOL)
+		);
+		List<RandomEventItem> puzzle12ActualItems = relationshipSystem.findItemsByHint(puzzle12.getHint(), puzzle12.getGivenItems(), 3).subList(0, 3);
+		Assertions.assertThat(puzzle12ActualItems).containsExactlyInAnyOrderElementsOf(puzzle12.getExpectedMatchingItems());
 	}
 
 	@Test
