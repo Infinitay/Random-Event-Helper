@@ -14,22 +14,17 @@ import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
+import randomeventhelper.RandomEventHelperConfig;
 import randomeventhelper.RandomEventHelperPlugin;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
-public class PirateHelper
+public class PirateHelper extends PluginModule
 {
-	@Inject
-	private EventBus eventBus;
-
-	@Inject
-	private Client client;
-
 	@Inject
 	private ClientThread clientThread;
 
@@ -49,22 +44,34 @@ public class PirateHelper
 	@Getter
 	private Map<Integer, Widget> widgetMap;
 
-	public void startUp()
+	@Inject
+	public PirateHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
 	{
-		this.eventBus.register(this);
+		super(overlayManager, config, client);
+	}
+
+	@Override
+	public void onStartUp()
+	{
 		this.overlayManager.add(pirateOverlay);
 		this.pirateChestSolver = new PirateChestSolver();
 		this.initiallyLoaded = false;
 		this.widgetMap = Maps.newHashMap();
 	}
 
-	public void shutDown()
+	@Override
+	public void onShutdown()
 	{
-		this.eventBus.unregister(this);
 		this.overlayManager.remove(pirateOverlay);
 		this.pirateChestSolver = null;
 		this.initiallyLoaded = false;
 		this.widgetMap = null;
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return this.config.isCaptArnavChestEnabled();
 	}
 
 	@Subscribe
