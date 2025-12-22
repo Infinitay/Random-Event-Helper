@@ -122,6 +122,24 @@ public class SurpriseExamHelper extends PluginModule
 		this.patternNextAnswer = null;
 		this.patternNextAnswerWidget = null;
 		this.relationshipSystem = new OSRSItemRelationshipSystem();
+
+		if (this.isLoggedIn())
+		{
+			this.clientThread.invokeLater(() -> {
+				if (this.client.getWidget(InterfaceID.PatternCards.HINT) != null)
+				{
+					WidgetLoaded matchingCardsWidgetLoaded = new WidgetLoaded();
+					matchingCardsWidgetLoaded.setGroupId(InterfaceID.PATTERN_CARDS);
+					this.eventBus.post(matchingCardsWidgetLoaded);
+				}
+				if (this.client.getWidget(InterfaceID.PatternNext.UNIVERSE_TEXT12) != null)
+				{
+					WidgetLoaded whatsNextWidgetLoaded = new WidgetLoaded();
+					whatsNextWidgetLoaded.setGroupId(InterfaceID.PATTERN_NEXT);
+					this.eventBus.post(whatsNextWidgetLoaded);
+				}
+			});
+		}
 	}
 
 	@Override
