@@ -57,6 +57,20 @@ public class MimeHelper extends PluginModule
 		this.mimeNPC = null;
 		this.currentMimeEmote = null;
 		this.mimeEmoteAnswerWidget = null;
+
+		// Not really needed since we depend on AnimationChanged, so if the plugin is off, then we won't ever catch it
+		// And if we do catch the animation, then the widget always loads anyway afterward
+		if (this.isLoggedIn())
+		{
+			this.clientThread.invokeLater(() -> {
+				if (this.client.getWidget(InterfaceID.MacroMimeEmotes.BUTTON_0) != null)
+				{
+					WidgetLoaded mimeEmoteButtonWidgetLoaded = new WidgetLoaded();
+					mimeEmoteButtonWidgetLoaded.setGroupId(InterfaceID.MACRO_MIME_EMOTES);
+					this.eventBus.post(mimeEmoteButtonWidgetLoaded);
+				}
+			});
+		}
 	}
 
 	@Override
@@ -90,19 +104,8 @@ public class MimeHelper extends PluginModule
 		{
 			return;
 		}
-		if (mime.getAnimation() != -1 && mime.getAnimation() != 858)
-		{
-			MimeEmote mimeEmote = MimeEmote.getMimeEmoteFromAnimationID(mime.getAnimation());
-			this.currentMimeEmote = mimeEmote;
-			if (mimeEmote != null)
-			{
-				log.debug("Mime Animation Detected: {}", mimeEmote);
-			}
-			else
-			{
-				log.debug("Unknown Mime Animation Detected: Animation ID = {}", mime.getAnimation());
-			}
-		}
+
+		this.updateMimeAnimation(mime);
 	}
 
 	@Subscribe
@@ -141,6 +144,9 @@ public class MimeHelper extends PluginModule
 		{
 			this.mimeNPC = npcSpawned.getNpc();
 			log.debug("Mime NPC Spawned, setting mimeNPC: {}", this.mimeNPC);
+
+			// In case the Mime is already doing an emote (starting mid-event, etc.)
+			this.updateMimeAnimation(this.mimeNPC);
 		}
 	}
 
@@ -153,6 +159,28 @@ public class MimeHelper extends PluginModule
 			this.currentMimeEmote = null;
 			this.mimeEmoteAnswerWidget = null;
 			log.debug("Mime NPC Despawned, clearing Mime Random Event data");
+		}
+	}
+
+	private void updateMimeAnimation(NPC mimeNPC)
+	{
+		if (mimeNPC.getAnimation() != -1 && mimeNPC.getAnimation() != 858)
+		{
+			MimeEmote mimeEmote = MimeEmote.getMimeEmoteFromAnimationID(mimeNPC.getAnimation());
+			if (mimeEmote == this.currentMimeEmote)
+			{
+				log.debug("Mime Animation unchanged: {}", mimeEmote);
+				return;
+			}
+			this.currentMimeEmote = mimeEmote;
+			if (mimeEmote != null)
+			{
+				log.debug("Mime Animation Detected: {}", mimeEmote);
+			}
+			else
+			{
+				log.debug("Unknown Mime Animation Detected: Animation ID = {}", mimeNPC.getAnimation());
+			}
 		}
 	}
 }
