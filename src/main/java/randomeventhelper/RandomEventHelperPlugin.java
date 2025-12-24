@@ -77,6 +77,9 @@ public class RandomEventHelperPlugin extends Plugin
 	private PirateHelper pirateHelper;
 
 	@Inject
+	private MimeHelper mimeHelper;
+
+	@Inject
 	private SurpriseExamHelper surpriseExamHelper;
 
 	// <String, PluginModule> -> <configKeyForIsEnabled, PluginModuleInstance>
@@ -90,6 +93,7 @@ public class RandomEventHelperPlugin extends Plugin
 
 		pluginModulesMap = ImmutableMap.<String, PluginModule>builder()
 			.put("isCaptArnavChestEnabled", pirateHelper)
+			.put("isMimeEnabled", mimeHelper)
 			.put("isSurpriseExamEnabled", surpriseExamHelper)
 			.build();
 		// Start only the enabled modules
