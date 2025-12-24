@@ -42,10 +42,9 @@ public class MimeOverlay extends Overlay
 		{
 			OverlayUtil.renderPolygon(graphics2D, plugin.getMimeEmoteAnswerWidget().getBounds(), Color.GREEN);
 		}
-		if (plugin.getMimeNPC() != null && plugin.getCurrentMimeEmote() != null)
+		if (plugin.getMimeNPC() != null)
 		{
-			String mimeEmoteText = plugin.getCurrentMimeEmote().name();
-			graphics2D.setFont(graphics2D.getFont().deriveFont(18f));
+			String mimeEmoteText = plugin.getCurrentMimeEmote() != null ? plugin.getCurrentMimeEmote().name() : "Waiting for emote";
 			int mimeHeight = plugin.getMimeNPC().getLogicalHeight();
 			int mimeTextOffset = plugin.getMimeNPC().getAnimationHeightOffset();
 			Point textPoint = plugin.getMimeNPC().getCanvasTextLocation(graphics2D, mimeEmoteText, mimeHeight + mimeTextOffset);
