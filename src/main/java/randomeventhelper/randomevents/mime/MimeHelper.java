@@ -14,21 +14,16 @@ import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
+import randomeventhelper.RandomEventHelperConfig;
 import randomeventhelper.RandomEventHelperPlugin;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
-public class MimeHelper
+public class MimeHelper extends PluginModule
 {
-	@Inject
-	private EventBus eventBus;
-
-	@Inject
-	private Client client;
-
 	@Inject
 	private ClientThread clientThread;
 
@@ -49,22 +44,34 @@ public class MimeHelper
 
 	private static final int MIME_RANDOM_EVENT_REGION_ID = 8010;
 
-	public void startUp()
+	@Inject
+	public MimeHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
 	{
-		this.eventBus.register(this);
+		super(overlayManager, config, client);
+	}
+
+	@Override
+	public void onStartUp()
+	{
 		this.overlayManager.add(mimeOverlay);
 		this.mimeNPC = null;
 		this.currentMimeEmote = null;
 		this.mimeEmoteAnswerWidget = null;
 	}
 
-	public void shutDown()
+	@Override
+	public void onShutdown()
 	{
-		this.eventBus.unregister(this);
 		this.overlayManager.remove(mimeOverlay);
 		this.mimeNPC = null;
 		this.currentMimeEmote = null;
 		this.mimeEmoteAnswerWidget = null;
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return this.config.isMimeEnabled();
 	}
 
 	@Subscribe
