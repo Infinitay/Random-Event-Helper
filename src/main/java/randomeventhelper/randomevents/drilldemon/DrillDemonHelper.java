@@ -21,22 +21,17 @@ import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.ObjectID;
 import net.runelite.api.gameval.VarbitID;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
+import randomeventhelper.RandomEventHelperConfig;
 import randomeventhelper.RandomEventHelperPlugin;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
-public class DrillDemonHelper
+public class DrillDemonHelper extends PluginModule
 {
-	@Inject
-	private EventBus eventBus;
-
-	@Inject
-	private Client client;
-
 	@Inject
 	private OverlayManager overlayManager;
 
@@ -60,9 +55,15 @@ public class DrillDemonHelper
 	@Getter
 	private DrillExercise requestedExercise;
 
-	public void startUp()
+	@Inject
+	public DrillDemonHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
 	{
-		this.eventBus.register(this);
+		super(overlayManager, config, client);
+	}
+
+	@Override
+	public void onStartUp()
+	{
 		this.overlayManager.add(drillDemonOverlay);
 		this.exerciseMatsAnswerList = Lists.newArrayListWithExpectedSize(4);
 		this.exerciseMatsMultimap = HashMultimap.create(4, 2);
@@ -72,9 +73,9 @@ public class DrillDemonHelper
 		this.requestedExercise = null;
 	}
 
-	public void shutDown()
+	@Override
+	public void onShutdown()
 	{
-		this.eventBus.unregister(this);
 		this.overlayManager.remove(drillDemonOverlay);
 		this.exerciseMatsAnswerList = null;
 		this.exerciseMatsMultimap = null;
@@ -82,6 +83,12 @@ public class DrillDemonHelper
 		this.initialRun = true;
 		this.drillDemonNPC = null;
 		this.requestedExercise = null;
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return this.config.isDrillDemonEnabled();
 	}
 
 	@Subscribe

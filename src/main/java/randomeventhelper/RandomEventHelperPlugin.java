@@ -77,6 +77,9 @@ public class RandomEventHelperPlugin extends Plugin
 	private PirateHelper pirateHelper;
 
 	@Inject
+	private DrillDemonHelper drillDemonHelper;
+
+	@Inject
 	private MimeHelper mimeHelper;
 
 	@Inject
@@ -93,6 +96,7 @@ public class RandomEventHelperPlugin extends Plugin
 
 		pluginModulesMap = ImmutableMap.<String, PluginModule>builder()
 			.put("isCaptArnavChestEnabled", pirateHelper)
+			.put("isDrillDemonEnabled", drillDemonHelper)
 			.put("isMimeEnabled", mimeHelper)
 			.put("isSurpriseExamEnabled", surpriseExamHelper)
 			.build();
