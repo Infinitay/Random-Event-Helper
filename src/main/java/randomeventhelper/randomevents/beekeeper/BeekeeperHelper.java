@@ -47,6 +47,18 @@ public class BeekeeperHelper extends PluginModule
 	{
 		this.overlayManager.add(beekeeperOverlay);
 		this.beehiveAnswerWidgets = null;
+
+		if (this.isLoggedIn())
+		{
+			this.clientThread.invokeLater(() -> {
+				if (this.client.getWidget(InterfaceID.Beehive.EXAMPLE) != null)
+				{
+					WidgetLoaded beehiveExampleWidgetLoaded = new WidgetLoaded();
+					beehiveExampleWidgetLoaded.setGroupId(InterfaceID.BEEHIVE);
+					this.eventBus.post(beehiveExampleWidgetLoaded);
+				}
+			});
+		}
 	}
 
 	@Override
@@ -78,10 +90,10 @@ public class BeekeeperHelper extends PluginModule
 					Widget destination4LayerWidget = this.client.getWidget(InterfaceID.Beehive.UNIVERSE_TEXT14);
 					if (destination1LayerWidget != null && destination2LayerWidget != null && destination3LayerWidget != null && destination4LayerWidget != null)
 					{
-						destination1LayerWidget.setText("1. " + destination1LayerWidget.getText());
-						destination2LayerWidget.setText("2. " + destination2LayerWidget.getText());
-						destination3LayerWidget.setText("3. " + destination3LayerWidget.getText());
-						destination4LayerWidget.setText("4. " + destination4LayerWidget.getText());
+						destination1LayerWidget.setText(destination1LayerWidget.getText().contains(".") ? destination1LayerWidget.getText() : "1. " + destination1LayerWidget.getText());
+						destination2LayerWidget.setText(destination2LayerWidget.getText().contains(".") ? destination2LayerWidget.getText() : "2. " + destination2LayerWidget.getText());
+						destination3LayerWidget.setText(destination3LayerWidget.getText().contains(".") ? destination3LayerWidget.getText() : "3. " + destination3LayerWidget.getText());
+						destination4LayerWidget.setText(destination4LayerWidget.getText().contains(".") ? destination4LayerWidget.getText() : "4. " + destination4LayerWidget.getText());
 					}
 					else
 					{
