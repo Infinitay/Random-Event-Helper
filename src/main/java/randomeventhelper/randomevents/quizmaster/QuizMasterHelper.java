@@ -17,20 +17,15 @@ import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
+import randomeventhelper.RandomEventHelperConfig;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
-public class QuizMasterHelper
+public class QuizMasterHelper extends PluginModule
 {
-	@Inject
-	private EventBus eventBus;
-
-	@Inject
-	private Client client;
-
 	@Inject
 	private ClientThread clientThread;
 
@@ -43,18 +38,30 @@ public class QuizMasterHelper
 	@Getter
 	private Widget quizAnswerWidget;
 
-	public void startUp()
+	@Inject
+	public QuizMasterHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
 	{
-		this.eventBus.register(this);
+		super(overlayManager, config, client);
+	}
+
+	@Override
+	public void onStartUp()
+	{
 		this.overlayManager.add(quizMasterOverlay);
 		this.quizAnswerWidget = null;
 	}
 
-	public void shutDown()
+	@Override
+	public void onShutdown()
 	{
-		this.eventBus.unregister(this);
 		this.overlayManager.remove(quizMasterOverlay);
 		this.quizAnswerWidget = null;
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return this.config.isQuizMasterEnabled();
 	}
 
 	@Subscribe
