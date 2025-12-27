@@ -57,6 +57,18 @@ public class PirateHelper extends PluginModule
 		this.pirateChestSolver = new PirateChestSolver();
 		this.initiallyLoaded = false;
 		this.widgetMap = Maps.newHashMap();
+
+		if (this.isLoggedIn())
+		{
+			this.clientThread.invokeLater(() -> {
+				if (this.client.getWidget(this.CONFIRM_BUTTON_WIDGET_ID) != null)
+				{
+					WidgetLoaded chestConfirmButtonWidgetLoaded = new WidgetLoaded();
+					chestConfirmButtonWidgetLoaded.setGroupId(InterfaceID.PIRATE_COMBILOCK);
+					this.eventBus.post(chestConfirmButtonWidgetLoaded);
+				}
+			});
+		}
 	}
 
 	@Override
