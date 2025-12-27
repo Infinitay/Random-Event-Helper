@@ -101,6 +101,7 @@ public class PirateChestSolver
 			log.debug("Pirate chest locks are correctly set.");
 			return true;
 		}
+		this.isSolved = false;
 		log.debug("Pirate chest locks are not correctly set.");
 		return false;
 	}

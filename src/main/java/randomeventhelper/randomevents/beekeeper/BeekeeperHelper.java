@@ -15,21 +15,15 @@ import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.plugins.Plugin;
 import net.runelite.client.ui.overlay.OverlayManager;
+import randomeventhelper.RandomEventHelperConfig;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
-public class BeekeeperHelper extends Plugin
+public class BeekeeperHelper extends PluginModule
 {
-	@Inject
-	private EventBus eventBus;
-
-	@Inject
-	private Client client;
-
 	@Inject
 	private ClientThread clientThread;
 
@@ -42,18 +36,42 @@ public class BeekeeperHelper extends Plugin
 	@Getter
 	private ImmutableList<Widget> beehiveAnswerWidgets;
 
-	public void startUp()
+	@Inject
+	public BeekeeperHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
 	{
-		this.eventBus.register(this);
+		super(overlayManager, config, client);
+	}
+
+	@Override
+	public void onStartUp()
+	{
 		this.overlayManager.add(beekeeperOverlay);
+		this.beehiveAnswerWidgets = null;
+
+		if (this.isLoggedIn())
+		{
+			this.clientThread.invokeLater(() -> {
+				if (this.client.getWidget(InterfaceID.Beehive.EXAMPLE) != null)
+				{
+					WidgetLoaded beehiveExampleWidgetLoaded = new WidgetLoaded();
+					beehiveExampleWidgetLoaded.setGroupId(InterfaceID.BEEHIVE);
+					this.eventBus.post(beehiveExampleWidgetLoaded);
+				}
+			});
+		}
+	}
+
+	@Override
+	public void onShutdown()
+	{
+		this.overlayManager.remove(beekeeperOverlay);
 		this.beehiveAnswerWidgets = null;
 	}
 
-	public void shutDown()
+	@Override
+	public boolean isEnabled()
 	{
-		this.eventBus.unregister(this);
-		this.overlayManager.remove(beekeeperOverlay);
-		this.beehiveAnswerWidgets = null;
+		return this.config.isBeekeeperEnabled();
 	}
 
 	@Subscribe
@@ -72,10 +90,10 @@ public class BeekeeperHelper extends Plugin
 					Widget destination4LayerWidget = this.client.getWidget(InterfaceID.Beehive.UNIVERSE_TEXT14);
 					if (destination1LayerWidget != null && destination2LayerWidget != null && destination3LayerWidget != null && destination4LayerWidget != null)
 					{
-						destination1LayerWidget.setText("1. " + destination1LayerWidget.getText());
-						destination2LayerWidget.setText("2. " + destination2LayerWidget.getText());
-						destination3LayerWidget.setText("3. " + destination3LayerWidget.getText());
-						destination4LayerWidget.setText("4. " + destination4LayerWidget.getText());
+						destination1LayerWidget.setText(destination1LayerWidget.getText().contains(".") ? destination1LayerWidget.getText() : "1. " + destination1LayerWidget.getText());
+						destination2LayerWidget.setText(destination2LayerWidget.getText().contains(".") ? destination2LayerWidget.getText() : "2. " + destination2LayerWidget.getText());
+						destination3LayerWidget.setText(destination3LayerWidget.getText().contains(".") ? destination3LayerWidget.getText() : "3. " + destination3LayerWidget.getText());
+						destination4LayerWidget.setText(destination4LayerWidget.getText().contains(".") ? destination4LayerWidget.getText() : "4. " + destination4LayerWidget.getText());
 					}
 					else
 					{

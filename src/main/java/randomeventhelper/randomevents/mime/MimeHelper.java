@@ -14,21 +14,16 @@ import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
+import randomeventhelper.RandomEventHelperConfig;
 import randomeventhelper.RandomEventHelperPlugin;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
-public class MimeHelper
+public class MimeHelper extends PluginModule
 {
-	@Inject
-	private EventBus eventBus;
-
-	@Inject
-	private Client client;
-
 	@Inject
 	private ClientThread clientThread;
 
@@ -49,22 +44,48 @@ public class MimeHelper
 
 	private static final int MIME_RANDOM_EVENT_REGION_ID = 8010;
 
-	public void startUp()
+	@Inject
+	public MimeHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
 	{
-		this.eventBus.register(this);
+		super(overlayManager, config, client);
+	}
+
+	@Override
+	public void onStartUp()
+	{
 		this.overlayManager.add(mimeOverlay);
+		this.mimeNPC = null;
+		this.currentMimeEmote = null;
+		this.mimeEmoteAnswerWidget = null;
+
+		// Not really needed since we depend on AnimationChanged, so if the plugin is off, then we won't ever catch it
+		// And if we do catch the animation, then the widget always loads anyway afterward
+		if (this.isLoggedIn())
+		{
+			this.clientThread.invokeLater(() -> {
+				if (this.client.getWidget(InterfaceID.MacroMimeEmotes.BUTTON_0) != null)
+				{
+					WidgetLoaded mimeEmoteButtonWidgetLoaded = new WidgetLoaded();
+					mimeEmoteButtonWidgetLoaded.setGroupId(InterfaceID.MACRO_MIME_EMOTES);
+					this.eventBus.post(mimeEmoteButtonWidgetLoaded);
+				}
+			});
+		}
+	}
+
+	@Override
+	public void onShutdown()
+	{
+		this.overlayManager.remove(mimeOverlay);
 		this.mimeNPC = null;
 		this.currentMimeEmote = null;
 		this.mimeEmoteAnswerWidget = null;
 	}
 
-	public void shutDown()
+	@Override
+	public boolean isEnabled()
 	{
-		this.eventBus.unregister(this);
-		this.overlayManager.remove(mimeOverlay);
-		this.mimeNPC = null;
-		this.currentMimeEmote = null;
-		this.mimeEmoteAnswerWidget = null;
+		return this.config.isMimeEnabled();
 	}
 
 	@Subscribe
@@ -83,19 +104,8 @@ public class MimeHelper
 		{
 			return;
 		}
-		if (mime.getAnimation() != -1 && mime.getAnimation() != 858)
-		{
-			MimeEmote mimeEmote = MimeEmote.getMimeEmoteFromAnimationID(mime.getAnimation());
-			this.currentMimeEmote = mimeEmote;
-			if (mimeEmote != null)
-			{
-				log.debug("Mime Animation Detected: {}", mimeEmote);
-			}
-			else
-			{
-				log.debug("Unknown Mime Animation Detected: Animation ID = {}", mime.getAnimation());
-			}
-		}
+
+		this.updateMimeAnimation(mime);
 	}
 
 	@Subscribe
@@ -134,6 +144,9 @@ public class MimeHelper
 		{
 			this.mimeNPC = npcSpawned.getNpc();
 			log.debug("Mime NPC Spawned, setting mimeNPC: {}", this.mimeNPC);
+
+			// In case the Mime is already doing an emote (starting mid-event, etc.)
+			this.updateMimeAnimation(this.mimeNPC);
 		}
 	}
 
@@ -146,6 +159,28 @@ public class MimeHelper
 			this.currentMimeEmote = null;
 			this.mimeEmoteAnswerWidget = null;
 			log.debug("Mime NPC Despawned, clearing Mime Random Event data");
+		}
+	}
+
+	private void updateMimeAnimation(NPC mimeNPC)
+	{
+		if (mimeNPC.getAnimation() != -1 && mimeNPC.getAnimation() != 858)
+		{
+			MimeEmote mimeEmote = MimeEmote.getMimeEmoteFromAnimationID(mimeNPC.getAnimation());
+			if (mimeEmote == this.currentMimeEmote)
+			{
+				log.debug("Mime Animation unchanged: {}", mimeEmote);
+				return;
+			}
+			this.currentMimeEmote = mimeEmote;
+			if (mimeEmote != null)
+			{
+				log.debug("Mime Animation Detected: {}", mimeEmote);
+			}
+			else
+			{
+				log.debug("Unknown Mime Animation Detected: Animation ID = {}", mimeNPC.getAnimation());
+			}
 		}
 	}
 }

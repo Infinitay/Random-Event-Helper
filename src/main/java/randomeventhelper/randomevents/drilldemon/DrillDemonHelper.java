@@ -21,21 +21,20 @@ import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.ObjectID;
 import net.runelite.api.gameval.VarbitID;
-import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
+import randomeventhelper.RandomEventHelperConfig;
 import randomeventhelper.RandomEventHelperPlugin;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
-public class DrillDemonHelper
+public class DrillDemonHelper extends PluginModule
 {
 	@Inject
-	private EventBus eventBus;
-
-	@Inject
-	private Client client;
+	private ClientThread clientThread;
 
 	@Inject
 	private OverlayManager overlayManager;
@@ -52,36 +51,59 @@ public class DrillDemonHelper
 	// <Exercise Varbit, Mat>
 	private Multimap<Integer, GroundObject> exerciseVarbitMatMultimap;
 
-	private boolean initialRun;
-
 	@Getter
 	private NPC drillDemonNPC;
 
 	@Getter
 	private DrillExercise requestedExercise;
 
-	public void startUp()
+	@Inject
+	public DrillDemonHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
 	{
-		this.eventBus.register(this);
+		super(overlayManager, config, client);
+	}
+
+	@Override
+	public void onStartUp()
+	{
 		this.overlayManager.add(drillDemonOverlay);
 		this.exerciseMatsAnswerList = Lists.newArrayListWithExpectedSize(4);
 		this.exerciseMatsMultimap = HashMultimap.create(4, 2);
 		this.exerciseVarbitMatMultimap = HashMultimap.create(4, 2);
-		this.initialRun = true;
 		this.drillDemonNPC = null;
 		this.requestedExercise = null;
+
+		if (this.isLoggedIn()) {
+			this.clientThread.invoke(() ->
+			{
+				log.debug("Initializing varbits for Drill Demon exercise mappings in case plugin was enabled mid-event.");
+				for (int postVarbitID = VarbitID.MACRO_DRILLDEMON_POST_1; postVarbitID <= VarbitID.MACRO_DRILLDEMON_POST_4; postVarbitID++)
+				{
+					int postVarbitValue = client.getVarbitValue(postVarbitID);
+					VarbitChanged varbitChangedEvent = new VarbitChanged();
+					varbitChangedEvent.setVarbitId(postVarbitID);
+					varbitChangedEvent.setValue(postVarbitValue);
+					this.onVarbitChanged(varbitChangedEvent);
+				}
+			});
+		}
 	}
 
-	public void shutDown()
+	@Override
+	public void onShutdown()
 	{
-		this.eventBus.unregister(this);
 		this.overlayManager.remove(drillDemonOverlay);
 		this.exerciseMatsAnswerList = null;
 		this.exerciseMatsMultimap = null;
 		this.exerciseVarbitMatMultimap = null;
-		this.initialRun = true;
 		this.drillDemonNPC = null;
 		this.requestedExercise = null;
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return this.config.isDrillDemonEnabled();
 	}
 
 	@Subscribe
@@ -92,19 +114,6 @@ public class DrillDemonHelper
 		if (npcSpawned.getNpc().getId() == NpcID.MACRO_DRILLDEMON && this.isInDrillDemonLocalInstance() && (this.drillDemonNPC == null || isNPCInteractingWithPlayer))
 		{
 			this.drillDemonNPC = npcSpawned.getNpc();
-			if (this.initialRun)
-			{
-				log.debug("Initializing varbits for Drill Demon exercise mappings in case plugin was enabled mid-event.");
-				int post1Varbit = client.getVarbitValue(VarbitID.MACRO_DRILLDEMON_POST_1);
-				int post2Varbit = client.getVarbitValue(VarbitID.MACRO_DRILLDEMON_POST_2);
-				int post3Varbit = client.getVarbitValue(VarbitID.MACRO_DRILLDEMON_POST_3);
-				int post4Varbit = client.getVarbitValue(VarbitID.MACRO_DRILLDEMON_POST_4);
-				this.updateExerciseMappings(post1Varbit, 1);
-				this.updateExerciseMappings(post2Varbit, 2);
-				this.updateExerciseMappings(post3Varbit, 3);
-				this.updateExerciseMappings(post4Varbit, 4);
-				this.initialRun = false;
-			}
 		}
 	}
 
@@ -117,7 +126,6 @@ public class DrillDemonHelper
 			this.exerciseMatsAnswerList.clear();
 			this.exerciseMatsMultimap.clear();
 			this.exerciseVarbitMatMultimap.clear();
-			this.initialRun = true;
 			this.drillDemonNPC = null;
 			this.requestedExercise = null;
 		}
@@ -188,26 +196,38 @@ public class DrillDemonHelper
 	{
 		if (this.isInDrillDemonLocalInstance())
 		{
+			int addedPost = -1;
 			switch (groundObjectSpawned.getGroundObject().getId())
 			{
 				case ObjectID.BARRACK_MAT_1:
 					exerciseMatsMultimap.put(1, groundObjectSpawned.getGroundObject());
 					log.debug("Added exercise mat with ID {} to post 1", groundObjectSpawned.getGroundObject().getId());
+					addedPost = 1;
 					break;
 				case ObjectID.BARRACK_MAT_2:
 					exerciseMatsMultimap.put(2, groundObjectSpawned.getGroundObject());
 					log.debug("Added exercise mat with ID {} to post 2", groundObjectSpawned.getGroundObject().getId());
+					addedPost = 2;
 					break;
 				case ObjectID.BARRACK_MAT_3:
 					exerciseMatsMultimap.put(3, groundObjectSpawned.getGroundObject());
 					log.debug("Added exercise mat with ID {} to post 3", groundObjectSpawned.getGroundObject().getId());
+					addedPost = 3;
 					break;
 				case ObjectID.BARRACK_MAT_4:
 					exerciseMatsMultimap.put(4, groundObjectSpawned.getGroundObject());
 					log.debug("Added exercise mat with ID {} to post 4", groundObjectSpawned.getGroundObject().getId());
+					addedPost = 4;
 					break;
 				default:
 					break;
+			}
+
+			if (addedPost != -1)
+			{
+				// Update the mappings in case the mats spawned after the varbits were set
+				int postVarbit = client.getVarbitValue(VarbitID.MACRO_DRILLDEMON_POST_1 + (addedPost - 1));
+				this.updateExerciseMappings(postVarbit, addedPost);
 			}
 		}
 	}

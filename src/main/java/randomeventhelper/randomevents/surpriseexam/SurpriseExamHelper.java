@@ -23,20 +23,15 @@ import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
+import randomeventhelper.RandomEventHelperConfig;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
-public class SurpriseExamHelper
+public class SurpriseExamHelper extends PluginModule
 {
-	@Inject
-	private EventBus eventBus;
-
-	@Inject
-	private Client client;
-
 	@Inject
 	private ClientThread clientThread;
 
@@ -111,9 +106,15 @@ public class SurpriseExamHelper
 		InterfaceID.PatternNext.SELECT_3
 	};
 
-	public void startUp()
+	@Inject
+	public SurpriseExamHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
 	{
-		this.eventBus.register(this);
+		super(overlayManager, config, client);
+	}
+
+	@Override
+	public void onStartUp()
+	{
 		this.overlayManager.add(overlay);
 		this.patternCardHint = null;
 		this.patternCardAnswers = null;
@@ -121,11 +122,29 @@ public class SurpriseExamHelper
 		this.patternNextAnswer = null;
 		this.patternNextAnswerWidget = null;
 		this.relationshipSystem = new OSRSItemRelationshipSystem();
+
+		if (this.isLoggedIn())
+		{
+			this.clientThread.invokeLater(() -> {
+				if (this.client.getWidget(InterfaceID.PatternCards.HINT) != null)
+				{
+					WidgetLoaded matchingCardsWidgetLoaded = new WidgetLoaded();
+					matchingCardsWidgetLoaded.setGroupId(InterfaceID.PATTERN_CARDS);
+					this.eventBus.post(matchingCardsWidgetLoaded);
+				}
+				if (this.client.getWidget(InterfaceID.PatternNext.UNIVERSE_TEXT12) != null)
+				{
+					WidgetLoaded whatsNextWidgetLoaded = new WidgetLoaded();
+					whatsNextWidgetLoaded.setGroupId(InterfaceID.PATTERN_NEXT);
+					this.eventBus.post(whatsNextWidgetLoaded);
+				}
+			});
+		}
 	}
 
-	public void shutDown()
+	@Override
+	public void onShutdown()
 	{
-		this.eventBus.unregister(this);
 		this.overlayManager.remove(overlay);
 		this.patternCardHint = null;
 		this.patternCardAnswers = null;
@@ -133,6 +152,12 @@ public class SurpriseExamHelper
 		this.patternNextAnswer = null;
 		this.patternNextAnswerWidget = null;
 		this.relationshipSystem = null;
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return this.config.isSurpriseExamEnabled();
 	}
 
 	@Subscribe
