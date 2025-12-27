@@ -74,6 +74,9 @@ public class RandomEventHelperPlugin extends Plugin
 	private RandomEventHelperItemOverlay itemOverlay;
 
 	@Inject
+	private BeekeeperHelper beekeeperHelper;
+
+	@Inject
 	private PirateHelper pirateHelper;
 
 	@Inject
@@ -95,6 +98,7 @@ public class RandomEventHelperPlugin extends Plugin
 		this.overlayManager.add(itemOverlay);
 
 		pluginModulesMap = ImmutableMap.<String, PluginModule>builder()
+			.put("isBeekeeperEnabled", beekeeperHelper)
 			.put("isCaptArnavChestEnabled", pirateHelper)
 			.put("isDrillDemonEnabled", drillDemonHelper)
 			.put("isMimeEnabled", mimeHelper)
