@@ -15,21 +15,15 @@ import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.plugins.Plugin;
 import net.runelite.client.ui.overlay.OverlayManager;
+import randomeventhelper.RandomEventHelperConfig;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
-public class BeekeeperHelper extends Plugin
+public class BeekeeperHelper extends PluginModule
 {
-	@Inject
-	private EventBus eventBus;
-
-	@Inject
-	private Client client;
-
 	@Inject
 	private ClientThread clientThread;
 
@@ -42,18 +36,30 @@ public class BeekeeperHelper extends Plugin
 	@Getter
 	private ImmutableList<Widget> beehiveAnswerWidgets;
 
-	public void startUp()
+	@Inject
+	public BeekeeperHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
 	{
-		this.eventBus.register(this);
+		super(overlayManager, config, client);
+	}
+
+	@Override
+	public void onStartUp()
+	{
 		this.overlayManager.add(beekeeperOverlay);
 		this.beehiveAnswerWidgets = null;
 	}
 
-	public void shutDown()
+	@Override
+	public void onShutdown()
 	{
-		this.eventBus.unregister(this);
 		this.overlayManager.remove(beekeeperOverlay);
 		this.beehiveAnswerWidgets = null;
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return this.config.isBeekeeperEnabled();
 	}
 
 	@Subscribe
