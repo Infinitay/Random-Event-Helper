@@ -49,6 +49,18 @@ public class QuizMasterHelper extends PluginModule
 	{
 		this.overlayManager.add(quizMasterOverlay);
 		this.quizAnswerWidget = null;
+
+		if (this.isLoggedIn())
+		{
+			this.clientThread.invokeLater(() -> {
+				if (this.client.getWidget(InterfaceID.MacroQuizshow.BUTTONS) != null)
+				{
+					WidgetLoaded quizMasterButtonsWidgetLoaded = new WidgetLoaded();
+					quizMasterButtonsWidgetLoaded.setGroupId(InterfaceID.MACRO_QUIZSHOW);
+					this.eventBus.post(quizMasterButtonsWidgetLoaded);
+				}
+			});
+		}
 	}
 
 	@Override
