@@ -88,6 +88,9 @@ public class RandomEventHelperPlugin extends Plugin
 	@Inject
 	private SurpriseExamHelper surpriseExamHelper;
 
+	@Inject
+	private QuizMasterHelper quizMasterHelper;
+
 	// <String, PluginModule> -> <configKeyForIsEnabled, PluginModuleInstance>
 	private Map<String, PluginModule> pluginModulesMap;
 
@@ -103,6 +106,7 @@ public class RandomEventHelperPlugin extends Plugin
 			.put("isDrillDemonEnabled", drillDemonHelper)
 			.put("isMimeEnabled", mimeHelper)
 			.put("isSurpriseExamEnabled", surpriseExamHelper)
+			.put("isQuizMasterEnabled", quizMasterHelper)
 			.build();
 		// Start only the enabled modules
 		for (PluginModule module : pluginModulesMap.values())
