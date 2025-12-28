@@ -12,21 +12,16 @@ import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
+import randomeventhelper.RandomEventHelperConfig;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
-public class SandwichLadyHelper
+public class SandwichLadyHelper extends PluginModule
 {
-	@Inject
-	private EventBus eventBus;
-
-	@Inject
-	private Client client;
-
 	@Inject
 	private ClientThread clientThread;
 
@@ -42,9 +37,15 @@ public class SandwichLadyHelper
 	private final String SANDWICH_LADY_TRAY_REGEX = "Have a (?<foodName>[\\w\\s]+) for free!";
 	private final Pattern SANDWICH_LADY_PATTERN = Pattern.compile(SANDWICH_LADY_TRAY_REGEX, Pattern.CASE_INSENSITIVE);
 
-	public void startUp()
+	@Inject
+	public SandwichLadyHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
 	{
-		this.eventBus.register(this);
+		super(overlayManager, config, client);
+	}
+
+	@Override
+	public void onStartUp()
+	{
 		this.overlayManager.add(sandwichLadyOverlay);
 		this.trayFoodAnswerWidget = null;
 		WidgetLoaded temp = new WidgetLoaded();
@@ -52,11 +53,18 @@ public class SandwichLadyHelper
 		onWidgetLoaded(temp);
 	}
 
-	public void shutDown()
+	@Override
+	public void onShutdown()
 	{
 		this.eventBus.unregister(this);
 		this.overlayManager.remove(sandwichLadyOverlay);
 		this.trayFoodAnswerWidget = null;
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return this.config.isSandwichLadyEnabled();
 	}
 
 	@Subscribe
