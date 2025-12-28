@@ -30,23 +30,18 @@ import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.VarbitID;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.ui.overlay.OverlayManager;
+import randomeventhelper.RandomEventHelperConfig;
 import randomeventhelper.RandomEventHelperPlugin;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
-public class GravediggerHelper
+public class GravediggerHelper extends PluginModule
 {
-	@Inject
-	private EventBus eventBus;
-
-	@Inject
-	private Client client;
-
 	@Inject
 	private ItemManager itemManager;
 
@@ -56,6 +51,7 @@ public class GravediggerHelper
 	@Inject
 	private OverlayManager overlayManager;
 
+	@Inject
 	private GravediggerOverlay gravediggerOverlay;
 
 	@Inject
@@ -79,10 +75,15 @@ public class GravediggerHelper
 	@Getter
 	private Set<Integer> coffinsInInventory;
 
-	public void startUp(GravediggerOverlay gravediggerOverlay)
+	@Inject
+	public GravediggerHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
 	{
-		this.gravediggerOverlay = gravediggerOverlay;
-		this.eventBus.register(this);
+		super(overlayManager, config, client);
+	}
+
+	@Override
+	public void onStartUp()
+	{
 		this.overlayManager.add(this.gravediggerOverlay);
 		this.overlayManager.add(gravediggerItemOverlay);
 		this.initiallyEnteredGraveDiggerArea = true;
@@ -94,13 +95,12 @@ public class GravediggerHelper
 		this.coffinsInInventory = Sets.newHashSetWithExpectedSize(5);
 	}
 
-	public void shutDown()
+	@Override
+	public void onShutdown()
 	{
-		this.eventBus.unregister(this);
 		if (this.gravediggerOverlay != null)
 		{
 			this.overlayManager.remove(gravediggerOverlay);
-			this.gravediggerOverlay = null;
 		}
 		this.overlayManager.remove(gravediggerItemOverlay);
 		this.initiallyEnteredGraveDiggerArea = true;
@@ -110,6 +110,12 @@ public class GravediggerHelper
 		this.previousInventory = null;
 		this.currentInventoryItems = null;
 		this.coffinsInInventory = null;
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return this.config.isGravediggerEnabled();
 	}
 
 	@Subscribe
