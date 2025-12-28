@@ -78,7 +78,13 @@ public class GravediggerOverlay extends Overlay
 					Color placedCoffinTransparentColor = this.getTransparentColor(placedCoffin.getColor(), 50);
 
 					// Renders the check or cross above the grave depending on if the correct coffin is placed
-					Point centeredSpritePoint = Perspective.getCanvasImageLocation(client, grave.getFilledGrave().getLocalLocation(), checkBufferedImage, 0);
+					GameObject graveObject = grave.getFilledGrave() != null ? grave.getFilledGrave() : grave.getEmptyGrave();
+					if (graveObject == null)
+					{
+						continue;
+					}
+
+					Point centeredSpritePoint = Perspective.getCanvasImageLocation(client, graveObject.getLocalLocation(), checkBufferedImage, 0);
 					if (centeredSpritePoint != null)
 					{
 						if (placedCoffin != requiredCoffin)
