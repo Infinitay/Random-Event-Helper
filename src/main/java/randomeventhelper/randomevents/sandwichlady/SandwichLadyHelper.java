@@ -48,9 +48,18 @@ public class SandwichLadyHelper extends PluginModule
 	{
 		this.overlayManager.add(sandwichLadyOverlay);
 		this.trayFoodAnswerWidget = null;
-		WidgetLoaded temp = new WidgetLoaded();
-		temp.setGroupId(InterfaceID.SANDWICH_TRAY);
-		onWidgetLoaded(temp);
+
+		if (this.isLoggedIn())
+		{
+			this.clientThread.invokeLater(() -> {
+				if (this.client.getWidget(InterfaceID.SandwichTray.SANDWHICH_REFRESHMENT_LAYER) != null)
+				{
+					WidgetLoaded sandwichLadyTrayRefreshmentWidgetLoaded = new WidgetLoaded();
+					sandwichLadyTrayRefreshmentWidgetLoaded.setGroupId(InterfaceID.SANDWICH_TRAY);
+					this.eventBus.post(sandwichLadyTrayRefreshmentWidgetLoaded);
+				}
+			});
+		}
 	}
 
 	@Override
