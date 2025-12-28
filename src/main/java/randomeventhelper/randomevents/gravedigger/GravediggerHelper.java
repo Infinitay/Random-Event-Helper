@@ -18,18 +18,15 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameObject;
 import net.runelite.api.Item;
-import net.runelite.api.NPC;
-import net.runelite.api.Tile;
 import net.runelite.api.events.GameObjectSpawned;
-import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.NpcDespawned;
-import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.VarbitID;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SpriteManager;
@@ -43,21 +40,19 @@ import randomeventhelper.pluginmodulesystem.PluginModule;
 public class GravediggerHelper extends PluginModule
 {
 	@Inject
+	private ClientThread clientThread;
+
+	@Inject
 	private ItemManager itemManager;
 
 	@Inject
 	private SpriteManager spriteManager;
 
 	@Inject
-	private OverlayManager overlayManager;
-
-	@Inject
 	private GravediggerOverlay gravediggerOverlay;
 
 	@Inject
 	private GravediggerItemOverlay gravediggerItemOverlay;
-
-	private boolean initiallyEnteredGraveDiggerArea;
 
 	// <Grave Number, Grave>
 	@Getter
@@ -86,24 +81,57 @@ public class GravediggerHelper extends PluginModule
 	{
 		this.overlayManager.add(this.gravediggerOverlay);
 		this.overlayManager.add(gravediggerItemOverlay);
-		this.initiallyEnteredGraveDiggerArea = true;
 		this.graveMap = Maps.newHashMapWithExpectedSize(5);
 		this.coffinItemImageMap = Maps.newHashMapWithExpectedSize(5);
 		this.coffinSkillImageMap = Maps.newHashMapWithExpectedSize(5);
 		this.previousInventory = HashMultiset.create();
 		this.currentInventoryItems = HashMultiset.create();
 		this.coffinsInInventory = Sets.newHashSetWithExpectedSize(5);
+
+		if (this.isLoggedIn())
+		{
+			this.clientThread.invokeLater(() -> {
+				ItemContainerChanged itemContainerChangedEvent = new ItemContainerChanged(InventoryID.INV, this.client.getItemContainer(InventoryID.INV));
+				this.onItemContainerChanged(itemContainerChangedEvent);
+
+				for (GraveNumber graveNumber : GraveNumber.values())
+				{
+					VarbitChanged graveTypeVarbitChangedEvent = new VarbitChanged();
+					graveTypeVarbitChangedEvent.setVarbitId(graveNumber.getGraveTypeVarbitID());
+					graveTypeVarbitChangedEvent.setValue(this.client.getVarbitValue(graveNumber.getGraveTypeVarbitID()));
+					VarbitChanged placedCoffinVarbitChangedEvent = new VarbitChanged();
+					placedCoffinVarbitChangedEvent.setVarbitId(graveNumber.getPlacedCoffinVarbitID());
+					placedCoffinVarbitChangedEvent.setValue(this.client.getVarbitValue(graveNumber.getPlacedCoffinVarbitID()));
+					// Use this#onVarbitChanged instead of EventBus#post because there is some CrowdsourcingVarbits exception due to us not having a proper VarpID (-1)
+					this.onVarbitChanged(graveTypeVarbitChangedEvent);
+					this.onVarbitChanged(placedCoffinVarbitChangedEvent);
+				}
+
+				// Make sure we're fetching the sprites and item images on the client thread
+				if (this.coffinItemImageMap.isEmpty())
+				{
+					for (Coffin coffin : Coffin.values())
+					{
+						this.coffinItemImageMap.put(coffin, coffin.getItemImage(this.itemManager));
+					}
+				}
+
+				if (this.coffinSkillImageMap.isEmpty())
+				{
+					for (Coffin coffin : Coffin.values())
+					{
+						this.coffinSkillImageMap.put(coffin, coffin.getSkillIconImage(this.spriteManager));
+					}
+				}
+			});
+		}
 	}
 
 	@Override
 	public void onShutdown()
 	{
-		if (this.gravediggerOverlay != null)
-		{
-			this.overlayManager.remove(gravediggerOverlay);
-		}
+		this.overlayManager.remove(gravediggerOverlay);
 		this.overlayManager.remove(gravediggerItemOverlay);
-		this.initiallyEnteredGraveDiggerArea = true;
 		this.graveMap = null;
 		this.coffinItemImageMap = null;
 		this.coffinSkillImageMap = null;
@@ -116,79 +144,6 @@ public class GravediggerHelper extends PluginModule
 	public boolean isEnabled()
 	{
 		return this.config.isGravediggerEnabled();
-	}
-
-	@Subscribe
-	public void onGameTick(GameTick gameTick)
-	{
-		// There is an edgecase where when you're at the grave digger random event if a varb is still 0 then it won't fire.
-		// So lets handle this by checking to see if a player is in the grave digger random event area via NPC Leo spawn
-		// And by using a separate variable to make sure not to run this constantly every game tick
-		if (this.initiallyEnteredGraveDiggerArea)
-		{
-			if (this.currentInventoryItems.isEmpty())
-			{
-				ItemContainerChanged itemContainerChangedEvent = new ItemContainerChanged(InventoryID.INV, this.client.getItemContainer(InventoryID.INV));
-				this.onItemContainerChanged(itemContainerChangedEvent);
-			}
-
-			if (this.graveMap.isEmpty())
-			{
-				Tile[][][] sceneTiles = this.client.getTopLevelWorldView().getScene().getTiles(); // [Plane][x][y]
-				Tile[][] tilesInZ = sceneTiles[this.client.getTopLevelWorldView().getPlane()]; // Tiles at [z]
-
-				for (Tile[] tilesInZX : tilesInZ) // Tiles at [z][x]
-				{
-					for (Tile tile : tilesInZX) // Tiles at [z][x][y]
-					{
-						if (tile != null && tile.getGameObjects() != null)
-						{
-							for (GameObject gameObject : tile.getGameObjects())
-							{
-								// There seemed to be some case where the game object was null
-								if (gameObject == null)
-								{
-									continue;
-								}
-								GameObjectSpawned gameObjectSpawnedEvent = new GameObjectSpawned();
-								gameObjectSpawnedEvent.setGameObject(gameObject);
-								this.onGameObjectSpawned(gameObjectSpawnedEvent);
-							}
-						}
-					}
-				}
-			}
-
-			for (GraveNumber graveNumber : GraveNumber.values())
-			{
-				VarbitChanged graveTypeVarbitChangedEvent = new VarbitChanged();
-				graveTypeVarbitChangedEvent.setVarbitId(graveNumber.getGraveTypeVarbitID());
-				graveTypeVarbitChangedEvent.setValue(this.client.getVarbitValue(graveNumber.getGraveTypeVarbitID()));
-				VarbitChanged placedCoffinVarbitChangedEvent = new VarbitChanged();
-				placedCoffinVarbitChangedEvent.setVarbitId(graveNumber.getPlacedCoffinVarbitID());
-				placedCoffinVarbitChangedEvent.setValue(this.client.getVarbitValue(graveNumber.getPlacedCoffinVarbitID()));
-				this.onVarbitChanged(graveTypeVarbitChangedEvent);
-				this.onVarbitChanged(placedCoffinVarbitChangedEvent);
-			}
-
-			if (this.coffinItemImageMap.isEmpty())
-			{
-				for (Coffin coffin : Coffin.values())
-				{
-					this.coffinItemImageMap.put(coffin, coffin.getItemImage(this.itemManager));
-				}
-			}
-
-			if (this.coffinSkillImageMap.isEmpty())
-			{
-				for (Coffin coffin : Coffin.values())
-				{
-					this.coffinSkillImageMap.put(coffin, coffin.getSkillIconImage(this.spriteManager));
-				}
-			}
-
-			this.initiallyEnteredGraveDiggerArea = false;
-		}
 	}
 
 	@Subscribe
@@ -303,26 +258,11 @@ public class GravediggerHelper extends PluginModule
 	}
 
 	@Subscribe
-	public void onNpcSpawned(NpcSpawned npcSpawned)
-	{
-		NPC npc = npcSpawned.getNpc();
-		if (RandomEventHelperPlugin.isInRandomEventLocalInstance(this.client))
-		{
-			if (npc.getId() == NpcID.MACRO_GRAVEDIGGER)
-			{
-				log.debug("Grave Digger Leo NPC spawned in grave digger random event area.");
-				this.initiallyEnteredGraveDiggerArea = true;
-			}
-		}
-	}
-
-	@Subscribe
 	public void onNpcDespawned(NpcDespawned npcDespawned)
 	{
 		if (npcDespawned.getNpc().getId() == NpcID.MACRO_GRAVEDIGGER)
 		{
 			log.debug("Grave Digger Leo NPC despawned, resetting grave digger area state.");
-			this.initiallyEnteredGraveDiggerArea = false;
 			this.graveMap.clear();
 			this.coffinItemImageMap.clear();
 			this.previousInventory.clear();
