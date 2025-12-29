@@ -18,23 +18,19 @@ import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.gameval.ObjectID;
 import net.runelite.client.config.ConfigManager;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.PluginMessage;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginManager;
+import net.runelite.client.ui.overlay.OverlayManager;
+import randomeventhelper.RandomEventHelperConfig;
 import randomeventhelper.RandomEventHelperPlugin;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
-public class MazeHelper
+public class MazeHelper extends PluginModule
 {
-	@Inject
-	private EventBus eventBus;
-
-	@Inject
-	private Client client;
-
 	@Inject
 	private PluginManager pluginManager;
 
@@ -48,7 +44,14 @@ public class MazeHelper
 	private boolean isFirstRun;
 	private GameObject mazeExitObject; // Only purpose this serves is to avoid unnecessary onGameTick
 
-	public void startUp()
+	@Inject
+	public MazeHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
+	{
+		super(overlayManager, config, client);
+	}
+
+	@Override
+	public void onStartUp()
 	{
 		Optional<Plugin> shortestPathPlugin = pluginManager.getPlugins().stream().filter(plugin -> plugin.getName().equals("Shortest Path")).findAny();
 
@@ -76,14 +79,13 @@ public class MazeHelper
 			this.configManager.setConfiguration("randomeventhelper", "isMazeEnabled", false);
 			return;
 		}
-		this.eventBus.register(this);
 		this.isFirstRun = true;
 		this.mazeExitObject = null;
 	}
 
-	public void shutDown()
+	@Override
+	public void onShutdown()
 	{
-		this.eventBus.unregister(this);
 		Optional<Plugin> shortestPathPlugin = pluginManager.getPlugins().stream().filter(plugin -> plugin.getName().equals("Shortest Path")).findAny();
 		if (shortestPathPlugin.isPresent())
 		{
@@ -97,6 +99,12 @@ public class MazeHelper
 		}
 		this.isFirstRun = true;
 		this.mazeExitObject = null;
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return this.config.isMazeEnabled();
 	}
 
 	@Subscribe
