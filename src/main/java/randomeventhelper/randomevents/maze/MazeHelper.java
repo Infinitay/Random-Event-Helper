@@ -80,7 +80,7 @@ public class MazeHelper extends PluginModule
 		Optional<Plugin> shortestPathPlugin = pluginManager.getPlugins().stream().filter(plugin -> plugin.getName().equals("Shortest Path")).findAny();
 		if (shortestPathPlugin.isPresent())
 		{
-			if (!pluginManager.isPluginEnabled(shortestPathPlugin.get()))
+			if (pluginManager.isPluginEnabled(shortestPathPlugin.get()))
 			{
 				this.sendShortestPathClear();
 			}
