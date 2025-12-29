@@ -9,13 +9,10 @@ import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
-import net.runelite.api.GameObject;
-import net.runelite.api.Tile;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameObjectDespawned;
 import net.runelite.api.events.GameObjectSpawned;
-import net.runelite.api.events.GameTick;
 import net.runelite.api.gameval.ObjectID;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -40,9 +37,6 @@ public class MazeHelper extends PluginModule
 	private static final String PLUGIN_MESSAGE_SHORTEST_PATH_NAMESPACE = "shortestpath";
 	private static final String PLUGIN_MESSAGE_SHORTEST_PATH_PATH_KEY = "path";
 	private static final String PLUGIN_MESSAGE_SHORTEST_PATH_CLEAR_KEY = "clear";
-
-	private boolean isFirstRun;
-	private GameObject mazeExitObject; // Only purpose this serves is to avoid unnecessary onGameTick
 
 	@Inject
 	public MazeHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
@@ -77,10 +71,7 @@ public class MazeHelper extends PluginModule
 			});
 			// Remember to disable Maze config option as well
 			this.configManager.setConfiguration("randomeventhelper", "isMazeEnabled", false);
-			return;
 		}
-		this.isFirstRun = true;
-		this.mazeExitObject = null;
 	}
 
 	@Override
@@ -91,14 +82,9 @@ public class MazeHelper extends PluginModule
 		{
 			if (!pluginManager.isPluginEnabled(shortestPathPlugin.get()))
 			{
-				if (this.isFirstRun)
-				{
-					this.sendShortestPathClear();
-				}
+				this.sendShortestPathClear();
 			}
 		}
-		this.isFirstRun = true;
-		this.mazeExitObject = null;
 	}
 
 	@Override
@@ -117,8 +103,6 @@ public class MazeHelper extends PluginModule
 				LocalPoint shrineLocalPoint = gameObjectSpawned.getGameObject().getLocalLocation();
 				WorldPoint instancedShrineWorldPoint = WorldPoint.fromLocalInstance(this.client, shrineLocalPoint);
 				log.debug("Detected maze exit object spawn, setting shortest path to it");
-				this.isFirstRun = false;
-				this.mazeExitObject = gameObjectSpawned.getGameObject();
 				this.sendShortestPathDestination(instancedShrineWorldPoint);
 			}
 		}
@@ -130,46 +114,7 @@ public class MazeHelper extends PluginModule
 		if (gameObjectDespawned.getGameObject().getId() == ObjectID.MACRO_MAZE_COMPLETE)
 		{
 			log.debug("Detected maze exit object despawn, clearing shortest path");
-			this.isFirstRun = false;
-			this.mazeExitObject = null;
 			this.sendShortestPathClear();
-		}
-	}
-
-	@Subscribe
-	public void onGameTick(GameTick gameTick)
-	{
-		if (this.isFirstRun && this.isInMazeLocalInstance() && this.mazeExitObject == null)
-		{
-			log.debug("Cold start detected in maze instance, searching for maze exit object");
-			this.isFirstRun = false;
-
-			Tile[][][] sceneTiles = this.client.getTopLevelWorldView().getScene().getTiles(); // [Plane][x][y]
-			Tile[][] tilesInZ = sceneTiles[this.client.getTopLevelWorldView().getPlane()]; // Tiles at [z]
-			for (Tile[] tilesInZX : tilesInZ) // Tiles at [z][x]
-			{
-				for (Tile tile : tilesInZX) // Tiles at [z][x][y]
-				{
-					if (tile != null && tile.getGameObjects() != null)
-					{
-						for (GameObject gameObject : tile.getGameObjects())
-						{
-							// There seemed to be some case where the game object was null
-							if (gameObject == null)
-							{
-								continue;
-							}
-							GameObjectSpawned gameObjectSpawnedEvent = new GameObjectSpawned();
-							gameObjectSpawnedEvent.setGameObject(gameObject);
-							this.onGameObjectSpawned(gameObjectSpawnedEvent);
-							if (this.mazeExitObject != null)
-							{
-								return;
-							}
-						}
-					}
-				}
-			}
 		}
 	}
 
