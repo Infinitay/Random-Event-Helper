@@ -82,6 +82,9 @@ public class RandomEventHelperPlugin extends Plugin
 	private DrillDemonHelper drillDemonHelper;
 
 	@Inject
+	private FreakyForesterHelper freakyForesterHelper;
+
+	@Inject
 	private GravediggerHelper gravediggerHelper;
 
 	@Inject
@@ -112,6 +115,7 @@ public class RandomEventHelperPlugin extends Plugin
 			.put("isBeekeeperEnabled", beekeeperHelper)
 			.put("isCaptArnavChestEnabled", pirateHelper)
 			.put("isDrillDemonEnabled", drillDemonHelper)
+			.put("isFreakyForesterEnabled", freakyForesterHelper)
 			.put("isGravediggerEnabled", gravediggerHelper)
 			.put("isMazeEnabled", mazeHelper)
 			.put("isMimeEnabled", mimeHelper)
