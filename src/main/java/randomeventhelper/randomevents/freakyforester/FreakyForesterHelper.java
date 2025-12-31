@@ -2,7 +2,6 @@ package randomeventhelper.randomevents.freakyforester;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import com.google.inject.Provides;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -20,25 +19,18 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.gameval.NpcID;
-import net.runelite.client.config.ConfigManager;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
 import randomeventhelper.RandomEventHelperConfig;
 import randomeventhelper.RandomEventHelperPlugin;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
-public class FreakyForesterHelper
+public class FreakyForesterHelper extends PluginModule
 {
-	@Inject
-	private EventBus eventBus;
-
-	@Inject
-	private Client client;
-
 	@Inject
 	private OverlayManager overlayManager;
 
@@ -78,15 +70,15 @@ public class FreakyForesterHelper
 		.put(4, NpcID.MACRO_PHEASANT_MODEL_4)
 		.build();
 
-	@Provides
-	RandomEventHelperConfig provideConfig(ConfigManager configManager)
+	@Inject
+	public FreakyForesterHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
 	{
-		return configManager.getConfig(RandomEventHelperConfig.class);
+		super(overlayManager, config, client);
 	}
 
-	public void startUp()
+	@Override
+	public void onStartUp()
 	{
-		this.eventBus.register(this);
 		this.overlayManager.add(freakyForesterOverlay);
 		this.pheasantHighlightMode = config.pheasantHighlightMode();
 		this.pheasantTailFeathers = 0;
@@ -95,9 +87,9 @@ public class FreakyForesterHelper
 		this.freakyForesterNPC = null;
 	}
 
-	public void shutDown()
+	@Override
+	public void onShutdown()
 	{
-		this.eventBus.unregister(this);
 		this.overlayManager.remove(freakyForesterOverlay);
 		this.pheasantTailFeathers = 0;
 		this.pheasantNPCSet = null;
@@ -105,6 +97,12 @@ public class FreakyForesterHelper
 		this.specificPheasantNPC = null;
 		this.initialRun = true;
 		this.freakyForesterNPC = null;
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return this.config.isFreakyForesterEnabled();
 	}
 
 	@Subscribe
