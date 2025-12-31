@@ -61,8 +61,6 @@ public class FreakyForesterHelper extends PluginModule
 	@Getter
 	private NPC freakyForesterNPC;
 
-	private boolean initialRun;
-
 	private final Map<Integer, Integer> PHEASANT_TAIL_NPCID_MAP = ImmutableMap.<Integer, Integer>builder()
 		.put(1, NpcID.MACRO_PHEASANT_MODEL_1)
 		.put(2, NpcID.MACRO_PHEASANT_MODEL_2)
@@ -83,7 +81,6 @@ public class FreakyForesterHelper extends PluginModule
 		this.pheasantHighlightMode = config.pheasantHighlightMode();
 		this.pheasantTailFeathers = 0;
 		this.pheasantNPCSet = Sets.newHashSet();
-		this.initialRun = true;
 		this.freakyForesterNPC = null;
 	}
 
@@ -95,7 +92,6 @@ public class FreakyForesterHelper extends PluginModule
 		this.pheasantNPCSet = null;
 		this.nearestPheasantNPC = null;
 		this.specificPheasantNPC = null;
-		this.initialRun = true;
 		this.freakyForesterNPC = null;
 	}
 
@@ -213,12 +209,6 @@ public class FreakyForesterHelper extends PluginModule
 	@Subscribe
 	public void onGameTick(GameTick gameTick)
 	{
-		// In case the player is already in the Freaky Forester instance when the plugin is started
-		if (this.initialRun && this.isInFreakyForesterInstance() && this.pheasantNPCSet.isEmpty())
-		{
-			this.initialRun = false;
-			this.client.getTopLevelWorldView().npcs().stream().filter(npc -> !npc.isDead()).forEach(npc -> this.onNpcSpawned(new NpcSpawned(npc)));
-		}
 		if (this.pheasantHighlightMode == PheasantMode.NEAREST && !this.pheasantNPCSet.isEmpty())
 		{
 			this.updateNearestPheasant();
