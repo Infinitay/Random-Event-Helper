@@ -140,17 +140,22 @@ public class MazeHelper extends PluginModule
 
 	private Map<String, Object> generatePathPayload(WorldPoint destinationWorldPoint)
 	{
-		WorldPoint startingWorldPoint = client.getLocalPlayer().getWorldLocation();
-		if (startingWorldPoint == null)
+		LocalPoint startingLocalPoint = client.getLocalPlayer().getLocalLocation();
+
+		if (startingLocalPoint == null)
 		{
-			log.warn("[#generatePathPayload-WorldPoint] Player's starting world point is null, cannot generate payload starting point");
+			log.warn("[#generatePathPayload(WorldPoint)] Player's starting local point is null, cannot generate payload starting point");
 			return Map.of();
 		}
-		return this.generatePathPayload(startingWorldPoint, destinationWorldPoint);
+
+		WorldPoint localInstanceStartingWorldPoint = WorldPoint.fromLocalInstance(this.client, startingLocalPoint);
+		log.debug("[#generatePathPayload(WorldPoint)] Converted player's local point {} to local instance world point {}", startingLocalPoint, localInstanceStartingWorldPoint);
+		return this.generatePathPayload(localInstanceStartingWorldPoint, destinationWorldPoint);
 	}
 
 	private Map<String, Object> generatePathPayload(WorldPoint startingWorldPoint, WorldPoint destinationWorldPoint)
 	{
+		log.debug("[#generatePathPayload(WorldPoint, WorldPoint)] Generated path payload with starting point: {} and destination point: {}", startingWorldPoint, destinationWorldPoint);
 		return Map.of(
 			"start", startingWorldPoint,
 			"target", destinationWorldPoint
