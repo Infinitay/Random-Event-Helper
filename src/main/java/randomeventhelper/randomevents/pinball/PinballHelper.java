@@ -15,6 +15,7 @@ import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.VarbitID;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
@@ -27,6 +28,9 @@ import randomeventhelper.pluginmodulesystem.PluginModule;
 public class PinballHelper extends PluginModule
 {
 	@Inject
+	private ClientThread clientThread;
+
+	@Inject
 	private OverlayManager overlayManager;
 
 	@Inject
@@ -37,8 +41,6 @@ public class PinballHelper extends PluginModule
 
 	// <Varbit value, Object ID>
 	private Map<Integer, GameObject> pinballPostsMap;
-
-	private boolean initial = false;
 
 	@Inject
 	public PinballHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
@@ -52,7 +54,11 @@ public class PinballHelper extends PluginModule
 		this.overlayManager.add(pinballOverlay);
 		this.activePinballPost = null;
 		this.pinballPostsMap = Maps.newHashMap();
-		this.initial = false;
+
+		if (this.isLoggedIn())
+		{
+			this.initiateActivePost();
+		}
 	}
 
 	@Override
@@ -61,7 +67,6 @@ public class PinballHelper extends PluginModule
 		this.overlayManager.remove(pinballOverlay);
 		this.activePinballPost = null;
 		this.pinballPostsMap = null;
-		this.initial = false;
 	}
 
 	@Override
@@ -93,18 +98,9 @@ public class PinballHelper extends PluginModule
 			{
 				log.debug("A pinball post has spawned: {}", pinballPost);
 				this.pinballPostsMap.put(pinballPost.getVarbitValue(), gameObject);
-
-				if (!this.initial)
+				if (this.activePinballPost == null)
 				{
-					int currentPostVarbitValue = this.client.getVarbitValue(VarbitID.MACRO_PINBALL_CURRENT);
-					if (currentPostVarbitValue != 0)
-					{
-						VarbitChanged temp = new VarbitChanged();
-						temp.setVarbitId(VarbitID.MACRO_PINBALL_CURRENT);
-						temp.setValue(currentPostVarbitValue);
-						this.onVarbitChanged(temp);
-						this.initial = true;
-					}
+					this.initiateActivePost();
 				}
 			}
 		}
@@ -121,6 +117,10 @@ public class PinballHelper extends PluginModule
 			{
 				log.debug("The active pinball post has changed to: {}", pinballPost);
 				this.activePinballPost = this.pinballPostsMap.get(value);
+				if (this.activePinballPost == null)
+				{
+					log.warn("The active pinball post game object is null for pinball post: {}", pinballPost);
+				}
 			}
 			else
 			{
@@ -141,8 +141,19 @@ public class PinballHelper extends PluginModule
 				log.debug("Pinball game has ended so resetting active pinball post and pinball posts set.");
 				this.activePinballPost = null;
 				this.pinballPostsMap = Maps.newHashMap();
-				this.initial = false;
 			}
 		}
+	}
+
+	private void initiateActivePost()
+	{
+		this.clientThread.invokeLater(() ->
+		{
+			int postVarbitValue = this.client.getVarbitValue(VarbitID.MACRO_PINBALL_CURRENT);
+			VarbitChanged varbitChangedEvent = new VarbitChanged();
+			varbitChangedEvent.setVarbitId(VarbitID.MACRO_PINBALL_CURRENT);
+			varbitChangedEvent.setValue(postVarbitValue);
+			this.onVarbitChanged(varbitChangedEvent);
+		});
 	}
 }
