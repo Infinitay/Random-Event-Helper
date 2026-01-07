@@ -15,22 +15,17 @@ import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.VarbitID;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
+import randomeventhelper.RandomEventHelperConfig;
 import randomeventhelper.RandomEventHelperPlugin;
+import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
-public class PinballHelper
+public class PinballHelper extends PluginModule
 {
-	@Inject
-	private EventBus eventBus;
-
-	@Inject
-	private Client client;
-
 	@Inject
 	private OverlayManager overlayManager;
 
@@ -45,22 +40,34 @@ public class PinballHelper
 
 	private boolean initial = false;
 
-	public void startUp()
+	@Inject
+	public PinballHelper(OverlayManager overlayManager, RandomEventHelperConfig config, Client client)
 	{
-		this.eventBus.register(this);
+		super(overlayManager, config, client);
+	}
+
+	@Override
+	public void onStartUp()
+	{
 		this.overlayManager.add(pinballOverlay);
 		this.activePinballPost = null;
 		this.pinballPostsMap = Maps.newHashMap();
 		this.initial = false;
 	}
 
-	public void shutDown()
+	@Override
+	public void onShutdown()
 	{
-		this.eventBus.unregister(this);
 		this.overlayManager.remove(pinballOverlay);
 		this.activePinballPost = null;
 		this.pinballPostsMap = null;
 		this.initial = false;
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return this.config.isPinballEnabled();
 	}
 
 	@Subscribe
