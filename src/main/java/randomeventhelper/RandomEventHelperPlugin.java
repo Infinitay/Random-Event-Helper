@@ -94,6 +94,9 @@ public class RandomEventHelperPlugin extends Plugin
 	private MimeHelper mimeHelper;
 
 	@Inject
+	private PinballHelper pinballHelper;
+
+	@Inject
 	private SandwichLadyHelper sandwichLadyHelper;
 
 	@Inject
@@ -119,6 +122,7 @@ public class RandomEventHelperPlugin extends Plugin
 			.put("isGravediggerEnabled", gravediggerHelper)
 			.put("isMazeEnabled", mazeHelper)
 			.put("isMimeEnabled", mimeHelper)
+			.put("isPinballEnabled", pinballHelper)
 			.put("isSandwichLadyEnabled", sandwichLadyHelper)
 			.put("isSurpriseExamEnabled", surpriseExamHelper)
 			.put("isQuizMasterEnabled", quizMasterHelper)
