@@ -14,7 +14,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.CommandExecuted;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.WidgetClosed;
@@ -23,9 +25,13 @@ import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.chat.ChatColorType;
+import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.Text;
 import randomeventhelper.RandomEventHelperConfig;
+import randomeventhelper.RandomEventHelperPlugin;
 import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
@@ -37,6 +43,9 @@ public class SurpriseExamHelper extends PluginModule
 
 	@Inject
 	private OverlayManager overlayManager;
+
+	@Inject
+	private ChatMessageManager chatMessageManager;
 
 	@Inject
 	private SurpriseExamOverlay overlay;
@@ -286,6 +295,33 @@ public class SurpriseExamHelper extends PluginModule
 	}
 
 	@Subscribe
+	public void onChatMessage(ChatMessage chatMessage)
+	{
+		String sanitizedChatMessage = Text.sanitizeMultilineText(chatMessage.getMessage());
+		if (chatMessage.getType() == ChatMessageType.DIALOG)
+		{
+			if (this.isInSurpriseExamLocalInstance() && sanitizedChatMessage.startsWith("Mr. Mordaut"))
+			{
+				sanitizedChatMessage = sanitizedChatMessage.replace("Mr. Mordaut|", "");
+				log.debug("The last puzzle solution was incorrect");
+
+				if (sanitizedChatMessage.startsWith("No") || sanitizedChatMessage.startsWith("That's WRONG") || sanitizedChatMessage.startsWith("How unfortunate, you FAILED"))
+				{
+					// Formatting idea thanks to Resource Pack plugin (https://github.com/melkypie/resource-packs)
+					String incorrectPuzzleMessage = RandomEventHelperPlugin.getChatMessageBuilderWithPrefix().append("The puzzle solution was incorrect. You can type '")
+						.append(ChatColorType.HIGHLIGHT)
+						.append("::exportexampuzzle")
+						.append(ChatColorType.NORMAL)
+						.append("' to export the data to your logs and clipboard. Please share it by opening an issue on GitHub.")
+						.build();
+					// Has to be ChatMessageType.CONSOLE to properly render the formatting highlights - GAMEMESSAGE will highlight everything after the first highlight
+					RandomEventHelperPlugin.sendChatMessage(this.chatMessageManager, incorrectPuzzleMessage);
+				}
+			}
+		}
+	}
+
+	@Subscribe
 	public void onCommandExecuted(CommandExecuted executedCommand)
 	{
 		if (executedCommand.getCommand().equalsIgnoreCase("exportexampuzzle"))
@@ -311,6 +347,10 @@ public class SurpriseExamHelper extends PluginModule
 			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 			clipboard.setContents(new StringSelection(sb.toString()), null);
 			log.info(sb.toString());
+			String exportedMessage = RandomEventHelperPlugin.getChatMessageBuilderWithPrefix()
+				.append("Exported surprise exam puzzle data to logs and also copied to clipboard.")
+				.build();
+			RandomEventHelperPlugin.sendChatMessage(this.chatMessageManager, exportedMessage);
 		}
 	}
 
@@ -406,5 +446,10 @@ public class SurpriseExamHelper extends PluginModule
 		}
 		log.warn("No matching selection widget found for model widget ID: {}", modelWidget.getId());
 		return null;
+	}
+
+	private boolean isInSurpriseExamLocalInstance()
+	{
+		return RandomEventHelperPlugin.getRegionIDFromCurrentLocalPointInstanced(client) == 7502;
 	}
 }
