@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Actor;
+import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.DynamicObject;
 import net.runelite.api.GameObject;
@@ -25,6 +26,10 @@ import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.chat.ChatColorType;
+import net.runelite.client.chat.ChatMessageBuilder;
+import net.runelite.client.chat.ChatMessageManager;
+import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -278,5 +283,21 @@ public class RandomEventHelperPlugin extends Plugin
 	public static boolean isInRandomEventLocalInstance(Client client)
 	{
 		return RandomEventHelperPlugin.getRegionIDFromCurrentLocalPointInstanced(client) == 7758;
+	}
+
+	public static ChatMessageBuilder getChatMessageBuilderWithPrefix()
+	{
+		return new ChatMessageBuilder()
+			.append(ChatColorType.NORMAL)
+			.append("[")
+			.append(ChatColorType.HIGHLIGHT)
+			.append("Random Event Helper")
+			.append(ChatColorType.NORMAL)
+			.append("] ");
+	}
+
+	public static void sendChatMessage(ChatMessageManager chatMessageManager, String runeLiteFormattedMessage)
+	{
+		chatMessageManager.queue(QueuedMessage.builder().type(ChatMessageType.CONSOLE).runeLiteFormattedMessage(runeLiteFormattedMessage).build());
 	}
 }
