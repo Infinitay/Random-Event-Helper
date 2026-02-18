@@ -182,8 +182,9 @@ public class SurpriseExamHelper extends PluginModule
 					log.debug("Exam hint widget loaded with text: {}", this.patternCardHint);
 					if (this.patternCardHint != null && !this.patternCardHint.isEmpty())
 					{
-						log.debug("Exam available pattern card items: {}", this.getPatternCardMap().values().asList());
-						List<RandomEventItem> answerItems = this.relationshipSystem.findItemsByHint(this.patternCardHint, this.getPatternCardMap().values().asList(), 3);
+						List<RandomEventItem> availablePatternCardItems = this.getPatternCardMap().values().asList();
+						log.debug("Exam available pattern card items: {}", availablePatternCardItems);
+						List<RandomEventItem> answerItems = this.relationshipSystem.findItemsByHint(this.patternCardHint,availablePatternCardItems, 3);
 						log.debug("Found answer items for exam hint '{}': {}", this.patternCardHint, answerItems);
 						if (answerItems.size() >= 3)
 						{
