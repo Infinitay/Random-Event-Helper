@@ -21,7 +21,7 @@ A RuneLite plugin to help solve random events by displaying solutions for each r
 
 - Highlights the correct answer for both the matching cards and next item sequence
   - Implemented via relations and keywords to hopefully support any variation of the questions/answers
-    - As a result of using keywords, there could be a chance the solutions are incorrect. If this is the case, please open an issue on the [GitHub repository](https://github.com/Infinitay/Random-Event-Solver/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen) with a screenshot of the random event question.
+    - As a result of using keywords, there could be a chance the solutions are incorrect. If this is the case, please open an issue on the [GitHub repository](https://github.com/Infinitay/Random-Event-Solver/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen) with a screenshot of the random event question and/or the logs via the chat command `::exportexampuzzle` or `::exportexampuzzles` to copy the data to your clipboard and output it to the log file.
     - _Disclaimer, the **relation matching system** was generated with AI, with me fixing the bugs and building upon the keywords._
 
 ### [Beekeeper](https://oldschool.runescape.wiki/w/Beekeeper_(Random_Event))
