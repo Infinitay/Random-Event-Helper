@@ -41,7 +41,8 @@ import randomeventhelper.RandomEventHelperConfig;
 import randomeventhelper.RandomEventHelperPlugin;
 import randomeventhelper.pluginmodulesystem.PluginModule;
 import randomeventhelper.randomevents.surpriseexam.data.ExamQuestion;
-import randomeventhelper.randomevents.surpriseexam.data.ExamQuestionType;
+import randomeventhelper.randomevents.surpriseexam.data.MatchingCardsQuestion;
+import randomeventhelper.randomevents.surpriseexam.data.NextItemQuestion;
 
 @Slf4j
 @Singleton
@@ -78,6 +79,12 @@ public class SurpriseExamHelper extends PluginModule
 	private ExamQuestion currentExamQuestion;
 
 	private List<ExamQuestion> examQuestionHistory;
+
+	private static final Gson EXAM_QUESTION_GSON_LOGGER = new GsonBuilder()
+		.registerTypeAdapterFactory(ExamQuestion.gsonTypeAdapterFactory())
+		.serializeNulls()
+		.setPrettyPrinting()
+		.create();
 
 	private static final int[] PATTERNCARDS_INTERFACEIDS_AVAILABLE_CARD_MODELS = {
 		InterfaceID.PatternCards.CARD_0,
@@ -197,17 +204,18 @@ public class SurpriseExamHelper extends PluginModule
 				{
 					this.patternCardHint = examHintWidget.getText();
 					log.debug("Exam hint widget loaded with text: {}", this.patternCardHint);
+					MatchingCardsQuestion matchingCardsQuestion = new MatchingCardsQuestion();
+					this.currentExamQuestion = matchingCardsQuestion;
 					if (this.patternCardHint != null && !this.patternCardHint.isEmpty())
 					{
 						List<RandomEventItem> availablePatternCardItems = this.getPatternCardMap().values().asList();
 						log.debug("Exam available pattern card items: {}", availablePatternCardItems);
 						List<RandomEventItem> answerItems = this.relationshipSystem.findItemsByHint(this.patternCardHint, availablePatternCardItems, 3);
 						log.debug("Found answer items for exam hint '{}': {}", this.patternCardHint, answerItems);
-						this.currentExamQuestion = new ExamQuestion(ExamQuestionType.MATCHING_CARDS);
 						this.examQuestionHistory = this.examQuestionHistory != null ? this.examQuestionHistory : Lists.newArrayList();
 						this.examQuestionHistory.add(this.currentExamQuestion);
-						this.currentExamQuestion.setMatchingHint(this.patternCardHint);
-						this.currentExamQuestion.setMatchingAvailableCards(availablePatternCardItems);
+						matchingCardsQuestion.setMatchingHint(this.patternCardHint);
+						matchingCardsQuestion.setMatchingAvailableCards(availablePatternCardItems);
 						if (answerItems.size() >= 3)
 						{
 							this.patternCardAnswers = ImmutableSet.copyOf(answerItems);
@@ -225,14 +233,14 @@ public class SurpriseExamHelper extends PluginModule
 								.filter(Objects::nonNull)
 								.collect(ImmutableSet.toImmutableSet());
 							log.debug("Pattern card answers set to: {}", this.patternCardAnswers);
-							this.currentExamQuestion.setMatchingAnswerItems(answerItems.subList(0, 3));
+							matchingCardsQuestion.setMatchingAnswerItems(answerItems.subList(0, 3));
 						}
 						else
 						{
 							log.warn("Found {} items for exam hint '{}', expected 3.", answerItems.size(), this.patternCardHint);
 							this.patternCardAnswers = null;
 							this.patternCardAnswerWidgets = null;
-							this.currentExamQuestion.setMatchingAnswerItems(null); // Okay to use ImmutableList here since we always set it to either this empty list or a sublist, and not modify it
+							matchingCardsQuestion.setMatchingAnswerItems(null); // Okay to use ImmutableList here since we always set it to either this empty list or a sublist, and not modify it
 						}
 					}
 					else
@@ -241,9 +249,9 @@ public class SurpriseExamHelper extends PluginModule
 						this.patternCardHint = null;
 						this.patternCardAnswers = null;
 						this.patternCardAnswerWidgets = null;
-						this.currentExamQuestion.setMatchingHint(null);
-						this.currentExamQuestion.setMatchingAvailableCards(null);
-						this.currentExamQuestion.setMatchingAnswerItems(null);
+						matchingCardsQuestion.setMatchingHint(null);
+						matchingCardsQuestion.setMatchingAvailableCards(null);
+						matchingCardsQuestion.setMatchingAnswerItems(null);
 					}
 				}
 			});
@@ -257,6 +265,8 @@ public class SurpriseExamHelper extends PluginModule
 				{
 					String whatsNextText = whatsNextTextWidget.getText();
 					log.debug("What's next widget text loaded: {}", whatsNextText);
+					NextItemQuestion nextItemQuestion = new NextItemQuestion();
+					this.currentExamQuestion = nextItemQuestion;
 					if (whatsNextText != null && !whatsNextText.isEmpty())
 					{
 						List<RandomEventItem> initialSelectionItems = this.getPatternNextInitialSelectionMap().values().asList();
@@ -264,25 +274,24 @@ public class SurpriseExamHelper extends PluginModule
 						log.debug("Exam next initial selection items: {}", initialSelectionItems);
 						log.debug("Exam next choice items: {}", choicesItems);
 						RandomEventItem answerItem = this.relationshipSystem.findMissingItem(initialSelectionItems, choicesItems);
-						this.currentExamQuestion = new ExamQuestion(ExamQuestionType.NEXT_ITEM);
 						this.examQuestionHistory = this.examQuestionHistory != null ? this.examQuestionHistory : Lists.newArrayList();
 						this.examQuestionHistory.add(this.currentExamQuestion);
-						this.currentExamQuestion.setNextInitialItemSequence(initialSelectionItems);
-						this.currentExamQuestion.setNextAvailableItems(choicesItems);
+						nextItemQuestion.setNextInitialItemSequence(initialSelectionItems);
+						nextItemQuestion.setNextAvailableItems(choicesItems);
 						if (answerItem != null)
 						{
 							this.patternNextAnswer = answerItem;
 							Integer interfaceID = getKeyForValue(this.getPatternNextChoicesMap(), answerItem);
 							this.patternNextAnswerWidget = interfaceID != null ? this.client.getWidget(interfaceID) : null;
 							log.debug("Pattern next answer set to: {}", this.patternNextAnswer);
-							this.currentExamQuestion.setNextAnswerItem(answerItem);
+							nextItemQuestion.setNextAnswerItem(answerItem);
 						}
 						else
 						{
 							log.warn("No valid answer found for what's next text '{}'.", whatsNextText);
 							this.patternNextAnswer = null;
 							this.patternNextAnswerWidget = null;
-							this.currentExamQuestion.setNextAnswerItem(null);
+							nextItemQuestion.setNextAnswerItem(null);
 						}
 					}
 					else
@@ -290,9 +299,9 @@ public class SurpriseExamHelper extends PluginModule
 						log.warn("Next hint widget text is empty or null.");
 						this.patternNextAnswer = null;
 						this.patternNextAnswerWidget = null;
-						this.currentExamQuestion.setNextInitialItemSequence(null);
-						this.currentExamQuestion.setNextAvailableItems(null);
-						this.currentExamQuestion.setNextAnswerItem(null);
+						nextItemQuestion.setNextInitialItemSequence(null);
+						nextItemQuestion.setNextAvailableItems(null);
+						nextItemQuestion.setNextAnswerItem(null);
 					}
 				}
 			});
@@ -343,13 +352,13 @@ public class SurpriseExamHelper extends PluginModule
 		}
 
 		// Don't worry about null checking currentExamQuestion because #onWidgetLoaded would have initialized it, and in this method we are checking clicks in those same Widget groups
-		if (clickedWidgetGroupID == InterfaceID.PATTERN_CARDS)
+		if (clickedWidgetGroupID == InterfaceID.PATTERN_CARDS && this.currentExamQuestion instanceof MatchingCardsQuestion)
 		{
-			List<RandomEventItem> selectedCards = this.currentExamQuestion.getMatchingSelectedCards();
+			List<RandomEventItem> selectedCards = ((MatchingCardsQuestion) this.currentExamQuestion).getMatchingSelectedCards();
 			if (selectedCards == null)
 			{
 				selectedCards = Lists.newArrayListWithCapacity(3);
-				this.currentExamQuestion.setMatchingSelectedCards(selectedCards); // Empty list
+				((MatchingCardsQuestion) this.currentExamQuestion).setMatchingSelectedCards(selectedCards); // Empty list
 			}
 
 			// Case 1. Player clicked a card that is already selected as part of their answer -> Remove the card from the selected answer cards
@@ -367,9 +376,9 @@ public class SurpriseExamHelper extends PluginModule
 			}
 		}
 
-		if (clickedWidgetGroupID == InterfaceID.PATTERN_NEXT)
+		if (clickedWidgetGroupID == InterfaceID.PATTERN_NEXT && this.currentExamQuestion instanceof NextItemQuestion)
 		{
-			this.currentExamQuestion.setNextSelectedItem(clickedItem);
+			((NextItemQuestion) this.currentExamQuestion).setNextSelectedItem(clickedItem);
 			log.debug("User selected the item {} as the next next item in the sequence.", clickedItem);
 		}
 	}
@@ -451,8 +460,7 @@ public class SurpriseExamHelper extends PluginModule
 		// In case people still use the old command name, lets add support both
 		if (executedCommand.getCommand().equalsIgnoreCase("exportexampuzzle") || executedCommand.getCommand().equalsIgnoreCase("exportexampuzzles"))
 		{
-			Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
-			String json = gson.toJson(this.examQuestionHistory != null ? this.examQuestionHistory : ImmutableList.of());
+			String json = EXAM_QUESTION_GSON_LOGGER.toJson(this.examQuestionHistory != null ? this.examQuestionHistory : ImmutableList.of());
 			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 			clipboard.setContents(new StringSelection(json), null);
 			log.info(json);
