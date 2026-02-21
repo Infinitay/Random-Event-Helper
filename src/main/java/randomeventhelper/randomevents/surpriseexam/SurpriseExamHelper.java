@@ -420,7 +420,7 @@ public class SurpriseExamHelper extends PluginModule
 			{
 				sanitizedChatMessage = sanitizedChatMessage.replace("Mr. Mordaut|", "");
 				Boolean answeredCorrectly = null;
-				if (sanitizedChatMessage.startsWith("No") || sanitizedChatMessage.startsWith("That's WRONG") || sanitizedChatMessage.startsWith("How unfortunate, you FAILED"))
+				if (this.doesMessageIndicateIncorrectAnswer(sanitizedChatMessage))
 				{
 					if (this.currentExamQuestion != null)
 					{
@@ -437,7 +437,7 @@ public class SurpriseExamHelper extends PluginModule
 					// Has to be ChatMessageType.CONSOLE to properly render the formatting highlights - GAMEMESSAGE will highlight everything after the first highlight
 					RandomEventHelperPlugin.sendChatMessage(this.chatMessageManager, incorrectPuzzleMessage);
 				}
-				else if (sanitizedChatMessage.startsWith("Wonderful!") || sanitizedChatMessage.startsWith("Finally") || sanitizedChatMessage.startsWith("That's correct!") || sanitizedChatMessage.startsWith("WELL DONE!"))
+				else if (this.doesMessageIndicateCorrectAnswer(sanitizedChatMessage))
 				{
 					if (this.currentExamQuestion != null)
 					{
@@ -563,6 +563,16 @@ public class SurpriseExamHelper extends PluginModule
 		}
 		log.warn("No matching selection widget found for model widget ID: {}", modelWidget.getId());
 		return null;
+	}
+
+	private boolean doesMessageIndicateCorrectAnswer(String sanitizedChatMessage)
+	{
+		return sanitizedChatMessage.startsWith("Wonderful!") || sanitizedChatMessage.startsWith("Finally") || sanitizedChatMessage.startsWith("That's correct!") || sanitizedChatMessage.startsWith("WELL DONE!");
+	}
+
+	private boolean doesMessageIndicateIncorrectAnswer(String sanitizedChatMessage)
+	{
+		return sanitizedChatMessage.startsWith("No") || sanitizedChatMessage.startsWith("That's WRONG") || sanitizedChatMessage.startsWith("How unfortunate, you FAILED");
 	}
 
 	private boolean isInSurpriseExamLocalInstance()
