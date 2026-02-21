@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -58,6 +57,9 @@ public class SurpriseExamHelper extends PluginModule
 	private ChatMessageManager chatMessageManager;
 
 	@Inject
+	private Gson gson;
+
+	@Inject
 	private SurpriseExamOverlay overlay;
 
 	private String patternCardHint;
@@ -80,11 +82,7 @@ public class SurpriseExamHelper extends PluginModule
 
 	private List<ExamQuestion> examQuestionHistory;
 
-	private static final Gson EXAM_QUESTION_GSON_LOGGER = new GsonBuilder()
-		.registerTypeAdapterFactory(ExamQuestion.gsonTypeAdapterFactory())
-		.serializeNulls()
-		.setPrettyPrinting()
-		.create();
+	private Gson gsonExamQuestionLogger;
 
 	private static final int[] PATTERNCARDS_INTERFACEIDS_AVAILABLE_CARD_MODELS = {
 		InterfaceID.PatternCards.CARD_0,
@@ -153,6 +151,11 @@ public class SurpriseExamHelper extends PluginModule
 		this.currentExamQuestion = null;
 		this.examQuestionHistory = null;
 		this.relationshipSystem = new OSRSItemRelationshipSystem();
+		this.gsonExamQuestionLogger = this.gson.newBuilder()
+			.registerTypeAdapterFactory(ExamQuestion.gsonTypeAdapterFactory())
+			.serializeNulls()
+			.setPrettyPrinting()
+			.create();
 
 		if (this.isLoggedIn())
 		{
@@ -185,6 +188,7 @@ public class SurpriseExamHelper extends PluginModule
 		this.currentExamQuestion = null;
 		this.examQuestionHistory = null;
 		this.relationshipSystem = null;
+		this.gsonExamQuestionLogger = null;
 	}
 
 	@Override
@@ -474,7 +478,7 @@ public class SurpriseExamHelper extends PluginModule
 		// In case people still use the old command name, lets add support both
 		if (executedCommand.getCommand().equalsIgnoreCase("exportexampuzzle") || executedCommand.getCommand().equalsIgnoreCase("exportexampuzzles"))
 		{
-			String json = EXAM_QUESTION_GSON_LOGGER.toJson(this.examQuestionHistory != null ? this.examQuestionHistory : ImmutableList.of());
+			String json = gsonExamQuestionLogger.toJson(this.examQuestionHistory != null ? this.examQuestionHistory : ImmutableList.of());
 			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 			clipboard.setContents(new StringSelection(json), null);
 			log.info(json);
