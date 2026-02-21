@@ -340,14 +340,29 @@ public class SurpriseExamHelper extends PluginModule
 		Widget clickedWidget = Objects.requireNonNull(menuOptionClicked.getWidget(), "Widget is null for the clicked menu option");
 		int clickedWidgetGroupID = WidgetUtil.componentToInterface(clickedWidget.getId());
 		int clickedWidgetModelID = clickedWidget.getModelId();
-		RandomEventItem clickedItem = RandomEventItem.fromModelID(clickedWidgetModelID);
+
+		RandomEventItem clickedItem = null;
+		// It turns out that when the user clicks on a Pattern Card, the game recognizes PatternCard.SELECT instead of PatternCard.CARD, so we need to fetch the corresponding CARD widget to fetch the model ID
+		if (clickedWidgetGroupID == InterfaceID.PATTERN_CARDS)
+		{
+			Widget patternCardCardWidget = this.getCorrespondingPatternCardWidgetFromSelectionWidget(clickedWidget);
+			if (patternCardCardWidget != null)
+			{
+				clickedItem = RandomEventItem.fromModelID(patternCardCardWidget.getModelId());
+			}
+		}
+		else
+		{
+			clickedItem = RandomEventItem.fromModelID(clickedWidgetModelID);
+		}
+
 		if (clickedItem != null)
 		{
 			log.debug("Clicked widget model ID {} corresponds to item {}", clickedWidgetModelID, clickedItem);
 		}
 		else
 		{
-			log.warn("Clicked widget model ID {} does not correspond to any known RandomEventItem", clickedWidgetModelID);
+			log.warn("Clicked widget model ID {} does not correspond to any known RandomEventItem (Associated Widget ID: {})", clickedWidgetModelID, clickedWidget.getId());
 			return;
 		}
 
@@ -361,15 +376,14 @@ public class SurpriseExamHelper extends PluginModule
 				((MatchingCardsQuestion) this.currentExamQuestion).setMatchingSelectedCards(selectedCards); // Empty list
 			}
 
-			// Case 1. Player clicked a card that is already selected as part of their answer -> Remove the card from the selected answer cards
-			// Case 2. Player clicked a card and there isn't 3 cards currently selected as the answer -> Add the card to the selected answer cards
-			// Case 3. List size == 3 and player clicked a card, so do nothing because the event doesn't allow more than 3 active selections and ignores the click
+			// Case 1. Player clicked a card that is already within selectedCards list -> Remove the card from the selected answer cards list
+			// Case 2. Player clicked a card that isn't already within selectedCards list -> Add the card to the selected answer cards list
 			if (selectedCards.contains(clickedItem))
 			{
 				selectedCards.remove(clickedItem);
 				log.debug("User unselected card item {}. Current selected cards: {}", clickedItem, selectedCards);
 			}
-			else if (selectedCards.size() < 3)
+			else
 			{
 				selectedCards.add(clickedItem);
 				log.debug("User selected card item {}. Current selected cards: {}", clickedItem, selectedCards);
@@ -562,6 +576,22 @@ public class SurpriseExamHelper extends PluginModule
 			}
 		}
 		log.warn("No matching selection widget found for model widget ID: {}", modelWidget.getId());
+		return null;
+	}
+
+	public Widget getCorrespondingPatternCardWidgetFromSelectionWidget(Widget selectionWidget)
+	{
+		// This method retrieves the widget for the pattern card model based on the selection widget.
+		// PATTERNCARDS_INTERFACEIDS_AVAILABLE_CARD_SELECTS[i] = PATTERNCARDS_INTERFACEIDS_AVAILABLE_CARD_MODELS[i]
+		// So if selectionWidget corresponds to PATTERNCARDS_INTERFACEIDS_AVAILABLE_CARD_SELECTS[i] then it should return PATTERNCARDS_INTERFACEIDS_AVAILABLE_CARD_MODELS[i]
+		for (int i = 0; i < PATTERNCARDS_INTERFACEIDS_AVAILABLE_CARD_SELECTS.length; i++)
+		{
+			if (selectionWidget.getId() == PATTERNCARDS_INTERFACEIDS_AVAILABLE_CARD_SELECTS[i])
+			{
+				return this.client.getWidget(PATTERNCARDS_INTERFACEIDS_AVAILABLE_CARD_MODELS[i]);
+			}
+		}
+		log.warn("No matching model widget found for selection widget ID: {}", selectionWidget.getId());
 		return null;
 	}
 
