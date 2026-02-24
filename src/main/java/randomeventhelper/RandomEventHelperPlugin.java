@@ -41,6 +41,7 @@ import randomeventhelper.pluginmodulesystem.PluginModule;
 import randomeventhelper.randomevents.beekeeper.BeekeeperHelper;
 import randomeventhelper.randomevents.drilldemon.DrillDemonHelper;
 import randomeventhelper.randomevents.freakyforester.FreakyForesterHelper;
+import randomeventhelper.randomevents.frog.FrogHelper;
 import randomeventhelper.randomevents.gravedigger.GravediggerHelper;
 import randomeventhelper.randomevents.maze.MazeHelper;
 import randomeventhelper.randomevents.mime.MimeHelper;
@@ -93,6 +94,9 @@ public class RandomEventHelperPlugin extends Plugin
 	private GravediggerHelper gravediggerHelper;
 
 	@Inject
+	private FrogHelper frogHelper;
+
+	@Inject
 	private MazeHelper mazeHelper;
 
 	@Inject
@@ -125,6 +129,7 @@ public class RandomEventHelperPlugin extends Plugin
 			.put("isDrillDemonEnabled", drillDemonHelper)
 			.put("isFreakyForesterEnabled", freakyForesterHelper)
 			.put("isGravediggerEnabled", gravediggerHelper)
+			.put("isFrogEnabled", frogHelper)
 			.put("isMazeEnabled", mazeHelper)
 			.put("isMimeEnabled", mimeHelper)
 			.put("isPinballEnabled", pinballHelper)
