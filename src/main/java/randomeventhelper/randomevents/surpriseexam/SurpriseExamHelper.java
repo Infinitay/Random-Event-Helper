@@ -317,8 +317,8 @@ public class SurpriseExamHelper extends PluginModule
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked menuOptionClicked)
 	{
-		// If the player is not in the event instance or (the click is not "Select" + there is no widget) -> Return
-		if (!isInSurpriseExamLocalInstance() || (!menuOptionClicked.getMenuOption().equals("Select") && menuOptionClicked.getWidget() == null))
+		// If the player is not in the event instance or (the click is not "Select" or there is no widget) -> Return
+		if (!isInSurpriseExamLocalInstance() || !menuOptionClicked.getMenuOption().equals("Select") || menuOptionClicked.getWidget() == null)
 		{
 			return;
 		}
