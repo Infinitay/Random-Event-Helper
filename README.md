@@ -172,8 +172,21 @@ https://github.com/user-attachments/assets/b9d810ba-be0b-4b09-a009-9aa5c2be8fb4
 </details>
 <details>
   <summary>Video</summary>
-  
-  https://github.com/user-attachments/assets/d6430888-785e-4d43-90bb-ab98b8b08415
+
+https://github.com/user-attachments/assets/d6430888-785e-4d43-90bb-ab98b8b08415
 </details>
 
 - Helps unlock the chest by highlighting which rotating dial align to the correct item
+
+### [Kiss the Frog](https://oldschool.runescape.wiki/w/Frog_(Kiss_the_frog))
+<details>
+  <summary>Screenshot</summary>
+  <img width="966" height="700" alt="image" src="https://github.com/user-attachments/assets/6ca312e9-a5ff-4340-a5e0-fc5a36771b67" />
+</details>
+<details>
+  <summary>Video</summary>
+
+_No video at this time_
+</details>
+
+- Highlights the correct frog to interact with
