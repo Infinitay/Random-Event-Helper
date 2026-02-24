@@ -43,7 +43,7 @@ public class SurpriseExamOverlay extends Overlay
 			}
 		}
 
-		if (plugin.getPatternNextAnswer() != null)
+		if (plugin.getPatternNextAnswerWidget() != null)
 		{
 			OverlayUtil.renderPolygon(graphics2D, plugin.getPatternNextAnswerWidget().getBounds(), Color.GREEN);
 		}
