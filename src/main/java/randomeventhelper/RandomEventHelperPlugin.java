@@ -129,7 +129,7 @@ public class RandomEventHelperPlugin extends Plugin
 			.put("isDrillDemonEnabled", drillDemonHelper)
 			.put("isFreakyForesterEnabled", freakyForesterHelper)
 			.put("isGravediggerEnabled", gravediggerHelper)
-			.put("isFrogEnabled", frogHelper)
+			.put("isKissTheFrogEnabled", frogHelper)
 			.put("isMazeEnabled", mazeHelper)
 			.put("isMimeEnabled", mimeHelper)
 			.put("isPinballEnabled", pinballHelper)
