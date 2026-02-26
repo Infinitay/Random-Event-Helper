@@ -1,6 +1,7 @@
 package randomeventhelper.randomevents.frog;
 
 import com.google.common.collect.ImmutableSet;
+import java.awt.Color;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -13,16 +14,25 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.InteractingChanged;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
+import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.NpcID;
+import net.runelite.api.widgets.JavaScriptCallback;
+import net.runelite.api.widgets.Widget;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
 import randomeventhelper.RandomEventHelperConfig;
+import randomeventhelper.RandomEventHelperPlugin;
 import randomeventhelper.pluginmodulesystem.PluginModule;
 
 @Slf4j
 @Singleton
 public class FrogHelper extends PluginModule
 {
+	@Inject
+	private ClientThread clientThread;
+
 	@Inject
 	private FrogOverlay frogOverlay;
 
@@ -53,6 +63,18 @@ public class FrogHelper extends PluginModule
 		this.crownedFrogNPC = null;
 		this.frogCrierNPC = null;
 		this.isEventActiveForPlayer = false;
+
+		if (this.isLoggedIn())
+		{
+			this.clientThread.invokeLater(() -> {
+				if (this.client.getWidget(InterfaceID.Chatmenu.OPTIONS) != null)
+				{
+					WidgetLoaded chatMenuOptionsWidgetLoaded = new WidgetLoaded();
+					chatMenuOptionsWidgetLoaded.setGroupId(InterfaceID.CHATMENU);
+					this.eventBus.post(chatMenuOptionsWidgetLoaded);
+				}
+			});
+		}
 	}
 
 	@Override
@@ -150,6 +172,44 @@ public class FrogHelper extends PluginModule
 					this.frogCrierNPC = null;
 				}
 			}
+		}
+	}
+
+	@Subscribe
+	public void onWidgetLoaded(WidgetLoaded widgetLoaded)
+	{
+		if (!this.isEventActiveForPlayer)
+		{
+			return;
+		}
+
+		if (widgetLoaded.getGroupId() == InterfaceID.CHATMENU)
+		{
+			this.clientThread.invokeLater(() -> {
+				Widget chatMenuOptionsWidget = this.client.getWidget(InterfaceID.Chatmenu.OPTIONS);
+				if (chatMenuOptionsWidget != null)
+				{
+					for (Widget optionWidget : chatMenuOptionsWidget.getDynamicChildren())
+					{
+						if (optionWidget != null && optionWidget.getText() != null && !optionWidget.getText().isEmpty())
+						{
+							if (optionWidget.getText().equals("Yes, I'd like to leave now."))
+							{
+								log.debug("Found 'Yes, I'd like to leave now.' chat menu option which indicates the player is in the dialogue with the Crowned Frog NPC and can leave Frog Land");
+								optionWidget.setTextColor(Color.GREEN.getRGB());
+								optionWidget.setOnMouseOverListener((JavaScriptCallback) ev -> {
+									optionWidget.setTextColor(Color.GREEN.getRGB());
+									optionWidget.setOpacity(128);
+								});
+								optionWidget.setOnMouseLeaveListener((JavaScriptCallback) ev -> {
+									optionWidget.setTextColor(Color.GREEN.getRGB());
+									optionWidget.setOpacity(0);
+								});
+							}
+						}
+					}
+				}
+			});
 		}
 	}
 
