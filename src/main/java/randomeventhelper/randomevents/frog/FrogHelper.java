@@ -193,9 +193,10 @@ public class FrogHelper extends PluginModule
 					{
 						if (optionWidget != null && optionWidget.getText() != null && !optionWidget.getText().isEmpty())
 						{
-							if (optionWidget.getText().equals("Yes, I'd like to leave now."))
+							String optionText = optionWidget.getText();
+							if (this.isOptionKiss(optionText) || this.isOptionTouch(optionText) || optionText.equals("Yes, I'd like to leave now."))
 							{
-								log.debug("Found 'Yes, I'd like to leave now.' chat menu option which indicates the player is in the dialogue with the Crowned Frog NPC and can leave Frog Land");
+								log.debug("Found chat menu option for \"{}\", highlighting and attaching listeners", optionText);
 								optionWidget.setTextColor(Color.GREEN.getRGB());
 								optionWidget.setOnMouseOverListener((JavaScriptCallback) ev -> {
 									optionWidget.setTextColor(Color.GREEN.getRGB());
@@ -235,6 +236,38 @@ public class FrogHelper extends PluginModule
 			log.debug("Could not find both the Frog Crier NPC and Crowned Frog NPC which indicates the Kiss the Frog random event is not active for the current player");
 			this.isEventActiveForPlayer = false;
 			return false;
+		}
+	}
+
+	private boolean isOptionTouch(String optionText)
+	{
+		switch (optionText)
+		{
+			case "Okay.":
+			case "Alright.":
+			case "All right.":
+			case "Sure, I will.":
+			case "Yeah, okay.":
+			case "I suppose so, sure.":
+			case "Very well, if a touch is all you need, I'll do it.":
+			case "Yes, I will touch you.":
+			case "Sure, I'll touch you.":
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	private boolean isOptionKiss(String optionText)
+	{
+		switch (optionText)
+		{
+			case "How about if we kiss?":
+			case "May I kiss you instead? ":
+			case "Would a kiss be acceptable?":
+				return true;
+			default:
+				return false;
 		}
 	}
 
