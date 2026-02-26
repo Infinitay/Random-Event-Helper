@@ -186,7 +186,8 @@ https://github.com/user-attachments/assets/d6430888-785e-4d43-90bb-ab98b8b08415
 <details>
   <summary>Video</summary>
 
-_No video at this time_
+https://github.com/user-attachments/assets/6af86020-3245-405b-a194-e5ee42f62a98
 </details>
 
-- Highlights the correct frog to interact with
+- Highlights the Crowned Frog to interact with
+- Highlights the correct positive options to select when interacting with the Crowned Frog
