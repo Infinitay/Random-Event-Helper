@@ -164,11 +164,22 @@ public class FrogHelper extends PluginModule
 			this.isEventActiveForPlayer = true;
 			return true;
 		}
+		else if (this.crownedFrogNPC != null && this.isInFrogLandInstance())
+		{
+			log.debug("Found the Crowned Frog NPC and the player is in the Frog Land instance which indicates the Kiss the Frog random event is for the current player");
+			this.isEventActiveForPlayer = true;
+			return true;
+		}
 		else
 		{
 			log.debug("Could not find both the Frog Crier NPC and Crowned Frog NPC which indicates the Kiss the Frog random event is not active for the current player");
 			this.isEventActiveForPlayer = false;
 			return false;
 		}
+	}
+
+	private boolean isInFrogLandInstance()
+	{
+		return RandomEventHelperPlugin.getRegionIDFromCurrentLocalPointInstanced(client) == 9802;
 	}
 }
