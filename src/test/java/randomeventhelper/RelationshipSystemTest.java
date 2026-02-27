@@ -144,6 +144,14 @@ public class RelationshipSystemTest
 		);
 		List<RandomEventItem> puzzle16ActualItems = relationshipSystem.findItemsByHint(puzzle16.getHint(), puzzle16.getGivenItems(), 3).subList(0, 3);
 		Assertions.assertThat(puzzle16ActualItems).containsExactlyInAnyOrderElementsOf(puzzle16.getExpectedMatchingItems());
+
+		RelationshipSystemTestMatchingData puzzle17 = new RelationshipSystemTestMatchingData(
+			"This pattern is igniting my brain.",
+			"[TROUT_COD_PIKE_SALMON_3, CANDLE_LANTERN, CUP_OF_TEA, LONGSWORD, LEDERHOSEN_HAT, TUNA, WATERING_CAN, LOGS, GEM_WITH_CROSS, HARPOON, PICKAXE, TINDERBOX, BOTTLE, KEY,HAMMER]",
+			List.of(RandomEventItem.CANDLE_LANTERN, RandomEventItem.LOGS, RandomEventItem.TINDERBOX)
+		);
+		List<RandomEventItem> puzzle17ActualItems = relationshipSystem.findItemsByHint(puzzle17.getHint(), puzzle17.getGivenItems(), 3).subList(0, 3);
+		Assertions.assertThat(puzzle17ActualItems).containsExactlyInAnyOrderElementsOf(puzzle17.getExpectedMatchingItems());
 	}
 
 	@Test

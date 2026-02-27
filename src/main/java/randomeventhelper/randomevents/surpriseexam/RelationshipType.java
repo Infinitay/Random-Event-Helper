@@ -12,7 +12,7 @@ public enum RelationshipType
 	ALCOHOL_PRODUCTION("alcohol, brewing, cocktail, beer, rum, gin, drinks"),
 	MAGIC_RUNECRAFTING("magic, runecrafting, runes, essence, spells, staff, abracadabra, hocus pocus"),
 	JEWELRY_CRAFTING("jewelry, gems, necklace, ring, crafting, status, shiny, precious, wearing all your bangles, bobbles and fineries"),
-	LIGHT_FIRE_SYSTEM("fire, light, candle, lantern, tinderbox, illumination"),
+	LIGHT_FIRE_SYSTEM("fire, light, candle, lantern, tinderbox, illumination, ignite, igniting"),
 	CONTAINER_STORAGE("container, storage, bottle, jug, pot, holding"),
 
 	// Thematic groups
