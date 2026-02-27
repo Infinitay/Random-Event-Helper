@@ -252,6 +252,7 @@ public class FrogHelper extends PluginModule
 			case "Very well, if a touch is all you need, I'll do it.":
 			case "Yes, I will touch you.":
 			case "Sure, I'll touch you.":
+			case "A touch? Yes, I'll do that.":
 				return true;
 			default:
 				return false;
