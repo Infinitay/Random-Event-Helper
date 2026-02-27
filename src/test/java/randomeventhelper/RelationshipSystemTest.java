@@ -168,7 +168,7 @@ public class RelationshipSystemTest
 
 		RelationshipSystemTestNextMissingItemData puzzle3 = new RelationshipSystemTestNextMissingItemData(
 			"[NECKLACE (41216), TIARA (41148), HOLY_SYMBOL (41159)]",
-			"[HAMMER (41183), RING (27091), HERRING_OR_MACKEREL (41193)]",
+			"[HAMMER (41183), RING (27091), BEER (41152), HERRING_OR_MACKEREL (41193)]",
 			RandomEventItem.RING
 		);
 		RandomEventItem puzzle3ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle3.getInitialSequenceItems(), puzzle3.getItemChoices());
