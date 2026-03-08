@@ -11,13 +11,13 @@ public enum RelationshipType
 	COOKING_PRODUCTION("cooking, food, chef, kitchen, bread, cake, meals"),
 	ALCOHOL_PRODUCTION("alcohol, brewing, cocktail, beer, rum, gin, drinks"),
 	MAGIC_RUNECRAFTING("magic, runecrafting, runes, essence, spells, staff, abracadabra, hocus pocus"),
-	JEWELRY_CRAFTING("jewelry, gems, necklace, ring, crafting, status, shiny, precious, wearing all your bangles, bobbles and fineries"),
+	JEWELRY_CRAFTING("jewelry, gems, necklace, ring, crafting, status, shiny, precious, wearing all your bangles, bobbles and fineries, accessory, accessories, silver, gold"),
 	LIGHT_FIRE_SYSTEM("fire, light, candle, lantern, tinderbox, illumination, ignite, igniting"),
 	CONTAINER_STORAGE("container, storage, bottle, jug, pot, holding"),
 
 	// Thematic groups
 	PIRATE_THEME("pirate, sea, nautical, hook, eyepatch, boots, hat, yarr, crime, strange"),
-	ENTERTAINMENT_THEME("entertainment, performance, jester, mime, mask, fun, clown, fool, mask, face, strange"),
+	ENTERTAINMENT_THEME("entertainment, performance, jester, mime, mask, fun, clown, fool, mask, face, strange, hairstyle, garment, garments"),
 	PROFESSIONAL_THEME("profession, work, chef, trade, job, occupation"),
 
 	// Equipment categories
@@ -30,7 +30,7 @@ public enum RelationshipType
 	FOOT_ARMOR("feet, boots, footwear, walking, protection"),
 	SHIELDS("shield, defense, blocking, protection, guard"),
 	MELEE_GEAR("melee, sword, scimitar, axe, mace, combat, sharp, helmet, platebody, platelegs, shield"),
-	JEWELRY_ACCESSORIES("jewelry, accessories, necklace, ring, status, shiny, precious, wearing all your bangles, bobbles and fineries"),
+	JEWELRY_ACCESSORIES("jewelry, accessories, accessory, necklace, ring, status, shiny, precious, wearing all your bangles, bobbles and fineries, silver, gold"),
 	FACE_ACCESSORIES("face, mask, eyepatch, hook, covering, facial"),
 
 	// Skill-based groupings
@@ -44,8 +44,8 @@ public enum RelationshipType
 	FISH("fish, raw, uncooked, sea, food, sea food, seafood, fishing, water"),
 	FRUITS("fruits, berries, fresh, healthy, vitamins, nature"),
 	BAKING_FOOD("cooked, food, meals, prepared, baked, ready"),
-	ALCOHOLIC_DRINKS("alcohol, drinks, beer, spirits, intoxicating, beverages, thirsty"),
-	DRINKS("drink, beverage, refreshing, hydrate, quench, thirsty, liquid, sip"),
+	ALCOHOLIC_DRINKS("alcohol, drinks, beer, spirits, intoxicating, beverages, thirsty, dehydrated"),
+	DRINKS("drink, beverage, refreshing, hydrate, quench, thirsty, liquid, sip, dehydrated"),
 
 	// Functional groupings
 	COMBAT_CONSUMABLES("combat, consumable, potion, bones, prayer, aid"),
