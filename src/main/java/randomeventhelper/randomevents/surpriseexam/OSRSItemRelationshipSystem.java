@@ -102,12 +102,13 @@ public class OSRSItemRelationshipSystem
 	private final Set<String> NEGATION_WORDS = Set.of("not", "dont", "don't", "no", "never", "hate", "avoid", "against");
 
 	private final Map<String, Set<RelationshipType>> NEGATION_OPPOSITE_MAP = Map.ofEntries(
-		Map.entry("ranged", Set.of(RelationshipType.MELEE_WEAPONS, RelationshipType.MELEE_GEAR)),
-		Map.entry("ranging", Set.of(RelationshipType.MELEE_WEAPONS, RelationshipType.MELEE_GEAR)),
-		Map.entry("range", Set.of(RelationshipType.MELEE_WEAPONS, RelationshipType.MELEE_GEAR)),
-		Map.entry("melee", Set.of(RelationshipType.RANGED_WEAPONS)),
-		Map.entry("magic", Set.of(RelationshipType.MELEE_WEAPONS, RelationshipType.RANGED_WEAPONS)),
-		Map.entry("spell", Set.of(RelationshipType.MELEE_WEAPONS, RelationshipType.RANGED_WEAPONS))
+		Map.entry("ranged", Set.of(RelationshipType.MELEE_WEAPONS, RelationshipType.MELEE_GEAR, RelationshipType.MAGIC_RUNES, RelationshipType.MAGIC_RUNECRAFTING)),
+		Map.entry("ranging", Set.of(RelationshipType.MELEE_WEAPONS, RelationshipType.MELEE_GEAR, RelationshipType.MAGIC_RUNES, RelationshipType.MAGIC_RUNECRAFTING)),
+		Map.entry("range", Set.of(RelationshipType.MELEE_WEAPONS, RelationshipType.MELEE_GEAR, RelationshipType.MAGIC_RUNES, RelationshipType.MAGIC_RUNECRAFTING)),
+		Map.entry("melee", Set.of(RelationshipType.RANGED_WEAPONS, RelationshipType.MAGIC_RUNES, RelationshipType.MAGIC_RUNECRAFTING)),
+		Map.entry("magic", Set.of(RelationshipType.RANGED_WEAPONS, RelationshipType.MELEE_WEAPONS, RelationshipType.MELEE_GEAR)),
+		Map.entry("mage", Set.of(RelationshipType.RANGED_WEAPONS, RelationshipType.MELEE_WEAPONS, RelationshipType.MELEE_GEAR)),
+		Map.entry("spell", Set.of(RelationshipType.RANGED_WEAPONS, RelationshipType.MELEE_WEAPONS, RelationshipType.MELEE_GEAR))
 	);
 
 	public OSRSItemRelationshipSystem()
@@ -116,6 +117,27 @@ public class OSRSItemRelationshipSystem
 		this.jaroWinklerDistance = new JaroWinklerDistance();
 	}
 
+	/**
+	 * Detects tokens in the riddle that are likely negated.
+	 *
+	 * <p>
+	 * This method analyzes the riddle text and identifies words that appear to be
+	 * negated by phrases such as <i>no</i>, <i>not</i>, <i>without</i>, or <i>hate</i>.
+	 * These tokens can then be excluded from further matching logic.
+	 * </p>
+	 *
+	 * <p><b>Example</b></p>
+	 * <pre>
+	 * Input:
+	 *   "Tools for warriors who hate ranging or magic."
+	 *
+	 * Output:
+	 *   ["ranging", "magic"]
+	 * </pre>
+	 *
+	 * @param riddle The riddle or hint text to analyze.
+	 * @return A {@code Set<String>} containing tokens that are likely negated within the provided riddle text.
+	 */
 	private Set<String> detectNegatedTokens(String riddle)
 	{
 		Set<String> negated = new HashSet<>();
@@ -229,11 +251,12 @@ public class OSRSItemRelationshipSystem
 		// Thematic groups
 		map.put(RelationshipType.PIRATE_THEME, Set.of(
 			RandomEventItem.PIRATE_HAT, RandomEventItem.PIRATE_BOOTS, RandomEventItem.PIRATE_HOOK,
-			RandomEventItem.EYE_PATCH, RandomEventItem.KEY, RandomEventItem.HIGHWAYMAN_MASK
+			RandomEventItem.EYE_PATCH, RandomEventItem.HIGHWAYMAN_MASK
 		));
 
 		map.put(RelationshipType.ENTERTAINMENT_THEME, Set.of(
-			RandomEventItem.JESTER_HAT, RandomEventItem.MIME_MASK, RandomEventItem.FROG_MASK, RandomEventItem.HIGHWAYMAN_MASK
+			RandomEventItem.JESTER_HAT, RandomEventItem.MIME_MASK, RandomEventItem.FROG_MASK, RandomEventItem.HIGHWAYMAN_MASK,
+			RandomEventItem.LEDERHOSEN_HAT, RandomEventItem.PIRATE_HAT
 		));
 
 		map.put(RelationshipType.PROFESSIONAL_THEME, Set.of(
@@ -449,18 +472,59 @@ public class OSRSItemRelationshipSystem
 		// Step 2: Expand keywords using context clues and synonyms
 		Set<String> expandedKeywords = expandWithContextAndSynonyms(riddleKeywords);
 
-		// Step 2.5: detect any negated tokens from hint (eg: "hate ranging or magic")
-		Set<String> negatedTokens = detectNegatedTokens(riddle);
+		// Step 2.5: detect any negated tokens from hint (eg: "hate ranging or magic" -> "ranging" and "magic" are negated)
+		Set<String> detectedNegatedTokens = detectNegatedTokens(riddle);
 
 		// Step 3: Score each relationship type based on keyword matches
+		// --- Advanced negation logic for combat styles ---
+		// If hint negates 2+ of melee, magic, range, boost the remaining style(s)
+		Set<String> combatStyles = Set.of("ranged", "ranging", "range", "melee", "magic", "mage", "spell");
+		Set<String> negatedCombatStyleKeys = new HashSet<>();
+		for (String neg : detectedNegatedTokens)
+		{
+			String n = neg.toLowerCase();
+			if (combatStyles.contains(n))
+			{
+				if (n.equals("ranged") || n.equals("ranging"))
+				{
+					n = "range";
+				}
+				if (n.equals("mage") || n.equals("spell"))
+				{
+					n = "magic";
+				}
+				negatedCombatStyleKeys.add(n);
+			}
+		}
+
+		// Map combat style to relationship
+		Map<String, Set<RelationshipType>> styleToRel = Map.of(
+			"melee", Set.of(RelationshipType.MELEE_WEAPONS, RelationshipType.MELEE_GEAR),
+			"magic", Set.of(RelationshipType.MAGIC_RUNES, RelationshipType.MAGIC_RUNECRAFTING),
+			"range", Set.of(RelationshipType.RANGED_WEAPONS)
+		);
+
+		Set<RelationshipType> boostableCombatStyleRelationshipTypes = new HashSet<>();
+		if (negatedCombatStyleKeys.size() >= 2)
+		{
+			// Boost the remaining style(s)
+			for (String style : styleToRel.keySet())
+			{
+				if (!negatedCombatStyleKeys.contains(style))
+				{
+					boostableCombatStyleRelationshipTypes.addAll(styleToRel.get(style));
+				}
+			}
+		}
+
 		for (RelationshipType type : RelationshipType.values())
 		{
 			double score = calculateRelationshipScore(type, expandedKeywords, riddleKeywords);
 			// Apply negation handling: if the relationship contains a negated token, penalize it
-			if (!negatedTokens.isEmpty())
+			if (!detectedNegatedTokens.isEmpty())
 			{
 				boolean containsNegated = false;
-				for (String neg : negatedTokens)
+				for (String neg : detectedNegatedTokens)
 				{
 					for (String relkw : type.getKeywordArray())
 					{
@@ -481,7 +545,7 @@ public class OSRSItemRelationshipSystem
 				}
 
 				// For negated tokens, if we have an opposite relationship mapping, boost the opposite(s)
-				for (String neg : negatedTokens)
+				for (String neg : detectedNegatedTokens)
 				{
 					Set<RelationshipType> opposites = NEGATION_OPPOSITE_MAP.get(neg.toLowerCase());
 					if (opposites != null && opposites.contains(type))
@@ -490,6 +554,11 @@ public class OSRSItemRelationshipSystem
 						break;
 					}
 				}
+			}
+			// Advanced: boost remaining (opposite) combat style if 2+ are negated
+			if (boostableCombatStyleRelationshipTypes.contains(type))
+			{
+				score *= 2.0; // Strong boost for the only remaining style
 			}
 			if (score > 0)
 			{
