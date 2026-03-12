@@ -282,7 +282,19 @@ public class RandomEventHelperPlugin extends Plugin
 	// Accounts for local instances too such as inside the pinball and gravekeeper random event
 	public static int getRegionIDFromCurrentLocalPointInstanced(Client client)
 	{
-		return WorldPoint.fromLocalInstance(client, client.getLocalPlayer().getLocalLocation()).getRegionID();
+		var localPlayer = client.getLocalPlayer();
+		if (localPlayer == null)
+		{
+			return -1;
+		}
+
+		var localLocation = localPlayer.getLocalLocation();
+		if (localLocation == null)
+		{
+			return -1;
+		}
+
+		return WorldPoint.fromLocalInstance(client, localLocation).getRegionID();
 	}
 
 	public static boolean isInRandomEventLocalInstance(Client client)
