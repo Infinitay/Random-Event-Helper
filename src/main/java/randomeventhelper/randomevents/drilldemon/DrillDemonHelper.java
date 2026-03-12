@@ -135,10 +135,7 @@ public class DrillDemonHelper extends PluginModule
 	public void onVarbitChanged(VarbitChanged varbitChanged)
 	{
 		// For some reason, when the player is within the maze random event, the varbits for the drill demon event fire/are modified
-		if (this.isInMazeLocalInstance())
-		{
-			return;
-		}
+		// So whenever a varbit comes in that's relevant for us, we have to first check if we're actually in the maze.
 
 		switch (varbitChanged.getVarbitId())
 		{
@@ -234,6 +231,11 @@ public class DrillDemonHelper extends PluginModule
 
 	private void updateExerciseMappings(int exerciseVarbitValue, int postNumber)
 	{
+		if (this.isInMazeLocalInstance())
+		{
+			return;
+		}
+
 		DrillExercise exercise = DrillExercise.VARBIT_TO_EXERCISE_MAP.get(exerciseVarbitValue);
 		if (exercise != null)
 		{
