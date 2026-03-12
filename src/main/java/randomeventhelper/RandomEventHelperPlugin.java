@@ -12,6 +12,7 @@ import net.runelite.api.DynamicObject;
 import net.runelite.api.GameObject;
 import net.runelite.api.NPC;
 import net.runelite.api.Player;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.ChatMessage;
@@ -282,7 +283,19 @@ public class RandomEventHelperPlugin extends Plugin
 	// Accounts for local instances too such as inside the pinball and gravekeeper random event
 	public static int getRegionIDFromCurrentLocalPointInstanced(Client client)
 	{
-		return WorldPoint.fromLocalInstance(client, client.getLocalPlayer().getLocalLocation()).getRegionID();
+		Player localPlayer = client.getLocalPlayer();
+		if (localPlayer == null)
+		{
+			return -1;
+		}
+
+		LocalPoint localLocation = localPlayer.getLocalLocation();
+		if (localLocation == null)
+		{
+			return -1;
+		}
+
+		return WorldPoint.fromLocalInstance(client, localLocation).getRegionID();
 	}
 
 	public static boolean isInRandomEventLocalInstance(Client client)
