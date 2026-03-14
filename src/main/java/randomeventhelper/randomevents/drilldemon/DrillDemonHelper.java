@@ -140,28 +140,16 @@ public class DrillDemonHelper extends PluginModule
 		switch (varbitChanged.getVarbitId())
 		{
 			case VarbitID.MACRO_DRILLDEMON_POST_1:
-				if (!this.isInMazeLocalInstance())
-				{
-					this.updateExerciseMappings(varbitChanged.getValue(), 1);
-				}
+				this.updateExerciseMappings(varbitChanged.getValue(), 1);
 				break;
 			case VarbitID.MACRO_DRILLDEMON_POST_2:
-				if (!this.isInMazeLocalInstance())
-				{
-					this.updateExerciseMappings(varbitChanged.getValue(), 2);
-				}
+				this.updateExerciseMappings(varbitChanged.getValue(), 2);
 				break;
 			case VarbitID.MACRO_DRILLDEMON_POST_3:
-				if (!this.isInMazeLocalInstance())
-				{
-					this.updateExerciseMappings(varbitChanged.getValue(), 3);
-				}
+				this.updateExerciseMappings(varbitChanged.getValue(), 3);
 				break;
 			case VarbitID.MACRO_DRILLDEMON_POST_4:
-				if (!this.isInMazeLocalInstance())
-				{
-					this.updateExerciseMappings(varbitChanged.getValue(), 4);
-				}
+				this.updateExerciseMappings(varbitChanged.getValue(), 4);
 				break;
 			default:
 				break;
@@ -243,6 +231,11 @@ public class DrillDemonHelper extends PluginModule
 
 	private void updateExerciseMappings(int exerciseVarbitValue, int postNumber)
 	{
+		if (this.isInMazeLocalInstance())
+		{
+			return;
+		}
+
 		DrillExercise exercise = DrillExercise.VARBIT_TO_EXERCISE_MAP.get(exerciseVarbitValue);
 		if (exercise != null)
 		{
