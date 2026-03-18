@@ -131,6 +131,6 @@ public enum RandomEventItem
 	@Override
 	public String toString()
 	{
-		return this.name() + " ("+ modelID + ")";
+		return this.name() + " (" + modelID + ")";
 	}
 }
