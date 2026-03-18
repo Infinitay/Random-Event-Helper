@@ -73,7 +73,8 @@ public class DrillDemonHelper extends PluginModule
 		this.drillDemonNPC = null;
 		this.requestedExercise = null;
 
-		if (this.isLoggedIn()) {
+		if (this.isLoggedIn())
+		{
 			this.clientThread.invokeLater(() ->
 			{
 				log.debug("Initializing varbits for Drill Demon exercise mappings in case plugin was enabled mid-event.");
