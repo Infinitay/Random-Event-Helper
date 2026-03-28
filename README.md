@@ -191,3 +191,16 @@ https://github.com/user-attachments/assets/6af86020-3245-405b-a194-e5ee42f62a98
 
 - Highlights the Crowned Frog to interact with
 - Highlights the correct positive options to select when interacting with the Crowned Frog
+
+### [Certer (Giles/Miles/Niles)](https://oldschool.runescape.wiki/w/Certer)
+<details>
+  <summary>Screenshot</summary>
+  <img width="966" height="700" alt="image" src="https://github.com/user-attachments/assets/d28cf029-981c-44dd-b28c-848b9e69fe2d" />
+</details>
+<details>
+  <summary>Video</summary>
+
+https://github.com/user-attachments/assets/91eb28a1-cd52-4837-9751-5f055f14b480
+</details>
+
+- Highlights the correct answer to the question asked by Certer of which item is being displayed
