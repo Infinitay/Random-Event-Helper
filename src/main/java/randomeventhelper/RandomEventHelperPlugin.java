@@ -40,6 +40,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import randomeventhelper.pluginmodulesystem.PluginModule;
 import randomeventhelper.randomevents.beekeeper.BeekeeperHelper;
+import randomeventhelper.randomevents.certer.CerterHelper;
 import randomeventhelper.randomevents.drilldemon.DrillDemonHelper;
 import randomeventhelper.randomevents.freakyforester.FreakyForesterHelper;
 import randomeventhelper.randomevents.frog.FrogHelper;
@@ -86,6 +87,9 @@ public class RandomEventHelperPlugin extends Plugin
 	private PirateHelper pirateHelper;
 
 	@Inject
+	private CerterHelper certerHelper;
+
+	@Inject
 	private DrillDemonHelper drillDemonHelper;
 
 	@Inject
@@ -127,6 +131,7 @@ public class RandomEventHelperPlugin extends Plugin
 		pluginModulesMap = ImmutableMap.<String, PluginModule>builder()
 			.put("isBeekeeperEnabled", beekeeperHelper)
 			.put("isCaptArnavChestEnabled", pirateHelper)
+			.put("isCerterEnabled", certerHelper)
 			.put("isDrillDemonEnabled", drillDemonHelper)
 			.put("isFreakyForesterEnabled", freakyForesterHelper)
 			.put("isGravediggerEnabled", gravediggerHelper)
