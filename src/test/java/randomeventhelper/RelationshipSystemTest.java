@@ -190,6 +190,22 @@ public class RelationshipSystemTest
 		);
 		List<RandomEventItem> puzzle22ActualItems = relationshipSystem.findItemsByHint(puzzle22.getHint(), puzzle22.getGivenItems(), 3).subList(0, 3);
 		Assertions.assertThat(puzzle22ActualItems).containsExactlyInAnyOrderElementsOf(puzzle22.getExpectedMatchingItems());
+
+		RelationshipSystemTestMatchingData puzzle23 = new RelationshipSystemTestMatchingData(
+			"Does this pattern leap out at you like magic?",
+			"[TROUT_COD_PIKE_SALMON_3, PIRATE_HAT, CUP_OF_TEA, TINDERBOX, BATTLE_AXE, MED_HELM, FIRE_RUNE, BOTTLE, GARDENING_TROWEL, NEEDLE, PIRATE_HOOK, STAFF, WATER_RUNE, INSULATED_BOOTS, EYE_PATCH]",
+			List.of(RandomEventItem.FIRE_RUNE, RandomEventItem.STAFF, RandomEventItem.WATER_RUNE)
+		);
+		List<RandomEventItem> puzzle23ActualItems = relationshipSystem.findItemsByHint(puzzle23.getHint(), puzzle23.getGivenItems(), 3).subList(0, 3);
+		Assertions.assertThat(puzzle23ActualItems).containsExactlyInAnyOrderElementsOf(puzzle23.getExpectedMatchingItems());
+
+		RelationshipSystemTestMatchingData puzzle24 = new RelationshipSystemTestMatchingData(
+			"There's nothing better than going hand-to-hand with these patterns.",
+			"[INSULATED_BOOTS, CROSSBOW, TROUT_COD_PIKE_SALMON_3, BOTTLE, BATTLE_AXE, BEER, LONGSWORD, RAKE, LOGS, POT, RUNE_OR_ESSENCE, SCIMITAR, BONES, NEEDLE, BAR]",
+			List.of(RandomEventItem.BATTLE_AXE, RandomEventItem.LONGSWORD, RandomEventItem.SCIMITAR)
+		);
+		List<RandomEventItem> puzzle24ActualItems = relationshipSystem.findItemsByHint(puzzle24.getHint(), puzzle24.getGivenItems(), 3).subList(0, 3);
+		Assertions.assertThat(puzzle24ActualItems).containsExactlyInAnyOrderElementsOf(puzzle24.getExpectedMatchingItems());
 	}
 
 	@Test
@@ -347,6 +363,22 @@ public class RelationshipSystemTest
 		);
 		RandomEventItem puzzle19ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle19.getInitialSequenceItems(), puzzle19.getItemChoices());
 		Assertions.assertThat(puzzle19ActualNextMissingItem).isEqualTo(puzzle19.getExpectedNextMissingItem());
+
+		RelationshipSystemTestNextMissingItemData puzzle20 = new RelationshipSystemTestNextMissingItemData(
+			"[HIGHWAYMAN_MASK, JESTER_HAT, PIRATE_HAT]",
+			"[PICKAXE, BREAD, LEDERHOSEN_HAT, CAKE]",
+			RandomEventItem.LEDERHOSEN_HAT
+		);
+		RandomEventItem puzzle20ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle20.getInitialSequenceItems(), puzzle20.getItemChoices());
+		Assertions.assertThat(puzzle20ActualNextMissingItem).isEqualTo(puzzle20.getExpectedNextMissingItem());
+
+		RelationshipSystemTestNextMissingItemData puzzle21 = new RelationshipSystemTestNextMissingItemData(
+			"[GARDENING_TROWEL, WATERING_CAN, SPADE]",
+			"[CAKE, WATER_RUNE, FIRE_RUNE, RAKE]",
+			RandomEventItem.RAKE
+		);
+		RandomEventItem puzzle21ActualNextMissingItem = relationshipSystem.findMissingItem(puzzle21.getInitialSequenceItems(), puzzle21.getItemChoices());
+		Assertions.assertThat(puzzle21ActualNextMissingItem).isEqualTo(puzzle21.getExpectedNextMissingItem());
 	}
 
 	@Data
