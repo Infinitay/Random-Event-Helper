@@ -71,7 +71,7 @@ public class OSRSItemRelationshipSystem
 		Map.entry("water", Set.of("fishing", "fish", "seafood", "ocean", "sea")),
 		Map.entry("sea", Set.of("fishing", "fish", "pirate", "nautical", "ocean")),
 		Map.entry("dragon", Set.of("combat", "weapon", "battle", "fighting")),
-		Map.entry("sword", Set.of("melee", "weapon", "combat", "blade")),
+		Map.entry("sword", Set.of("melee", "weapon", "combat", "blade", "hand-to-hand")),
 		Map.entry("bow", Set.of("range", "weapon", "arrow", "ammunition")),
 		Map.entry("spell", Set.of("magic", "runes", "staff", "runecrafting")),
 		Map.entry("food", Set.of("cooking", "chef", "meal", "kitchen")),
@@ -115,64 +115,6 @@ public class OSRSItemRelationshipSystem
 	{
 		this.relationships = initializeRelationships();
 		this.jaroWinklerDistance = new JaroWinklerDistance();
-	}
-
-	/**
-	 * Detects tokens in the riddle that are likely negated.
-	 *
-	 * <p>
-	 * This method analyzes the riddle text and identifies words that appear to be
-	 * negated by phrases such as <i>no</i>, <i>not</i>, <i>without</i>, or <i>hate</i>.
-	 * These tokens can then be excluded from further matching logic.
-	 * </p>
-	 *
-	 * <p><b>Example</b></p>
-	 * <pre>
-	 * Input:
-	 *   "Tools for warriors who hate ranging or magic."
-	 *
-	 * Output:
-	 *   ["ranging", "magic"]
-	 * </pre>
-	 *
-	 * @param riddle The riddle or hint text to analyze.
-	 * @return A {@code Set<String>} containing tokens that are likely negated within the provided riddle text.
-	 */
-	private Set<String> detectNegatedTokens(String riddle)
-	{
-		Set<String> negated = new HashSet<>();
-		if (riddle == null || riddle.isEmpty())
-		{
-			return negated;
-		}
-
-		String cleanRiddle = riddle.toLowerCase().replaceAll("[^a-zA-Z\\s]", " ").replaceAll("\\s+", " ").trim();
-		String[] tokens = cleanRiddle.split("\\s+");
-
-		for (int i = 0; i < tokens.length; i++)
-		{
-			String t = tokens[i];
-			if (NEGATION_WORDS.contains(t))
-			{
-				// look forward up to 4 tokens for possible negated tokens
-				for (int j = i + 1; j < Math.min(tokens.length, i + 5); j++)
-				{
-					String nt = tokens[j];
-					if (STOP_WORDS.contains(nt) || NEGATION_WORDS.contains(nt) || nt.equals("or") || nt.equals("and"))
-					{
-						// skip connector words and break if we encounter another negation
-						if (nt.equals("or") || nt.equals("and"))
-						{
-							continue;
-						}
-						break;
-					}
-					negated.add(nt);
-				}
-			}
-		}
-
-		return negated;
 	}
 
 	private Map<RelationshipType, Set<RandomEventItem>> initializeRelationships()
@@ -734,7 +676,7 @@ public class OSRSItemRelationshipSystem
 
 		// Clean and split the riddle
 		String cleanRiddle = riddle.toLowerCase()
-			.replaceAll("[^a-zA-Z\\s]", " ") // Remove punctuation
+			.replaceAll("[^a-zA-Z\\s-]", " ") // Remove punctuation
 			.replaceAll("\\s+", " ") // Normalize whitespace
 			.trim();
 
@@ -778,6 +720,64 @@ public class OSRSItemRelationshipSystem
 		}
 
 		return expandedKeywords;
+	}
+
+	/**
+	 * Detects tokens in the riddle that are likely negated.
+	 *
+	 * <p>
+	 * This method analyzes the riddle text and identifies words that appear to be
+	 * negated by phrases such as <i>no</i>, <i>not</i>, <i>without</i>, or <i>hate</i>.
+	 * These tokens can then be excluded from further matching logic.
+	 * </p>
+	 *
+	 * <p><b>Example</b></p>
+	 * <pre>
+	 * Input:
+	 *   "Tools for warriors who hate ranging or magic."
+	 *
+	 * Output:
+	 *   ["ranging", "magic"]
+	 * </pre>
+	 *
+	 * @param riddle The riddle or hint text to analyze.
+	 * @return A {@code Set<String>} containing tokens that are likely negated within the provided riddle text.
+	 */
+	private Set<String> detectNegatedTokens(String riddle)
+	{
+		Set<String> negated = new HashSet<>();
+		if (riddle == null || riddle.isEmpty())
+		{
+			return negated;
+		}
+
+		String cleanRiddle = riddle.toLowerCase().replaceAll("[^a-zA-Z\\s]", " ").replaceAll("\\s+", " ").trim();
+		String[] tokens = cleanRiddle.split("\\s+");
+
+		for (int i = 0; i < tokens.length; i++)
+		{
+			String t = tokens[i];
+			if (NEGATION_WORDS.contains(t))
+			{
+				// look forward up to 4 tokens for possible negated tokens
+				for (int j = i + 1; j < Math.min(tokens.length, i + 5); j++)
+				{
+					String nt = tokens[j];
+					if (STOP_WORDS.contains(nt) || NEGATION_WORDS.contains(nt) || nt.equals("or") || nt.equals("and"))
+					{
+						// skip connector words and break if we encounter another negation
+						if (nt.equals("or") || nt.equals("and"))
+						{
+							continue;
+						}
+						break;
+					}
+					negated.add(nt);
+				}
+			}
+		}
+
+		return negated;
 	}
 
 	private RandomEventItem findMissingItemByPartialMatch(List<RandomEventItem> knownItems, List<RandomEventItem> candidates)
