@@ -10,7 +10,7 @@ public enum RelationshipType
 	FARMING_ECOSYSTEM("farming, agriculture, rake, seeds, crops, harvest, plants"),
 	COOKING_PRODUCTION("cooking, food, chef, kitchen, bread, cake, meals"),
 	ALCOHOL_PRODUCTION("alcohol, brewing, cocktail, beer, rum, gin, drinks"),
-	MAGIC_RUNECRAFTING("magic, runecrafting, runes, essence, spells, staff, abracadabra, hocus pocus"),
+	MAGIC_RUNECRAFTING("magic, runecrafting, runes, essence, spells, staff, abracadabra, hocus pocus, wizard"),
 	JEWELRY_CRAFTING("jewelry, gems, necklace, ring, crafting, status, shiny, precious, wearing all your bangles, bobbles and fineries, accessory, accessories, silver, gold"),
 	LIGHT_FIRE_SYSTEM("fire, light, candle, lantern, tinderbox, illumination, ignite, igniting"),
 	CONTAINER_STORAGE("container, storage, bottle, jug, pot, holding"),

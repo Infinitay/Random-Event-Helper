@@ -206,6 +206,14 @@ public class RelationshipSystemTest
 		);
 		List<RandomEventItem> puzzle24ActualItems = relationshipSystem.findItemsByHint(puzzle24.getHint(), puzzle24.getGivenItems(), 3).subList(0, 3);
 		Assertions.assertThat(puzzle24ActualItems).containsExactlyInAnyOrderElementsOf(puzzle24.getExpectedMatchingItems());
+
+		RelationshipSystemTestMatchingData puzzle25 = new RelationshipSystemTestMatchingData(
+			"There is wizardry here!",
+			"[EYE_PATCH, TINDERBOX, MED_HELM, CUP_OF_TEA, TROUT_COD_PIKE_SALMON_3, PIRATE_HOOK, NEEDLE, PIRATE_HAT, FIRE_RUNE, STAFF, BOTTLE, WATER_RUNE, GARDENING_TROWEL, BATTLE_AXE, INSULATED_BOOTS]",
+			List.of(RandomEventItem.FIRE_RUNE, RandomEventItem.STAFF, RandomEventItem.WATER_RUNE)
+		);
+		List<RandomEventItem> puzzle25ActualItems = relationshipSystem.findItemsByHint(puzzle25.getHint(), puzzle25.getGivenItems(), 3).subList(0, 3);
+		Assertions.assertThat(puzzle25ActualItems).containsExactlyInAnyOrderElementsOf(puzzle25.getExpectedMatchingItems());
 	}
 
 	@Test
