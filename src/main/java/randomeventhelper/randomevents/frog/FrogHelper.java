@@ -264,7 +264,7 @@ public class FrogHelper extends PluginModule
 		switch (optionText)
 		{
 			case "How about if we kiss?":
-			case "May I kiss you instead? ":
+			case "May I kiss you instead?":
 			case "Would a kiss be acceptable?":
 				return true;
 			default:
