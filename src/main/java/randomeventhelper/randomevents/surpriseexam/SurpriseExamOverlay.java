@@ -12,18 +12,21 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
+import randomeventhelper.RandomEventHelperConfig;
 
 @Slf4j
 @Singleton
 public class SurpriseExamOverlay extends Overlay
 {
 	private final Client client;
+	private final RandomEventHelperConfig config;
 	private final SurpriseExamHelper plugin;
 
 	@Inject
-	public SurpriseExamOverlay(Client client, SurpriseExamHelper plugin)
+	public SurpriseExamOverlay(Client client, RandomEventHelperConfig config, SurpriseExamHelper plugin)
 	{
 		this.client = client;
+		this.config = config;
 		this.plugin = plugin;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
@@ -38,14 +41,14 @@ public class SurpriseExamOverlay extends Overlay
 			{
 				if (answerWidget != null && !answerWidget.isHidden())
 				{
-					OverlayUtil.renderPolygon(graphics2D, answerWidget.getBounds(), Color.GREEN);
+					OverlayUtil.renderPolygon(graphics2D, answerWidget.getBounds(), this.config.highlightColor());
 				}
 			}
 		}
 
 		if (plugin.getPatternNextAnswerWidget() != null)
 		{
-			OverlayUtil.renderPolygon(graphics2D, plugin.getPatternNextAnswerWidget().getBounds(), Color.GREEN);
+			OverlayUtil.renderPolygon(graphics2D, plugin.getPatternNextAnswerWidget().getBounds(), this.config.highlightColor());
 		}
 		return null;
 	}

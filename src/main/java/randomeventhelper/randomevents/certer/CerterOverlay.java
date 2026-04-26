@@ -11,18 +11,21 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
+import randomeventhelper.RandomEventHelperConfig;
 
 @Slf4j
 @Singleton
 public class CerterOverlay extends Overlay
 {
 	private final Client client;
+	private final RandomEventHelperConfig config;
 	private final CerterHelper plugin;
 
 	@Inject
-	public CerterOverlay(Client client, CerterHelper plugin)
+	public CerterOverlay(Client client, RandomEventHelperConfig config, CerterHelper plugin)
 	{
 		this.client = client;
+		this.config = config;
 		this.plugin = plugin;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
@@ -33,7 +36,7 @@ public class CerterOverlay extends Overlay
 	{
 		if (this.plugin.getCerterAnswerWidget() != null && !this.plugin.getCerterAnswerWidget().isHidden())
 		{
-			OverlayUtil.renderPolygon(graphics2D, this.plugin.getCerterAnswerWidget().getBounds(), Color.GREEN);
+			OverlayUtil.renderPolygon(graphics2D, this.plugin.getCerterAnswerWidget().getBounds(), this.config.highlightColor());
 		}
 		return null;
 	}

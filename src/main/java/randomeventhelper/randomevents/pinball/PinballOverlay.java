@@ -11,18 +11,21 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
+import randomeventhelper.RandomEventHelperConfig;
 
 @Slf4j
 @Singleton
 public class PinballOverlay extends Overlay
 {
 	private final Client client;
+	private final RandomEventHelperConfig config;
 	private final PinballHelper plugin;
 
 	@Inject
-	public PinballOverlay(Client client, PinballHelper plugin)
+	public PinballOverlay(Client client, RandomEventHelperConfig config, PinballHelper plugin)
 	{
 		this.client = client;
+		this.config = config;
 		this.plugin = plugin;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_SCENE);
@@ -33,7 +36,7 @@ public class PinballOverlay extends Overlay
 	{
 		if (plugin.getActivePinballPost() != null)
 		{
-			OverlayUtil.renderPolygon(graphics2D, plugin.getActivePinballPost().getConvexHull(), Color.GREEN);
+			OverlayUtil.renderPolygon(graphics2D, plugin.getActivePinballPost().getConvexHull(), this.config.highlightColor());
 		}
 		return null;
 	}

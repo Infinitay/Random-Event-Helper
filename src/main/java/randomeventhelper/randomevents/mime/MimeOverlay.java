@@ -16,6 +16,7 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
+import randomeventhelper.RandomEventHelperConfig;
 import randomeventhelper.randomevents.gravedigger.GravediggerHelper;
 
 @Slf4j
@@ -23,12 +24,14 @@ import randomeventhelper.randomevents.gravedigger.GravediggerHelper;
 public class MimeOverlay extends Overlay
 {
 	private final Client client;
+	private final RandomEventHelperConfig config;
 	private final MimeHelper plugin;
 
 	@Inject
-	public MimeOverlay(Client client, MimeHelper plugin)
+	public MimeOverlay(Client client, RandomEventHelperConfig config, MimeHelper plugin)
 	{
 		this.client = client;
+		this.config = config;
 		this.plugin = plugin;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
@@ -40,7 +43,7 @@ public class MimeOverlay extends Overlay
 	{
 		if (plugin.getMimeEmoteAnswerWidget() != null && !plugin.getMimeEmoteAnswerWidget().isHidden())
 		{
-			OverlayUtil.renderPolygon(graphics2D, plugin.getMimeEmoteAnswerWidget().getBounds(), Color.GREEN);
+			OverlayUtil.renderPolygon(graphics2D, plugin.getMimeEmoteAnswerWidget().getBounds(), this.config.highlightColor());
 		}
 		if (plugin.getMimeNPC() != null)
 		{
