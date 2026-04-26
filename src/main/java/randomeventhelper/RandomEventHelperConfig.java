@@ -1,5 +1,6 @@
 package randomeventhelper;
 
+import java.awt.Color;
 import java.util.Set;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
@@ -211,4 +212,13 @@ public interface RandomEventHelperConfig extends Config
 	{
 		return true;
 	}
+
+
+	@ConfigItem(
+		keyName = "highlightColor",
+		name = "Highlight Color",
+		description = "Configures the color used for highlighting the solutions to the various random events.<br>Note, this excludes the Gravedigger highlights.",
+		position = 13
+	)
+	default Color highlightColor() { return Color.GREEN; }
 }

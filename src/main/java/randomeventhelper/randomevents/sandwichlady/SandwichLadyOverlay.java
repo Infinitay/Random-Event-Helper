@@ -11,18 +11,21 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
+import randomeventhelper.RandomEventHelperConfig;
 
 @Slf4j
 @Singleton
 public class SandwichLadyOverlay extends Overlay
 {
 	private final Client client;
+	private final RandomEventHelperConfig config;
 	private final SandwichLadyHelper plugin;
 
 	@Inject
-	public SandwichLadyOverlay(Client client, SandwichLadyHelper plugin)
+	public SandwichLadyOverlay(Client client, RandomEventHelperConfig config, SandwichLadyHelper plugin)
 	{
 		this.client = client;
+		this.config = config;
 		this.plugin = plugin;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
@@ -33,7 +36,7 @@ public class SandwichLadyOverlay extends Overlay
 	{
 		if (plugin.getTrayFoodAnswerWidget() != null && !plugin.getTrayFoodAnswerWidget().isHidden())
 		{
-			OverlayUtil.renderPolygon(graphics2D, plugin.getTrayFoodAnswerWidget().getBounds(), Color.GREEN);
+			OverlayUtil.renderPolygon(graphics2D, plugin.getTrayFoodAnswerWidget().getBounds(), this.config.highlightColor());
 		}
 		return null;
 	}

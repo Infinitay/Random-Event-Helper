@@ -15,18 +15,21 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
+import randomeventhelper.RandomEventHelperConfig;
 
 @Slf4j
 @Singleton
 public class DrillDemonOverlay extends Overlay
 {
 	private final Client client;
+	private final RandomEventHelperConfig config;
 	private final DrillDemonHelper plugin;
 
 	@Inject
-	public DrillDemonOverlay(Client client, DrillDemonHelper plugin)
+	public DrillDemonOverlay(Client client, RandomEventHelperConfig config, DrillDemonHelper plugin)
 	{
 		this.client = client;
+		this.config = config;
 		this.plugin = plugin;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_SCENE);
@@ -44,7 +47,7 @@ public class DrillDemonOverlay extends Overlay
 			{
 				if (exerciseGroundObject != null)
 				{
-					OverlayUtil.renderPolygon(graphics2D, combinedMatHull, Color.GREEN);
+					OverlayUtil.renderPolygon(graphics2D, combinedMatHull, this.config.highlightColor());
 				}
 			}
 		}

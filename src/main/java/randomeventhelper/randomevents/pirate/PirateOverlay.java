@@ -12,6 +12,7 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
+import randomeventhelper.RandomEventHelperConfig;
 import randomeventhelper.randomevents.mime.MimeHelper;
 
 @Slf4j
@@ -19,12 +20,14 @@ import randomeventhelper.randomevents.mime.MimeHelper;
 public class PirateOverlay extends Overlay
 {
 	private final Client client;
+	private final RandomEventHelperConfig config;
 	private final PirateHelper plugin;
 
 	@Inject
-	public PirateOverlay(Client client, PirateHelper plugin)
+	public PirateOverlay(Client client, RandomEventHelperConfig config, PirateHelper plugin)
 	{
 		this.client = client;
+		this.config = config;
 		this.plugin = plugin;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
@@ -39,7 +42,7 @@ public class PirateOverlay extends Overlay
 		}
 		if (plugin.getPirateChestSolver().isSolved())
 		{
-			OverlayUtil.renderPolygon(graphics2D, plugin.getWidgetMap().get(PirateHelper.CONFIRM_BUTTON_WIDGET_ID).getBounds(), Color.GREEN);
+			OverlayUtil.renderPolygon(graphics2D, plugin.getWidgetMap().get(PirateHelper.CONFIRM_BUTTON_WIDGET_ID).getBounds(), this.config.highlightColor());
 		}
 		else
 		{
@@ -48,15 +51,15 @@ public class PirateOverlay extends Overlay
 			Widget rightActionWidget = plugin.getWidgetMap().get(plugin.getPirateChestSolver().getRightSlotUseWidget());
 			if (leftActionWidget != null)
 			{
-				OverlayUtil.renderPolygon(graphics2D, leftActionWidget.getBounds(), Color.GREEN);
+				OverlayUtil.renderPolygon(graphics2D, leftActionWidget.getBounds(), this.config.highlightColor());
 			}
 			if (centerActionWidget != null)
 			{
-				OverlayUtil.renderPolygon(graphics2D, centerActionWidget.getBounds(), Color.GREEN);
+				OverlayUtil.renderPolygon(graphics2D, centerActionWidget.getBounds(), this.config.highlightColor());
 			}
 			if (rightActionWidget != null)
 			{
-				OverlayUtil.renderPolygon(graphics2D, rightActionWidget.getBounds(), Color.GREEN);
+				OverlayUtil.renderPolygon(graphics2D, rightActionWidget.getBounds(), this.config.highlightColor());
 			}
 		}
 		return null;
