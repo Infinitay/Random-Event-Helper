@@ -95,7 +95,8 @@ public class OSRSItemRelationshipSystem
 		"pirate", Set.of("buccaneer", "seafarer", "mariner", "sailor", "nautical"),
 		"drink", Set.of("beverage", "liquid", "fluid", "potion", "brew", "sip"),
 		"tool", Set.of("equipment", "implement", "instrument", "utility", "gear"),
-		"bow", Set.of("archery", "ranged", "range", "arrow", "archer", "crossbow")
+		"bow", Set.of("archery", "ranged", "range", "arrow", "archer", "crossbow"),
+		"fire", Set.of("light", "burn", "ignite", "flame", "heat")
 	);
 
 	// Negation words and a small map to suggest opposite relationships for negated keywords
