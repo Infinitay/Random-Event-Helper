@@ -1,6 +1,5 @@
 package randomeventhelper.randomevents.surpriseexam;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import javax.inject.Inject;
@@ -11,8 +10,8 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayUtil;
 import randomeventhelper.RandomEventHelperConfig;
+import randomeventhelper.RandomEventHelperOverlay;
 
 @Slf4j
 @Singleton
@@ -41,14 +40,14 @@ public class SurpriseExamOverlay extends Overlay
 			{
 				if (answerWidget != null && !answerWidget.isHidden())
 				{
-					OverlayUtil.renderPolygon(graphics2D, answerWidget.getBounds(), this.config.highlightColor());
+					RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, answerWidget.getBounds(), this.config.borderColor(), this.config.fillColor());
 				}
 			}
 		}
 
 		if (plugin.getPatternNextAnswerWidget() != null)
 		{
-			OverlayUtil.renderPolygon(graphics2D, plugin.getPatternNextAnswerWidget().getBounds(), this.config.highlightColor());
+			RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, this.plugin.getPatternNextAnswerWidget().getBounds(), this.config.borderColor(), this.config.fillColor());
 		}
 		return null;
 	}

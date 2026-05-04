@@ -3,21 +3,17 @@ package randomeventhelper.randomevents.mime;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.Point;
-import net.runelite.api.gameval.InterfaceID;
-import net.runelite.api.widgets.Widget;
-import net.runelite.client.game.SpriteManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
 import randomeventhelper.RandomEventHelperConfig;
-import randomeventhelper.randomevents.gravedigger.GravediggerHelper;
+import randomeventhelper.RandomEventHelperOverlay;
 
 @Slf4j
 @Singleton
@@ -43,8 +39,9 @@ public class MimeOverlay extends Overlay
 	{
 		if (plugin.getMimeEmoteAnswerWidget() != null && !plugin.getMimeEmoteAnswerWidget().isHidden())
 		{
-			OverlayUtil.renderPolygon(graphics2D, plugin.getMimeEmoteAnswerWidget().getBounds(), this.config.highlightColor());
+			RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, this.plugin.getMimeEmoteAnswerWidget().getBounds(), this.config.borderColor(), this.config.fillColor());
 		}
+
 		if (plugin.getMimeNPC() != null)
 		{
 			String mimeEmoteText = plugin.getCurrentMimeEmote() != null ? plugin.getCurrentMimeEmote().name() : "Waiting for emote";

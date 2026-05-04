@@ -14,6 +14,7 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
 import randomeventhelper.RandomEventHelperConfig;
+import randomeventhelper.RandomEventHelperOverlay;
 
 @Slf4j
 @Singleton
@@ -41,7 +42,7 @@ public class FreakyForesterOverlay extends Overlay
 			case SPECIFIC:
 				if (plugin.getSpecificPheasantNPC() != null && !plugin.getSpecificPheasantNPC().isDead())
 				{
-					OverlayUtil.renderPolygon(graphics2D, plugin.getSpecificPheasantNPC().getConvexHull(), this.config.highlightColor());
+					RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, this.plugin.getSpecificPheasantNPC().getConvexHull(), this.config.borderColor(), this.config.fillColor());
 				}
 				else if (plugin.getSpecificPheasantNPC() == null && plugin.getFreakyForesterNPC() != null)
 				{
@@ -51,7 +52,7 @@ public class FreakyForesterOverlay extends Overlay
 			case NEAREST:
 				if (plugin.getNearestPheasantNPC() != null && !plugin.getNearestPheasantNPC().isDead())
 				{
-					OverlayUtil.renderPolygon(graphics2D, plugin.getNearestPheasantNPC().getConvexHull(), this.config.highlightColor());
+					RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, this.plugin.getNearestPheasantNPC().getConvexHull(), this.config.borderColor(), this.config.fillColor());
 				}
 				break;
 			case ALL:
@@ -59,7 +60,7 @@ public class FreakyForesterOverlay extends Overlay
 				{
 					if (pheasantNPC != null && !pheasantNPC.isDead())
 					{
-						OverlayUtil.renderPolygon(graphics2D, pheasantNPC.getConvexHull(), this.config.highlightColor());
+						RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, pheasantNPC.getConvexHull(), this.config.borderColor(), this.config.fillColor());
 					}
 				}
 				break;

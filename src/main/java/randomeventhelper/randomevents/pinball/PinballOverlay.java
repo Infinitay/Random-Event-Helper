@@ -1,6 +1,5 @@
 package randomeventhelper.randomevents.pinball;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import javax.inject.Inject;
@@ -10,8 +9,8 @@ import net.runelite.api.Client;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayUtil;
 import randomeventhelper.RandomEventHelperConfig;
+import randomeventhelper.RandomEventHelperOverlay;
 
 @Slf4j
 @Singleton
@@ -36,7 +35,7 @@ public class PinballOverlay extends Overlay
 	{
 		if (plugin.getActivePinballPost() != null)
 		{
-			OverlayUtil.renderPolygon(graphics2D, plugin.getActivePinballPost().getConvexHull(), this.config.highlightColor());
+			RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, this.plugin.getActivePinballPost().getConvexHull(), this.config.borderColor(), this.config.fillColor());
 		}
 		return null;
 	}

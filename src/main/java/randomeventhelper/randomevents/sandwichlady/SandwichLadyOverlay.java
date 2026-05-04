@@ -1,6 +1,5 @@
 package randomeventhelper.randomevents.sandwichlady;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import javax.inject.Inject;
@@ -10,8 +9,8 @@ import net.runelite.api.Client;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayUtil;
 import randomeventhelper.RandomEventHelperConfig;
+import randomeventhelper.RandomEventHelperOverlay;
 
 @Slf4j
 @Singleton
@@ -36,7 +35,7 @@ public class SandwichLadyOverlay extends Overlay
 	{
 		if (plugin.getTrayFoodAnswerWidget() != null && !plugin.getTrayFoodAnswerWidget().isHidden())
 		{
-			OverlayUtil.renderPolygon(graphics2D, plugin.getTrayFoodAnswerWidget().getBounds(), this.config.highlightColor());
+			RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, this.plugin.getTrayFoodAnswerWidget().getBounds(), this.config.borderColor(), this.config.fillColor());
 		}
 		return null;
 	}
