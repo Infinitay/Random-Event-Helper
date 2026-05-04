@@ -1,6 +1,5 @@
 package randomeventhelper.randomevents.pirate;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import javax.inject.Inject;
@@ -11,9 +10,8 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayUtil;
 import randomeventhelper.RandomEventHelperConfig;
-import randomeventhelper.randomevents.mime.MimeHelper;
+import randomeventhelper.RandomEventHelperOverlay;
 
 @Slf4j
 @Singleton
@@ -40,9 +38,10 @@ public class PirateOverlay extends Overlay
 		{
 			return null;
 		}
+
 		if (plugin.getPirateChestSolver().isSolved())
 		{
-			OverlayUtil.renderPolygon(graphics2D, plugin.getWidgetMap().get(PirateHelper.CONFIRM_BUTTON_WIDGET_ID).getBounds(), this.config.highlightColor());
+			RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, this.plugin.getWidgetMap().get(PirateHelper.CONFIRM_BUTTON_WIDGET_ID).getBounds(), this.config.borderColor(), this.config.fillColor());
 		}
 		else
 		{
@@ -51,15 +50,15 @@ public class PirateOverlay extends Overlay
 			Widget rightActionWidget = plugin.getWidgetMap().get(plugin.getPirateChestSolver().getRightSlotUseWidget());
 			if (leftActionWidget != null)
 			{
-				OverlayUtil.renderPolygon(graphics2D, leftActionWidget.getBounds(), this.config.highlightColor());
+				RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, leftActionWidget.getBounds(), this.config.borderColor(), this.config.fillColor());
 			}
 			if (centerActionWidget != null)
 			{
-				OverlayUtil.renderPolygon(graphics2D, centerActionWidget.getBounds(), this.config.highlightColor());
+				RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, centerActionWidget.getBounds(), this.config.borderColor(), this.config.fillColor());
 			}
 			if (rightActionWidget != null)
 			{
-				OverlayUtil.renderPolygon(graphics2D, rightActionWidget.getBounds(), this.config.highlightColor());
+				RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, rightActionWidget.getBounds(), this.config.borderColor(), this.config.fillColor());
 			}
 		}
 		return null;

@@ -8,7 +8,6 @@ import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Actor;
 import net.runelite.api.Client;
 import net.runelite.api.GroundObject;
 import net.runelite.client.ui.overlay.Overlay;
@@ -16,6 +15,7 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
 import randomeventhelper.RandomEventHelperConfig;
+import randomeventhelper.RandomEventHelperOverlay;
 
 @Slf4j
 @Singleton
@@ -47,7 +47,7 @@ public class DrillDemonOverlay extends Overlay
 			{
 				if (exerciseGroundObject != null)
 				{
-					OverlayUtil.renderPolygon(graphics2D, combinedMatHull, this.config.highlightColor());
+					RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, combinedMatHull, this.config.borderColor(), this.config.fillColor());
 				}
 			}
 		}
