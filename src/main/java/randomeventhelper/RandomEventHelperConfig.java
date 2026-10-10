@@ -215,10 +215,21 @@ public interface RandomEventHelperConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "isPrisonPeteEnabled",
+		name = "Prison Pete",
+		description = "Helps highlight the correct balloon animal for the Prison Pete random event.",
+		position = 13
+	)
+
+	default boolean isPrisonPeteEnabled()
+	{
+		return true;
+	}
+	@ConfigItem(
 		keyName = "borderColor",
 		name = "Border Color",
 		description = "Configures the border color used for highlighting the solutions to the various random events.<br>Note, this excludes the Gravedigger highlights.",
-		position = 13
+		position = 20
 	)
 	@Alpha
 	default Color borderColor()
@@ -230,7 +241,7 @@ public interface RandomEventHelperConfig extends Config
 		keyName = "fillColor",
 		name = "Fill Color",
 		description = "Configures the fill color used for highlighting the solutions to the various random events.<br>Note, this excludes the Gravedigger highlights.",
-		position = 14
+		position = 21
 	)
 	@Alpha
 	default Color fillColor()
