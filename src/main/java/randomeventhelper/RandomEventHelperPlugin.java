@@ -49,6 +49,7 @@ import randomeventhelper.randomevents.maze.MazeHelper;
 import randomeventhelper.randomevents.mime.MimeHelper;
 import randomeventhelper.randomevents.pinball.PinballHelper;
 import randomeventhelper.randomevents.pirate.PirateHelper;
+import randomeventhelper.randomevents.prisonpete.PrisonPeteHelper;
 import randomeventhelper.randomevents.sandwichlady.SandwichLadyHelper;
 import randomeventhelper.randomevents.quizmaster.QuizMasterHelper;
 import randomeventhelper.randomevents.surpriseexam.SurpriseExamHelper;
@@ -119,6 +120,9 @@ public class RandomEventHelperPlugin extends Plugin
 	@Inject
 	private QuizMasterHelper quizMasterHelper;
 
+	@Inject
+	private PrisonPeteHelper prisonPeteHelper;
+
 	// <String, PluginModule> -> <configKeyForIsEnabled, PluginModuleInstance>
 	private Map<String, PluginModule> pluginModulesMap;
 
@@ -142,6 +146,7 @@ public class RandomEventHelperPlugin extends Plugin
 			.put("isSandwichLadyEnabled", sandwichLadyHelper)
 			.put("isSurpriseExamEnabled", surpriseExamHelper)
 			.put("isQuizMasterEnabled", quizMasterHelper)
+			.put("isPrisonPeteEnabled", prisonPeteHelper)
 			.build();
 		// Start only the enabled modules
 		for (PluginModule module : pluginModulesMap.values())

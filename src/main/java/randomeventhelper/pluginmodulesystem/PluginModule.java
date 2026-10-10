@@ -39,7 +39,7 @@ public abstract class PluginModule
 		if (this.client.getGameState().getState() >= GameState.LOGGED_IN.getState())
 		{
 			// Remember to pass in the instance (this) and not the class (#getClass)
-			// Re-posts NpcSpawned, PlayerSpawned, WallObjectSpawned, DecorativeObjectSpawned, GroundObjectSpawned, GameObjectSpawned, ItemSpawned, WorldEntitySpawned
+			// Re-posts ItemContainerChanged, NpcSpawned, PlayerSpawned, WallObjectSpawned, DecorativeObjectSpawned, GroundObjectSpawned, GameObjectSpawned, ItemSpawned, WorldEntitySpawned
 			this.gameEventManager.simulateGameEvents(this);
 		}
 		log.debug("Started the {} module", this.getClass().getSimpleName());
