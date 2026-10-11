@@ -1,6 +1,6 @@
 package randomeventhelper.randomevents.prisonpete;
 
-import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Actor;
 import net.runelite.api.Client;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.client.ui.overlay.Overlay;
@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.awt.*;
 
-@Slf4j
 @Singleton
 public class PrisonPeteOverlay extends Overlay
 {
@@ -39,8 +38,8 @@ public class PrisonPeteOverlay extends Overlay
 
 		if (plugin.getHighlightedAnimal() != null && !plugin.isInvHasKey())
 		{
-			client.getTopLevelWorldView().npcs().stream().filter(npc -> npc.getId() == plugin.getHighlightedAnimal().getNpcId())
-				.map(npc -> npc.getConvexHull())
+			client.getTopLevelWorldView().npcs().stream().filter(npc -> plugin.getHighlightedAnimal().isMatch(npc))
+				.map(Actor::getConvexHull)
 				.forEach(shape -> RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, shape, this.config.borderColor(), this.config.fillColor()));
 		}
 
@@ -52,7 +51,7 @@ public class PrisonPeteOverlay extends Overlay
 		if (plugin.isInvHasKey())
 		{
 			client.getTopLevelWorldView().npcs().stream().filter(npc -> npc.getId() == NpcID.PRISONPETE_PETE)
-				.map(npc -> npc.getConvexHull())
+				.map(Actor::getConvexHull)
 				.forEach(shape -> RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, shape, this.config.borderColor(), this.config.fillColor()));
 		}
 
