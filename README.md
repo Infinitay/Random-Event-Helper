@@ -204,3 +204,16 @@ https://github.com/user-attachments/assets/91eb28a1-cd52-4837-9751-5f055f14b480
 </details>
 
 - Highlights the correct answer to the question asked by Certer of which item is being displayed
+
+### [Prison Pete](https://oldschool.runescape.wiki/w/Prison_Pete)
+<details>
+  <summary>Screenshot</summary>
+  <img width="966" height="700" alt="image" src="https://github.com/user-attachments/assets/55405469-d2a6-41b3-8da6-219bd7a76d9a" />
+</details>
+<details>
+  <summary>Video</summary>
+
+https://github.com/user-attachments/assets/059ac741-c883-4a64-bf3f-083d082bc704
+</details>
+
+- Highlights the correct balloon animals to pop
