@@ -41,6 +41,10 @@ public class RandomEventHelperOverlay extends Overlay
 
 	public static void renderOverlayWithFill(Graphics2D graphics, Shape poly, Color borderColor, Color fillColor)
 	{
+		if (poly == null)
+		{
+			return;
+		}
 		OverlayUtil.renderPolygon(graphics, poly, borderColor, fillColor, new BasicStroke(2));
 	}
 }

@@ -1,8 +1,9 @@
 package randomeventhelper.randomevents.prisonpete;
 
-import net.runelite.api.Actor;
+import java.awt.geom.Area;
 import net.runelite.api.Client;
-import net.runelite.api.gameval.NpcID;
+import net.runelite.api.GameObject;
+import net.runelite.api.NPC;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -33,26 +34,51 @@ public class PrisonPeteOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics2D)
 	{
-		if (!plugin.inPrisonRegion()) return null;
-		if (plugin.getEnergyBarriersLeft() == 0) return null;
-
-		if (plugin.getHighlightedAnimal() != null && !plugin.isInvHasKey())
+		if (this.plugin.getPrisonPeteNPC() == null)
 		{
-			client.getTopLevelWorldView().npcs().stream().filter(npc -> plugin.getHighlightedAnimal().isMatch(npc))
-				.map(Actor::getConvexHull)
-				.forEach(shape -> RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, shape, this.config.borderColor(), this.config.fillColor()));
+			return null;
 		}
 
-		if (plugin.getLever() != null && !plugin.isInvHasKey() && plugin.getHighlightedAnimal() == null)
+		// Player doesn't have a key and the correct balloon animal has been identified -> Highlight the correct balloon animals
+		if (plugin.getCorrectBalloonAnimal() != null && !plugin.isKeyInInventory())
+		{
+			for (NPC correctBalloonAnimalNPC : this.plugin.getCorrectBalloonAnimalNPCSet())
+			{
+				if (correctBalloonAnimalNPC != null)
+				{
+					RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, correctBalloonAnimalNPC.getConvexHull(), this.config.borderColor(), this.config.fillColor());
+				}
+			}
+		}
+
+		// Player doesn't have a key and the correct balloon animal has not been identified -> Highlight the lever
+		if (plugin.getLever() != null && !plugin.isKeyInInventory() && plugin.getCorrectBalloonAnimal() == null)
 		{
 			RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, plugin.getLever().getConvexHull(), this.config.borderColor(), this.config.fillColor());
 		}
 
-		if (plugin.isInvHasKey())
+		// Player has a key in their inventory -> Highlight Prison Pete
+		if (plugin.isKeyInInventory() && this.plugin.getPrisonPeteNPC() != null)
 		{
-			client.getTopLevelWorldView().npcs().stream().filter(npc -> npc.getId() == NpcID.PRISONPETE_PETE)
-				.map(Actor::getConvexHull)
-				.forEach(shape -> RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, shape, this.config.borderColor(), this.config.fillColor()));
+			RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, this.plugin.getPrisonPeteNPC().getConvexHull(), this.config.borderColor(), this.config.fillColor());
+		}
+
+		// Player has dispelled all the barriers and they can exit the event area
+		if (plugin.isBarriersDispelled() && this.plugin.getEnergyBarriers() != null)
+		{
+			Area energyBarrierArea = new Area();
+			for (GameObject energyBarrier : plugin.getEnergyBarriers())
+			{
+				if (energyBarrier != null && energyBarrier.getCanvasTilePoly() != null)
+				{
+					energyBarrierArea.add(new Area(energyBarrier.getCanvasTilePoly()));
+				}
+			}
+
+			if (!energyBarrierArea.isEmpty())
+			{
+				RandomEventHelperOverlay.renderOverlayWithFill(graphics2D, energyBarrierArea, config.borderColor(), config.fillColor());
+			}
 		}
 
 		return null;
