@@ -182,10 +182,21 @@ public interface RandomEventHelperConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "isPrisonPeteEnabled",
+		name = "Prison Pete",
+		description = "Helps highlight the correct balloon animals for the Prison Pete random event.",
+		position = 10
+	)
+	default boolean isPrisonPeteEnabled()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "isSandwichLadyEnabled",
 		name = "Sandwich Lady",
 		description = "Helps highlight the correct food to take from the Sandwich Lady random event.",
-		position = 10
+		position = 11
 	)
 	default boolean isSandwichLadyEnabled()
 	{
@@ -196,7 +207,7 @@ public interface RandomEventHelperConfig extends Config
 		keyName = "isSurpriseExamEnabled",
 		name = "Surprise Exam",
 		description = "Helps highlight the answers for the Surprise Exam random event. Supports both matching and next item questions.",
-		position = 11
+		position = 12
 	)
 	default boolean isSurpriseExamEnabled()
 	{
@@ -207,24 +218,13 @@ public interface RandomEventHelperConfig extends Config
 		keyName = "isQuizMasterEnabled",
 		name = "Quiz Master",
 		description = "Helps highlight the correct odd item for the Quiz Master random event.",
-		position = 12
+		position = 13
 	)
 	default boolean isQuizMasterEnabled()
 	{
 		return true;
 	}
 
-	@ConfigItem(
-		keyName = "isPrisonPeteEnabled",
-		name = "Prison Pete",
-		description = "Helps highlight the correct balloon animal for the Prison Pete random event.",
-		position = 13
-	)
-
-	default boolean isPrisonPeteEnabled()
-	{
-		return true;
-	}
 	@ConfigItem(
 		keyName = "borderColor",
 		name = "Border Color",
