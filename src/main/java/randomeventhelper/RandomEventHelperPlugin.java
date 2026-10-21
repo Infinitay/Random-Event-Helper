@@ -5,28 +5,11 @@ import com.google.inject.Provides;
 import java.util.Map;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Actor;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
-import net.runelite.api.DynamicObject;
-import net.runelite.api.GameObject;
-import net.runelite.api.NPC;
 import net.runelite.api.Player;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.AnimationChanged;
-import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameObjectSpawned;
-import net.runelite.api.events.GameTick;
-import net.runelite.api.events.GroundObjectSpawned;
-import net.runelite.api.events.ItemContainerChanged;
-import net.runelite.api.events.MenuEntryAdded;
-import net.runelite.api.events.NpcDespawned;
-import net.runelite.api.events.NpcSpawned;
-import net.runelite.api.events.VarbitChanged;
-import net.runelite.api.events.WidgetClosed;
-import net.runelite.api.events.WidgetLoaded;
-import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
@@ -34,7 +17,6 @@ import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
-import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -61,25 +43,7 @@ import randomeventhelper.randomevents.surpriseexam.SurpriseExamHelper;
 public class RandomEventHelperPlugin extends Plugin
 {
 	@Inject
-	private Client client;
-
-	@Inject
-	private ClientThread clientThread;
-
-	@Inject
-	private OverlayManager overlayManager;
-
-	@Inject
-	private ItemManager itemManager;
-
-	@Inject
 	private RandomEventHelperConfig config;
-
-	@Inject
-	private RandomEventHelperOverlay overlay;
-
-	@Inject
-	private RandomEventHelperItemOverlay itemOverlay;
 
 	@Inject
 	private BeekeeperHelper beekeeperHelper;
@@ -129,9 +93,6 @@ public class RandomEventHelperPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		this.overlayManager.add(overlay);
-		this.overlayManager.add(itemOverlay);
-
 		pluginModulesMap = ImmutableMap.<String, PluginModule>builder()
 			.put("isBeekeeperEnabled", beekeeperHelper)
 			.put("isCaptArnavChestEnabled", pirateHelper)
@@ -143,10 +104,10 @@ public class RandomEventHelperPlugin extends Plugin
 			.put("isMazeEnabled", mazeHelper)
 			.put("isMimeEnabled", mimeHelper)
 			.put("isPinballEnabled", pinballHelper)
+			.put("isPrisonPeteEnabled", prisonPeteHelper)
 			.put("isSandwichLadyEnabled", sandwichLadyHelper)
 			.put("isSurpriseExamEnabled", surpriseExamHelper)
 			.put("isQuizMasterEnabled", quizMasterHelper)
-			.put("isPrisonPeteEnabled", prisonPeteHelper)
 			.build();
 		// Start only the enabled modules
 		for (PluginModule module : pluginModulesMap.values())
@@ -161,8 +122,6 @@ public class RandomEventHelperPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
-		this.overlayManager.remove(overlay);
-		this.overlayManager.remove(itemOverlay);
 		// Shutdown all modules regardless of their enabled state
 		for (PluginModule module : pluginModulesMap.values())
 		{
@@ -190,98 +149,6 @@ public class RandomEventHelperPlugin extends Plugin
 				}
 			}
 		}
-	}
-
-	@Subscribe
-	public void onAnimationChanged(AnimationChanged animationChanged)
-	{
-		Actor actor = animationChanged.getActor();
-		if (actor instanceof NPC)
-		{
-			// log.debug("NPC Animation changed: {} - New Animation ID: {}", ((NPC) actor).getName(), actor.getAnimation());
-		}
-		else if (actor instanceof GameObject)
-		{
-			// log.debug("GameObject Animation changed: {} - New Animation ID: {}", ((GameObject) actor).getId(), actor.getAnimation());
-		}
-		else if (actor instanceof Player)
-		{
-			// log.debug("Player Animation changed: {} - New Animation ID: {}", ((Player) actor).getName(), actor.getAnimation());
-		}
-		else if (actor instanceof DynamicObject)
-		{
-			// log.debug("DynamicObject Animation changed: {} - New Animation ID: {}", ((DynamicObject) actor).getModel().getSceneId(), actor.getAnimation());
-		}
-		else
-		{
-			// log.debug("Unknown Actor Animation changed: {} - New Animation ID: {}", actor.getName(), actor.getAnimation());
-		}
-	}
-
-	@Subscribe
-	public void onGameTick(GameTick gameTick)
-	{
-		// log.debug("isInstanced: {} | WorldLocation Region ID: {} | LocalLocation Region ID: {}", this.client.getTopLevelWorldView().isInstance(), this.client.getLocalPlayer().getWorldLocation().getRegionID(), this.getRegionIDFromCurrentLocalPointInstanced());
-	}
-
-	@Subscribe
-	public void onWidgetLoaded(WidgetLoaded widgetLoaded)
-	{
-		// log.debug("Widget loaded with group ID: {}", widgetLoaded.getGroupId());
-	}
-
-	@Subscribe
-	public void onWidgetClosed(WidgetClosed widgetClosed)
-	{
-		// log.debug("Widget closed with group ID: {}", widgetClosed.getGroupId());
-	}
-
-	@Subscribe
-	public void onNpcSpawned(NpcSpawned npcSpawned)
-	{
-
-	}
-
-	@Subscribe
-	public void onNpcDespawned(NpcDespawned npcDespawned)
-	{
-
-	}
-
-	@Subscribe
-	public void onGameObjectSpawned(GameObjectSpawned gameObjectSpawned)
-	{
-	}
-
-	@Subscribe
-	public void onChatMessage(ChatMessage chatMessage)
-	{
-		// log.debug("Chat message ({}) received: {}", chatMessage.getType(), chatMessage.getMessage());
-		// String sanitizedChatMessage = Text.sanitizeMultilineText(chatMessage.getMessage());
-	}
-
-	@Subscribe
-	public void onVarbitChanged(VarbitChanged varbitChanged)
-	{
-
-	}
-
-	@Subscribe
-	public void onGroundObjectSpawned(GroundObjectSpawned groundObjectSpawned)
-	{
-
-	}
-
-	@Subscribe
-	public void onItemContainerChanged(ItemContainerChanged itemContainerChanged)
-	{
-
-	}
-
-	@Subscribe
-	public void onMenuEntryAdded(MenuEntryAdded menuEntryAdded)
-	{
-
 	}
 
 	@Provides
