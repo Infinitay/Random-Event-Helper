@@ -54,23 +54,7 @@ public class MimeHelper extends PluginModule
 	public void onStartUp()
 	{
 		this.overlayManager.add(mimeOverlay);
-		this.mimeNPC = null;
-		this.currentMimeEmote = null;
-		this.mimeEmoteAnswerWidget = null;
-
-		// Not really needed since we depend on AnimationChanged, so if the plugin is off, then we won't ever catch it
-		// And if we do catch the animation, then the widget always loads anyway afterward
-		if (this.isLoggedIn())
-		{
-			this.clientThread.invokeLater(() -> {
-				if (this.client.getWidget(InterfaceID.MacroMimeEmotes.BUTTON_0) != null)
-				{
-					WidgetLoaded mimeEmoteButtonWidgetLoaded = new WidgetLoaded();
-					mimeEmoteButtonWidgetLoaded.setGroupId(InterfaceID.MACRO_MIME_EMOTES);
-					this.eventBus.post(mimeEmoteButtonWidgetLoaded);
-				}
-			});
-		}
+		this.initializeState();
 	}
 
 	@Override
@@ -88,10 +72,38 @@ public class MimeHelper extends PluginModule
 		return this.config.isMimeEnabled();
 	}
 
+	@Override
+	public void onPlayerValidated()
+	{
+		this.initializeState();
+		log.debug("Player validated, checking if Mime emote buttons widget is open");
+
+		// Not really needed since we depend on AnimationChanged, so if the plugin is off, then we won't ever catch it
+		// And if we do catch the animation, then the widget always loads anyway afterward
+		if (this.client.getWidget(InterfaceID.MacroMimeEmotes.BUTTON_0) != null)
+		{
+			WidgetLoaded mimeEmoteButtonWidgetLoaded = new WidgetLoaded();
+			mimeEmoteButtonWidgetLoaded.setGroupId(InterfaceID.MACRO_MIME_EMOTES);
+			this.clientThread.invoke(() -> this.eventBus.post(mimeEmoteButtonWidgetLoaded));
+		}
+	}
+
+	private void initializeState()
+	{
+		log.debug("Initializing Mime state");
+		this.mimeNPC = null;
+		this.currentMimeEmote = null;
+		this.mimeEmoteAnswerWidget = null;
+	}
+
 	@Subscribe
 	public void onAnimationChanged(AnimationChanged animationChanged)
 	{
-		if (this.client.getLocalPlayer() != null && RandomEventHelperPlugin.getRegionIDFromCurrentLocalPointInstanced(this.client) != MIME_RANDOM_EVENT_REGION_ID)
+		if (this.isBlockingEvents())
+		{
+			return;
+		}
+		if (this.client.getLocalPlayer() != null && !this.isInMimeRegion())
 		{
 			return;
 		}
@@ -111,7 +123,11 @@ public class MimeHelper extends PluginModule
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded widgetLoaded)
 	{
-		if (this.currentMimeEmote != null && widgetLoaded.getGroupId() == InterfaceID.MACRO_MIME_EMOTES)
+		if (this.isBlockingEvents())
+		{
+			return;
+		}
+		if (this.currentMimeEmote != null && widgetLoaded.getGroupId() == InterfaceID.MACRO_MIME_EMOTES && this.isInMimeRegion())
 		{
 			this.clientThread.invokeLater(() -> {
 				log.debug("Mime Emote Widget Loaded, attempting to set answer widget for emote: {}", this.currentMimeEmote);
@@ -140,7 +156,11 @@ public class MimeHelper extends PluginModule
 	@Subscribe
 	public void onNpcSpawned(NpcSpawned npcSpawned)
 	{
-		if (npcSpawned.getNpc().getId() == NpcID.MACRO_MIME)
+		if (this.isBlockingEvents())
+		{
+			return;
+		}
+		if (npcSpawned.getNpc().getId() == NpcID.MACRO_MIME && this.isInMimeRegion())
 		{
 			this.mimeNPC = npcSpawned.getNpc();
 			log.debug("Mime NPC Spawned, setting mimeNPC: {}", this.mimeNPC);
@@ -182,5 +202,10 @@ public class MimeHelper extends PluginModule
 				log.debug("Unknown Mime Animation Detected: Animation ID = {}", mimeNPC.getAnimation());
 			}
 		}
+	}
+
+	private boolean isInMimeRegion()
+	{
+		return RandomEventHelperPlugin.getRegionIDFromCurrentLocalPointInstanced(this.client) == MIME_RANDOM_EVENT_REGION_ID;
 	}
 }
