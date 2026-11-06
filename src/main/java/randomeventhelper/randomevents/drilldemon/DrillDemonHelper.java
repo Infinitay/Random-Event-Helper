@@ -3,6 +3,7 @@ package randomeventhelper.randomevents.drilldemon;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import java.util.List;
 import javax.inject.Inject;
@@ -20,6 +21,7 @@ import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.ObjectID;
+import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
@@ -67,27 +69,7 @@ public class DrillDemonHelper extends PluginModule
 	public void onStartUp()
 	{
 		this.overlayManager.add(drillDemonOverlay);
-		this.exerciseMatsAnswerList = Lists.newArrayListWithExpectedSize(4);
-		this.exerciseMatsMultimap = HashMultimap.create(4, 2);
-		this.exerciseVarbitMatMultimap = HashMultimap.create(4, 2);
-		this.drillDemonNPC = null;
-		this.requestedExercise = null;
-
-		if (this.isLoggedIn())
-		{
-			this.clientThread.invokeLater(() ->
-			{
-				log.debug("Initializing varbits for Drill Demon exercise mappings in case plugin was enabled mid-event.");
-				for (int postVarbitID = VarbitID.MACRO_DRILLDEMON_POST_1; postVarbitID <= VarbitID.MACRO_DRILLDEMON_POST_4; postVarbitID++)
-				{
-					int postVarbitValue = client.getVarbitValue(postVarbitID);
-					VarbitChanged varbitChangedEvent = new VarbitChanged();
-					varbitChangedEvent.setVarbitId(postVarbitID);
-					varbitChangedEvent.setValue(postVarbitValue);
-					this.onVarbitChanged(varbitChangedEvent);
-				}
-			});
-		}
+		this.initializeState();
 	}
 
 	@Override
@@ -107,12 +89,47 @@ public class DrillDemonHelper extends PluginModule
 		return this.config.isDrillDemonEnabled();
 	}
 
+	@Override
+	public void onPlayerValidated()
+	{
+		this.initializeState();
+		log.debug("Player validated, re-posting varbits");
+		this.invokeAfterLoggedInAndValidated(() -> {
+			log.debug("Initializing varbits for Drill Demon exercise mappings in case plugin was enabled mid-event.");
+			for (int postVarbitID = VarbitID.MACRO_DRILLDEMON_POST_1; postVarbitID <= VarbitID.MACRO_DRILLDEMON_POST_4; postVarbitID++)
+			{
+				VarbitChanged varbitChangedEvent = new VarbitChanged();
+				int postVarbitValue = client.getVarbitValue(postVarbitID);
+				varbitChangedEvent.setVarpId(VarPlayerID.MACRO_TRANSMIT);
+				varbitChangedEvent.setVarbitId(postVarbitID);
+				varbitChangedEvent.setValue(postVarbitValue);
+				this.clientThread.invoke(() -> {
+					this.eventBus.post(varbitChangedEvent);
+				});
+			}
+		});
+	}
+
+	private void initializeState()
+	{
+		log.debug("Initializing Drill Demon state");
+		this.exerciseMatsAnswerList = Lists.newArrayListWithExpectedSize(4);
+		this.exerciseMatsMultimap = HashMultimap.create(4, 2);
+		this.exerciseVarbitMatMultimap = HashMultimap.create(4, 2);
+		this.drillDemonNPC = null;
+		this.requestedExercise = null;
+	}
+
 	@Subscribe
 	public void onNpcSpawned(NpcSpawned npcSpawned)
 	{
+		if (this.isBlockingEvents())
+		{
+			return;
+		}
 		// We want to prio storing the Drill Demon NPC if it's interacting with the player because that one is the correct one in case of edge cases
 		boolean isNPCInteractingWithPlayer = npcSpawned.getNpc().getInteracting() != null && npcSpawned.getNpc().getInteracting().equals(client.getLocalPlayer());
-		if (npcSpawned.getNpc().getId() == NpcID.MACRO_DRILLDEMON && this.isInDrillDemonLocalInstance() && (this.drillDemonNPC == null || isNPCInteractingWithPlayer))
+		if (npcSpawned.getNpc().getId() == NpcID.MACRO_DRILLDEMON && (this.drillDemonNPC == null || isNPCInteractingWithPlayer) && this.isInDrillDemonLocalInstance())
 		{
 			this.drillDemonNPC = npcSpawned.getNpc();
 		}
@@ -137,6 +154,11 @@ public class DrillDemonHelper extends PluginModule
 	{
 		// For some reason, when the player is within the maze random event, the varbits for the drill demon event fire/are modified
 		// So whenever a varbit comes in that's relevant for us, we have to first check if we're actually in the maze.
+		// The check is being on within #updateExerciseMappings
+		if (varbitChanged.getVarpId() != VarPlayerID.MACRO_TRANSMIT || !this.isInDrillDemonLocalInstance())
+		{
+			return;
+		}
 
 		switch (varbitChanged.getVarbitId())
 		{
@@ -192,6 +214,10 @@ public class DrillDemonHelper extends PluginModule
 	@Subscribe
 	public void onGroundObjectSpawned(GroundObjectSpawned groundObjectSpawned)
 	{
+		if (this.isBlockingEvents())
+		{
+			return;
+		}
 		if (this.isInDrillDemonLocalInstance())
 		{
 			int addedPost = -1;
