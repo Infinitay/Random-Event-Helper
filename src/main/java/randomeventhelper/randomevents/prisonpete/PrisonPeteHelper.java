@@ -208,7 +208,6 @@ public class PrisonPeteHelper extends PluginModule
 	@Subscribe
 	public void onNpcDespawned(NpcDespawned npcDespawned)
 	{
-		log.debug("NPC despawned: {} (ID: {})", npcDespawned.getNpc().getName(), npcDespawned.getNpc().getId());
 		if (!this.inPrisonRegion() && npcDespawned.getNpc().getId() == NpcID.PRISONPETE_PETE)
 		{
 			log.debug("Prison Pete NPC despawned, resetting state.");
