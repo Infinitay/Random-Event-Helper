@@ -46,19 +46,7 @@ public class BeekeeperHelper extends PluginModule
 	public void onStartUp()
 	{
 		this.overlayManager.add(beekeeperOverlay);
-		this.beehiveAnswerWidgets = null;
-
-		if (this.isLoggedIn())
-		{
-			this.clientThread.invokeLater(() -> {
-				if (this.client.getWidget(InterfaceID.Beehive.EXAMPLE) != null)
-				{
-					WidgetLoaded beehiveExampleWidgetLoaded = new WidgetLoaded();
-					beehiveExampleWidgetLoaded.setGroupId(InterfaceID.BEEHIVE);
-					this.eventBus.post(beehiveExampleWidgetLoaded);
-				}
-			});
-		}
+		this.initializeState();
 	}
 
 	@Override
@@ -72,6 +60,26 @@ public class BeekeeperHelper extends PluginModule
 	public boolean isEnabled()
 	{
 		return this.config.isBeekeeperEnabled();
+	}
+
+	@Override
+	public void onPlayerValidated()
+	{
+		this.initializeState();
+		log.debug("Player validated, checking if Beehive widget is open");
+
+		if (this.client.getWidget(InterfaceID.Beehive.EXAMPLE) != null)
+		{
+			WidgetLoaded beehiveExampleWidgetLoaded = new WidgetLoaded();
+			beehiveExampleWidgetLoaded.setGroupId(InterfaceID.BEEHIVE);
+			this.clientThread.invoke(() -> this.eventBus.post(beehiveExampleWidgetLoaded));
+		}
+	}
+
+	private void initializeState()
+	{
+		log.debug("Initializing Beekeeper state");
+		this.beehiveAnswerWidgets = null;
 	}
 
 	@Subscribe

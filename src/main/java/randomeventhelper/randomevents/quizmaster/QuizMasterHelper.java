@@ -48,19 +48,7 @@ public class QuizMasterHelper extends PluginModule
 	public void onStartUp()
 	{
 		this.overlayManager.add(quizMasterOverlay);
-		this.quizAnswerWidget = null;
-
-		if (this.isLoggedIn())
-		{
-			this.clientThread.invokeLater(() -> {
-				if (this.client.getWidget(InterfaceID.MacroQuizshow.BUTTONS) != null)
-				{
-					WidgetLoaded quizMasterButtonsWidgetLoaded = new WidgetLoaded();
-					quizMasterButtonsWidgetLoaded.setGroupId(InterfaceID.MACRO_QUIZSHOW);
-					this.eventBus.post(quizMasterButtonsWidgetLoaded);
-				}
-			});
-		}
+		this.initializeState();
 	}
 
 	@Override
@@ -74,6 +62,25 @@ public class QuizMasterHelper extends PluginModule
 	public boolean isEnabled()
 	{
 		return this.config.isQuizMasterEnabled();
+	}
+
+	@Override
+	public void onPlayerValidated()
+	{
+		this.initializeState();
+		log.debug("Player validated, checking if Quiz Master buttons widget is open");
+		if (this.client.getWidget(InterfaceID.MacroQuizshow.BUTTONS) != null)
+		{
+			WidgetLoaded quizMasterButtonsWidgetLoaded = new WidgetLoaded();
+			quizMasterButtonsWidgetLoaded.setGroupId(InterfaceID.MACRO_QUIZSHOW);
+			this.clientThread.invoke(() -> this.eventBus.post(quizMasterButtonsWidgetLoaded));
+		}
+	}
+
+	private void initializeState()
+	{
+		log.debug("Initializing Quiz Master state");
+		this.quizAnswerWidget = null;
 	}
 
 	@Subscribe
@@ -129,7 +136,7 @@ public class QuizMasterHelper extends PluginModule
 	{
 		if (widgetClosed.getGroupId() == InterfaceID.MACRO_QUIZSHOW)
 		{
-			log.debug("Quiz Master widget closed - Event ended");
+			log.debug("Quiz Master widget closed");
 			this.quizAnswerWidget = null;
 		}
 	}
