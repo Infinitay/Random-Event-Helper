@@ -32,7 +32,6 @@ import net.runelite.client.util.Text;
 import randomeventhelper.RandomEventHelperConfig;
 import randomeventhelper.RandomEventHelperPlugin;
 import randomeventhelper.pluginmodulesystem.PluginModule;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -297,7 +296,7 @@ public class PrisonPeteHelper extends PluginModule
 		String sanitizedChatMessage = Text.sanitizeMultilineText(chatMessage.getMessage());
 		if (chatMessage.getType() == ChatMessageType.DIALOG)
 		{
-			if (this.inPrisonRegion() && sanitizedChatMessage.startsWith("Prison Pete"))
+			if (sanitizedChatMessage.startsWith("Prison Pete"))
 			{
 				sanitizedChatMessage = sanitizedChatMessage.replace("Prison Pete|", "");
 				boolean shouldResetCorrectBalloonAnimal = false;
