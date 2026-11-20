@@ -78,10 +78,7 @@ public class FreakyForesterHelper extends PluginModule
 	public void onStartUp()
 	{
 		this.overlayManager.add(freakyForesterOverlay);
-		this.pheasantHighlightMode = config.pheasantHighlightMode();
-		this.pheasantTailFeathers = 0;
-		this.pheasantNPCSet = Sets.newHashSet();
-		this.freakyForesterNPC = null;
+		this.initializeState();
 	}
 
 	@Override
@@ -111,6 +108,21 @@ public class FreakyForesterHelper extends PluginModule
 				this.pheasantHighlightMode = PheasantMode.valueOf(configChanged.getNewValue());
 			}
 		}
+	}
+
+	@Override
+	public void onPlayerValidated()
+	{
+		this.initializeState();
+	}
+
+	private void initializeState()
+	{
+		log.debug("Initializing Freaky Forester state");
+		this.pheasantHighlightMode = config.pheasantHighlightMode();
+		this.pheasantTailFeathers = 0;
+		this.pheasantNPCSet = Sets.newHashSet();
+		this.freakyForesterNPC = null;
 	}
 
 	@Subscribe
@@ -159,6 +171,10 @@ public class FreakyForesterHelper extends PluginModule
 	@Subscribe
 	public void onNpcSpawned(NpcSpawned npcSpawned)
 	{
+		if (this.isBlockingEvents())
+		{
+			return;
+		}
 		NPC npc = npcSpawned.getNpc();
 		if (this.isInFreakyForesterInstance())
 		{

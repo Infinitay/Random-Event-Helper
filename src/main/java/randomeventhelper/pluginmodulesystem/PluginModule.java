@@ -132,6 +132,8 @@ public abstract class PluginModule
 		log.debug("Shutdown the {} module", this.getClass().getSimpleName());
 	}
 
+	// When hopping worlds inside the Pinball random event, for some reason the game sends LOADING -> LOGGED_IN twice (Loading -> Logged In -> Loading -> Logged In)
+	// That's why you'll see "Re-log/Hop detected" twice
 	@Subscribe
 	private void onGameStateChanged(GameStateChanged event)
 	{
