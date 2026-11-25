@@ -57,10 +57,21 @@ public interface RandomEventHelperConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "isEvilBobEnabled",
+		name = "Evil Bob",
+		description = "Helps highlight the correct fishing spots for the Evil Bob random event.",
+		position = 4
+	)
+	default boolean isEvilBobEnabled()
+	{
+		return true;
+	}
+
 	@ConfigSection(
 		name = "Freaky Forester",
 		description = "Freaky Forester random event options",
-		position = 4,
+		position = 5,
 		closedByDefault = true
 	)
 	String SECTION_FREAKY_FORESTER = "sectionFreakyForester";
@@ -92,7 +103,7 @@ public interface RandomEventHelperConfig extends Config
 	@ConfigSection(
 		name = "Gravedigger",
 		description = "Gravedigger random event options",
-		position = 5,
+		position = 6,
 		closedByDefault = true
 	)
 	String SECTION_GRAVEDIGGER = "sectionGravedigger";
@@ -141,7 +152,7 @@ public interface RandomEventHelperConfig extends Config
 		keyName = "isKissTheFrogEnabled",
 		name = "Kiss the Frog",
 		description = "Helps highlight the correct frog to interact with for the Kiss the Frog random event.",
-		position = 6
+		position = 7
 	)
 	default boolean isKissTheFrogEnabled()
 	{
@@ -152,7 +163,7 @@ public interface RandomEventHelperConfig extends Config
 		keyName = "isMazeEnabled",
 		name = "Maze",
 		description = "Automatically sets path of Shortest Path plugin to the Strange Shrine in the Maze random event.",
-		position = 7
+		position = 8
 	)
 	default boolean isMazeEnabled()
 	{
@@ -163,7 +174,7 @@ public interface RandomEventHelperConfig extends Config
 		keyName = "isMimeEnabled",
 		name = "Mime",
 		description = "Helps highlight the answers for the Mime random event.",
-		position = 8
+		position = 9
 	)
 	default boolean isMimeEnabled()
 	{
@@ -174,7 +185,7 @@ public interface RandomEventHelperConfig extends Config
 		keyName = "isPinballEnabled",
 		name = "Pinball",
 		description = "Helps highlight the correct pillars to touch for the Pinball random event.",
-		position = 9
+		position = 10
 	)
 	default boolean isPinballEnabled()
 	{
@@ -185,7 +196,7 @@ public interface RandomEventHelperConfig extends Config
 		keyName = "isPrisonPeteEnabled",
 		name = "Prison Pete",
 		description = "Helps highlight the correct balloon animals for the Prison Pete random event.",
-		position = 10
+		position = 11
 	)
 	default boolean isPrisonPeteEnabled()
 	{
@@ -196,7 +207,7 @@ public interface RandomEventHelperConfig extends Config
 		keyName = "isSandwichLadyEnabled",
 		name = "Sandwich Lady",
 		description = "Helps highlight the correct food to take from the Sandwich Lady random event.",
-		position = 11
+		position = 12
 	)
 	default boolean isSandwichLadyEnabled()
 	{
@@ -207,7 +218,7 @@ public interface RandomEventHelperConfig extends Config
 		keyName = "isSurpriseExamEnabled",
 		name = "Surprise Exam",
 		description = "Helps highlight the answers for the Surprise Exam random event. Supports both matching and next item questions.",
-		position = 12
+		position = 13
 	)
 	default boolean isSurpriseExamEnabled()
 	{
@@ -218,7 +229,7 @@ public interface RandomEventHelperConfig extends Config
 		keyName = "isQuizMasterEnabled",
 		name = "Quiz Master",
 		description = "Helps highlight the correct odd item for the Quiz Master random event.",
-		position = 13
+		position = 14
 	)
 	default boolean isQuizMasterEnabled()
 	{
