@@ -14,6 +14,7 @@ import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.NpcID;
+import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
@@ -52,13 +53,7 @@ public class PinballHelper extends PluginModule
 	public void onStartUp()
 	{
 		this.overlayManager.add(pinballOverlay);
-		this.activePinballPost = null;
-		this.pinballPostsMap = Maps.newHashMap();
-
-		if (this.isLoggedIn())
-		{
-			this.initiateActivePost();
-		}
+		this.initializeState();
 	}
 
 	@Override
@@ -75,6 +70,30 @@ public class PinballHelper extends PluginModule
 		return this.config.isPinballEnabled();
 	}
 
+	@Override
+	public void onPlayerValidated()
+	{
+		this.initializeState();
+		log.debug("Player validated, re-posting varbits");
+		this.invokeAfterLoggedInAndValidated(() -> {
+			int postVarbitValue = this.client.getVarbitValue(VarbitID.MACRO_PINBALL_CURRENT);
+			VarbitChanged varbitChangedEvent = new VarbitChanged();
+			varbitChangedEvent.setVarpId(VarPlayerID.MACRO_PINBALL_VAR);
+			varbitChangedEvent.setVarbitId(VarbitID.MACRO_PINBALL_CURRENT);
+			varbitChangedEvent.setValue(postVarbitValue);
+			this.clientThread.invoke(() -> {
+				this.eventBus.post(varbitChangedEvent);
+			});
+		});
+	}
+
+	private void initializeState()
+	{
+		log.debug("Initializing Pinball state");
+		this.activePinballPost = null;
+		this.pinballPostsMap = Maps.newHashMap();
+	}
+
 	@Subscribe
 	public void onNpcDespawned(NpcDespawned npcDespawned)
 	{
@@ -89,19 +108,19 @@ public class PinballHelper extends PluginModule
 	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned gameObjectSpawned)
 	{
-		GameObject gameObject = gameObjectSpawned.getGameObject();
+		if (this.isBlockingEvents())
+		{
+			return;
+		}
 		// Pinball and grave digger random even locations are in region 7758
 		if (RandomEventHelperPlugin.isInRandomEventLocalInstance(this.client))
 		{
+			GameObject gameObject = gameObjectSpawned.getGameObject();
 			PinballPost pinballPost = PinballPost.fromObjectID(gameObject.getId());
 			if (pinballPost != null)
 			{
 				log.debug("A pinball post has spawned: {}", pinballPost);
 				this.pinballPostsMap.put(pinballPost.getVarbitValue(), gameObject);
-				if (this.activePinballPost == null)
-				{
-					this.initiateActivePost();
-				}
 			}
 		}
 	}
@@ -109,7 +128,7 @@ public class PinballHelper extends PluginModule
 	@Subscribe
 	public void onVarbitChanged(VarbitChanged varbitChanged)
 	{
-		if (RandomEventHelperPlugin.isInRandomEventLocalInstance(this.client) && varbitChanged.getVarbitId() == VarbitID.MACRO_PINBALL_CURRENT)
+		if (varbitChanged.getVarbitId() == VarbitID.MACRO_PINBALL_CURRENT && RandomEventHelperPlugin.isInRandomEventLocalInstance(this.client))
 		{
 			int value = varbitChanged.getValue();
 			PinballPost pinballPost = PinballPost.fromVarbitValue(value);
@@ -133,6 +152,10 @@ public class PinballHelper extends PluginModule
 	@Subscribe
 	public void onChatMessage(ChatMessage chatMessage)
 	{
+		if (!RandomEventHelperPlugin.isInRandomEventLocalInstance(this.client))
+		{
+			return;
+		}
 		String sanitizedChatMessage = Text.sanitizeMultilineText(chatMessage.getMessage());
 		if (chatMessage.getType() == ChatMessageType.GAMEMESSAGE)
 		{
@@ -143,17 +166,5 @@ public class PinballHelper extends PluginModule
 				this.pinballPostsMap = Maps.newHashMap();
 			}
 		}
-	}
-
-	private void initiateActivePost()
-	{
-		this.clientThread.invokeLater(() ->
-		{
-			int postVarbitValue = this.client.getVarbitValue(VarbitID.MACRO_PINBALL_CURRENT);
-			VarbitChanged varbitChangedEvent = new VarbitChanged();
-			varbitChangedEvent.setVarbitId(VarbitID.MACRO_PINBALL_CURRENT);
-			varbitChangedEvent.setValue(postVarbitValue);
-			this.onVarbitChanged(varbitChangedEvent);
-		});
 	}
 }

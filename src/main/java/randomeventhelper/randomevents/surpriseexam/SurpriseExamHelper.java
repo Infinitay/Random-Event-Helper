@@ -134,9 +134,6 @@ public class SurpriseExamHelper extends PluginModule
 	public void onStartUp()
 	{
 		this.overlayManager.add(overlay);
-		this.patternCardAnswerWidgets = null;
-		this.patternNextAnswerWidget = null;
-		this.currentExamQuestion = null;
 		this.examQuestionHistory = null;
 		this.relationshipSystem = new OSRSItemRelationshipSystem();
 		this.gsonExamQuestionLogger = this.gson.newBuilder()
@@ -144,24 +141,6 @@ public class SurpriseExamHelper extends PluginModule
 			.serializeNulls()
 			.setPrettyPrinting()
 			.create();
-
-		if (this.isLoggedIn())
-		{
-			this.clientThread.invokeLater(() -> {
-				if (this.client.getWidget(InterfaceID.PatternCards.HINT) != null)
-				{
-					WidgetLoaded matchingCardsWidgetLoaded = new WidgetLoaded();
-					matchingCardsWidgetLoaded.setGroupId(InterfaceID.PATTERN_CARDS);
-					this.eventBus.post(matchingCardsWidgetLoaded);
-				}
-				if (this.client.getWidget(InterfaceID.PatternNext.UNIVERSE_TEXT12) != null)
-				{
-					WidgetLoaded whatsNextWidgetLoaded = new WidgetLoaded();
-					whatsNextWidgetLoaded.setGroupId(InterfaceID.PATTERN_NEXT);
-					this.eventBus.post(whatsNextWidgetLoaded);
-				}
-			});
-		}
 	}
 
 	@Override
@@ -180,6 +159,33 @@ public class SurpriseExamHelper extends PluginModule
 	public boolean isEnabled()
 	{
 		return this.config.isSurpriseExamEnabled();
+	}
+
+	@Override
+	public void onPlayerValidated()
+	{
+		this.initializeState();
+		log.debug("Player validated, checking if Surprise Exam widget is open");
+		if (this.client.getWidget(InterfaceID.PatternCards.HINT) != null)
+		{
+			WidgetLoaded matchingCardsWidgetLoaded = new WidgetLoaded();
+			matchingCardsWidgetLoaded.setGroupId(InterfaceID.PATTERN_CARDS);
+			this.clientThread.invoke(() -> this.eventBus.post(matchingCardsWidgetLoaded));
+		}
+		if (this.client.getWidget(InterfaceID.PatternNext.UNIVERSE_TEXT12) != null)
+		{
+			WidgetLoaded whatsNextWidgetLoaded = new WidgetLoaded();
+			whatsNextWidgetLoaded.setGroupId(InterfaceID.PATTERN_NEXT);
+			this.clientThread.invoke(() -> this.eventBus.post(whatsNextWidgetLoaded));
+		}
+	}
+
+	private void initializeState()
+	{
+		log.debug("Initializing Surprise Exam state");
+		this.patternCardAnswerWidgets = null;
+		this.patternNextAnswerWidget = null;
+		this.currentExamQuestion = null;
 	}
 
 	@Subscribe
@@ -318,7 +324,7 @@ public class SurpriseExamHelper extends PluginModule
 	public void onMenuOptionClicked(MenuOptionClicked menuOptionClicked)
 	{
 		// If the player is not in the event instance or (the click is not "Select" or there is no widget) -> Return
-		if (!isInSurpriseExamLocalInstance() || !menuOptionClicked.getMenuOption().equals("Select") || menuOptionClicked.getWidget() == null)
+		if (menuOptionClicked.getWidget() == null || !menuOptionClicked.getMenuOption().equals("Select") || !this.isInSurpriseExamLocalInstance())
 		{
 			return;
 		}
@@ -386,6 +392,10 @@ public class SurpriseExamHelper extends PluginModule
 	@Subscribe
 	public void onNpcSpawned(NpcSpawned npcSpawned)
 	{
+		if (this.isBlockingEvents())
+		{
+			return;
+		}
 		if (npcSpawned.getNpc().getId() == NpcID.PATTERN_TEACHER)
 		{
 			log.debug("Mr. Mordaut NPC spawned, resetting current exam history.");
@@ -413,7 +423,7 @@ public class SurpriseExamHelper extends PluginModule
 		String sanitizedChatMessage = Text.sanitizeMultilineText(chatMessage.getMessage());
 		if (chatMessage.getType() == ChatMessageType.DIALOG)
 		{
-			if (this.isInSurpriseExamLocalInstance() && sanitizedChatMessage.startsWith("Mr. Mordaut"))
+			if (sanitizedChatMessage.startsWith("Mr. Mordaut") && this.isInSurpriseExamLocalInstance())
 			{
 				sanitizedChatMessage = sanitizedChatMessage.replace("Mr. Mordaut|", "");
 				Boolean answeredCorrectly = null;

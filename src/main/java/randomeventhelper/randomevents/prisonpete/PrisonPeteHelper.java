@@ -32,7 +32,6 @@ import net.runelite.client.util.Text;
 import randomeventhelper.RandomEventHelperConfig;
 import randomeventhelper.RandomEventHelperPlugin;
 import randomeventhelper.pluginmodulesystem.PluginModule;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -92,17 +91,6 @@ public class PrisonPeteHelper extends PluginModule
 		this.overlayManager.add(prisonPeteOverlay);
 		this.overlayManager.add(prisonPeteItemOverlay);
 		this.initializeState();
-		if (this.isLoggedIn())
-		{
-			this.clientThread.invokeLater(() -> {
-				if (this.client.getWidget(InterfaceID.Prisonpete.BALLOON1) != null)
-				{
-					WidgetLoaded prisonPeteKeyHolderWidgetLoaded = new WidgetLoaded();
-					prisonPeteKeyHolderWidgetLoaded.setGroupId(InterfaceID.PRISONPETE);
-					this.eventBus.post(prisonPeteKeyHolderWidgetLoaded);
-				}
-			});
-		}
 	}
 
 	@Override
@@ -126,8 +114,22 @@ public class PrisonPeteHelper extends PluginModule
 		return this.config.isPrisonPeteEnabled();
 	}
 
+	@Override
+	public void onPlayerValidated()
+	{
+		this.initializeState();
+		log.debug("Player validated, checking if Prison Pete balloon lever widget is open");
+		if (this.client.getWidget(InterfaceID.Prisonpete.BALLOON1) != null)
+		{
+			WidgetLoaded prisonPeteKeyHolderWidgetLoaded = new WidgetLoaded();
+			prisonPeteKeyHolderWidgetLoaded.setGroupId(InterfaceID.PRISONPETE);
+			this.clientThread.invoke(() -> this.eventBus.post(prisonPeteKeyHolderWidgetLoaded));
+		}
+	}
+
 	private void initializeState()
 	{
+		log.debug("Initializing Prison Pete state");
 		this.correctBalloonAnimal = null;
 		this.correctBalloonAnimalNPCSet = Sets.newHashSet();
 		this.balloonAnimalNPCMap = Maps.newHashMap();
@@ -141,7 +143,11 @@ public class PrisonPeteHelper extends PluginModule
 	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned event)
 	{
-		if (inPrisonRegion() && event.getGameObject().getId() == ObjectID.FAI_FALADOR_PARTY_NEG_ROOM_LEVER)
+		if (this.isBlockingEvents())
+		{
+			return;
+		}
+		if (this.inPrisonRegion() && event.getGameObject().getId() == ObjectID.FAI_FALADOR_PARTY_NEG_ROOM_LEVER)
 		{
 			this.lever = event.getGameObject();
 		}
@@ -160,7 +166,7 @@ public class PrisonPeteHelper extends PluginModule
 	@Subscribe
 	public void onGameObjectDespawned(GameObjectDespawned event)
 	{
-		if (inPrisonRegion() && event.getGameObject().getId() == ObjectID.FAI_FALADOR_PARTY_NEG_ROOM_LEVER)
+		if (this.inPrisonRegion() && event.getGameObject().getId() == ObjectID.FAI_FALADOR_PARTY_NEG_ROOM_LEVER)
 		{
 			// Shouldn't happen, but just in case
 			this.lever = null;
@@ -180,7 +186,11 @@ public class PrisonPeteHelper extends PluginModule
 	@Subscribe
 	public void onNpcSpawned(NpcSpawned npcSpawned)
 	{
-		if (!inPrisonRegion())
+		if (this.isBlockingEvents())
+		{
+			return;
+		}
+		if (!this.inPrisonRegion())
 		{
 			return;
 		}
@@ -197,7 +207,7 @@ public class PrisonPeteHelper extends PluginModule
 	@Subscribe
 	public void onNpcDespawned(NpcDespawned npcDespawned)
 	{
-		if (!inPrisonRegion() && npcDespawned.getNpc().getId() == NpcID.PRISONPETE_PETE)
+		if (!this.inPrisonRegion() && npcDespawned.getNpc().getId() == NpcID.PRISONPETE_PETE)
 		{
 			log.debug("Prison Pete NPC despawned, resetting state.");
 			this.correctBalloonAnimal = null;
@@ -209,7 +219,7 @@ public class PrisonPeteHelper extends PluginModule
 			this.energyBarriers.clear();
 			this.isBarriersDispelled = false;
 		}
-		else if (inPrisonRegion() && npcDespawned.getNpc().equals(this.lastInteractedWithBalloonAnimalNPC) && BalloonAnimal.fromNpcID(npcDespawned.getNpc().getId()) != null)
+		else if (this.inPrisonRegion() && npcDespawned.getNpc().equals(this.lastInteractedWithBalloonAnimalNPC) && BalloonAnimal.fromNpcID(npcDespawned.getNpc().getId()) != null)
 		{
 			this.balloonAnimalNPCMap.remove(npcDespawned.getNpc());
 			if (this.correctBalloonAnimal != null && this.correctBalloonAnimal.isMatch(npcDespawned.getNpc()))
@@ -229,6 +239,14 @@ public class PrisonPeteHelper extends PluginModule
 	@Subscribe
 	public void onInteractingChanged(InteractingChanged interactingChanged)
 	{
+		if (this.isBlockingEvents())
+		{
+			return;
+		}
+		if (!this.inPrisonRegion())
+		{
+			return;
+		}
 		if (interactingChanged.getSource() instanceof Player && interactingChanged.getSource().equals(this.client.getLocalPlayer()) && interactingChanged.getTarget() instanceof NPC)
 		{
 			NPC interactedNPC = (NPC) interactingChanged.getTarget();
@@ -243,7 +261,11 @@ public class PrisonPeteHelper extends PluginModule
 	@Subscribe
 	public void onItemContainerChanged(ItemContainerChanged event)
 	{
-		if (inPrisonRegion() && event.getContainerId() == InventoryID.INV)
+		if (this.isBlockingEvents())
+		{
+			return;
+		}
+		if (this.inPrisonRegion() && event.getContainerId() == InventoryID.INV)
 		{
 			// Don't make any assumptions about whether the player turned in the key or not, so don't reset here
 			this.isKeyInInventory = event.getItemContainer().contains(ItemID.PRISONPETE_KEY);
@@ -267,10 +289,14 @@ public class PrisonPeteHelper extends PluginModule
 	@Subscribe
 	public void onChatMessage(ChatMessage chatMessage)
 	{
+		if (!this.inPrisonRegion())
+		{
+			return;
+		}
 		String sanitizedChatMessage = Text.sanitizeMultilineText(chatMessage.getMessage());
 		if (chatMessage.getType() == ChatMessageType.DIALOG)
 		{
-			if (this.inPrisonRegion() && sanitizedChatMessage.startsWith("Prison Pete"))
+			if (sanitizedChatMessage.startsWith("Prison Pete"))
 			{
 				sanitizedChatMessage = sanitizedChatMessage.replace("Prison Pete|", "");
 				boolean shouldResetCorrectBalloonAnimal = false;
@@ -308,6 +334,10 @@ public class PrisonPeteHelper extends PluginModule
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded widgetLoaded)
 	{
+		if (!this.inPrisonRegion())
+		{
+			return;
+		}
 		if (widgetLoaded.getGroupId() == InterfaceID.PRISONPETE)
 		{
 			log.debug("Player opened balloon lever widget");

@@ -76,6 +76,11 @@ public class MazeHelper extends PluginModule
 		return this.config.isMazeEnabled();
 	}
 
+	@Override
+	public void onPlayerValidated() {
+		this.mazeExitObject = null;
+	}
+
 	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned gameObjectSpawned)
 	{
@@ -110,7 +115,6 @@ public class MazeHelper extends PluginModule
 	@Subscribe
 	public void onPluginChanged(PluginChanged pluginChanged)
 	{
-		log.debug("[#onPluginChanged] Plugin changed: {} | Loaded: {}", pluginChanged.getPlugin().getName(), pluginChanged.isLoaded());
 		if (pluginChanged.getPlugin().getName().equals("Shortest Path") && pluginChanged.isLoaded())
 		{
 			log.debug("[#onPluginChanged] Shortest Path plugin was loaded, re-sending current maze exit object if it exists");
